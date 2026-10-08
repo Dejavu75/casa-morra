@@ -1,0 +1,69 @@
+.competition-page {
+  padding-block: clamp(2rem, 6vw, 5rem);
+  min-height: 60vh;
+}
+
+.competition-page h1,
+.competition-page h2 {
+  color: var(--heading);
+  font-family: var(--font-serif);
+  line-height: 1.15;
+}
+
+.competition-page h1 { font-size: clamp(2.6rem, 7vw, 5rem); margin: .5rem 0 1rem; }
+.competition-page h2 { font-size: clamp(1.6rem, 3vw, 2.35rem); margin: 2.25rem 0 1rem; }
+.competition-page > p { max-width: 74ch; }
+.competition-page a { color: var(--accent-text); text-underline-offset: .22em; }
+.competition-eyebrow { color: var(--accent-text); font-size: .82rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.competition-back { margin-bottom: 1.5rem; }
+
+.competition-filters {
+  display: flex;
+  align-items: end;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-block: 2rem 1rem;
+}
+
+.competition-filters label { display: grid; gap: .4rem; font-weight: 650; }
+.competition-filters select,
+.competition-filters button {
+  min-height: 2.8rem;
+  padding: .45rem .75rem;
+  border: 1px solid var(--line);
+  border-radius: .25rem;
+  font: inherit;
+}
+.competition-filters select { background: var(--surface); color: var(--text); min-width: 11rem; }
+.competition-filters button { background: var(--indigo); color: var(--paper); cursor: pointer; }
+.competition-count { font-weight: 700; }
+.competition-empty { padding: 2rem; border: 1px dashed var(--line); }
+
+.competition-list,
+.competition-season-links { list-style: none; padding: 0; }
+.competition-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 1rem; }
+.competition-card { padding: 1.35rem; border: 1px solid var(--line); background: var(--surface); }
+.competition-card h2 { margin: .4rem 0 .7rem; }
+.competition-meta { color: var(--accent-text); font-size: .87rem; font-weight: 700; }
+.competition-season-links { display: flex; flex-wrap: wrap; gap: .65rem; }
+.competition-season-links a { display: inline-block; border: 1px solid var(--line); padding: .5rem .85rem; }
+.competition-season-links [aria-current="page"] { background: var(--indigo); border-color: var(--indigo); color: var(--paper); text-decoration: none; }
+
+.competition-table-wrap { overflow-x: auto; max-width: 100%; }
+.competition-page table { width: 100%; border-collapse: collapse; min-width: 37rem; text-align: left; font-variant-numeric: tabular-nums; }
+.competition-page caption { text-align: left; font-weight: 700; padding-block: .6rem; }
+.competition-page th,
+.competition-page td { border-bottom: 1px solid var(--line); padding: .7rem .6rem; }
+.competition-page thead { background: var(--indigo); color: var(--paper); }
+.competition-page tbody th { font-weight: 650; }
+.competition-results { padding-left: 1.5rem; }
+.competition-results li { padding: .6rem 0; border-bottom: 1px solid var(--line); }
+.competition-results strong { margin-inline: .75rem; white-space: nowrap; }
+.competition-results small { display: block; color: var(--muted); }
+.competition-note { max-width: 75ch; border-inline-start: 4px solid var(--teal); padding: .4rem 1.3rem; margin-top: 2.5rem; background: color-mix(in srgb, var(--surface) 90%, var(--teal)); }
+
+@media (max-width: 640px) {
+  .competition-filters { align-items: stretch; }
+  .competition-filters label { width: 100%; }
+  .competition-filters select { width: 100%; }
+}
