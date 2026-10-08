@@ -89,7 +89,9 @@ function startApp() {
   const navigation = document.querySelector('#navegacion-principal');
   const themeButton = document.querySelector('[data-theme-toggle]');
   const refreshButton = document.querySelector('[data-demo-refresh]');
+  const sourceStatus = document.querySelector('[data-demo-status]');
   const warning = document.querySelector('[data-demo-warning]');
+  const warningText = document.querySelector('[data-demo-warning-text]');
   if (!main) return;
   main.tabIndex = -1;
 
@@ -102,9 +104,11 @@ function startApp() {
   const source = createDemoSource({ fixture: demoData, fetch: (...args) => window.fetch(...args),
     crypto: window.crypto, onChange(state) {
       activeData = state.data;
+      if (sourceStatus) sourceStatus.textContent = translate(state.warning ?
+        'demo.status.unavailable' : state.kind === 'export' ? 'demo.status.export' : 'demo.status.fixture', locale);
       if (warning) {
         warning.hidden = !state.warning;
-        warning.textContent = state.warning ? translate(state.warning, locale) : '';
+        if (warningText && state.warning) warningText.textContent = translate(state.warning, locale);
       }
       renderLocation();
     } });

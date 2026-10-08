@@ -168,5 +168,6 @@ test('la aplicación inicia desde exportación y ofrece recarga explícita acces
   assert.match(app, /renderRoute\(route, activeData/);
   assert.match(app, /attachGameReplay\([^,]+, activeData/);
   assert.match(html, /data-demo-refresh/);
-  assert.match(html, /data-demo-warning[^>]+role="status"/);
+  assert.match(html, /data-demo-status[^>]+role="status"/);
+  assert.match(html, /data-demo-warning[^>]+hidden/);
 });

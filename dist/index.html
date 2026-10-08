@@ -43,7 +43,11 @@
 
     <div class="demo-source-controls container">
       <button type="button" data-demo-refresh data-i18n="demo.refresh">Actualizar datos</button>
-      <p data-demo-warning role="status" hidden></p>
+      <p data-demo-status role="status" data-i18n="demo.status.fixture">Datos de ejemplo del sitio</p>
+      <details data-demo-warning hidden>
+        <summary data-i18n="demo.sourceDetails">Detalles de la fuente</summary>
+        <p data-demo-warning-text data-i18n="demo.fallback">No se pudo cargar la exportación pública. Se muestran datos de demostración incluidos en el sitio; pueden estar desactualizados.</p>
+      </details>
     </div>
 
     <main id="contenido">
