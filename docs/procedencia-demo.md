@@ -4,11 +4,11 @@ Casa Morra usa identidades, torneos, resultados y textos ficticios creados para 
 
 ## Artefactos verificables
 
-Estos SHA-256 identifican los bytes **de esta revisión**. `node --test test/provenance.test.mjs` comprueba que el documento y los archivos coincidan; si un recurso cambia, hay que revisar su procedencia y actualizar la tabla y la prueba en el mismo cambio.
+Estos SHA-256 identifican el contenido **de esta revisión**. Para los PNG, el hash se calcula sobre los bytes exactos. Para `dist/data/demo.js`, se calcula sobre UTF-8 con saltos de línea LF: un checkout Windows puede convertirlos a CRLF sin cambiar el contenido versionado. Por eso el hash del archivo de trabajo Windows puede diferir del indicado aquí; la prueba normaliza solo `CRLF → LF` y verifica ambos escenarios. `node --test test/provenance.test.mjs` comprueba que el documento y los archivos coincidan; si un recurso cambia, hay que revisar su procedencia y actualizar la tabla y la prueba en el mismo cambio.
 
 | Archivo | SHA-256 | Procedencia |
 |---|---|---|
-| `dist/data/demo.js` | `321C96B848642A63FE59CE0210FAB1054DC796B6949FDC24843539C2BA4345F6` | Fixture ficticio creado para Casa Morra. |
+| `dist/data/demo.js` | `AB52BC4378AC31BD5135566C1033E384125529AD29B0E7850F41FE5227969B4B` | Fixture ficticio creado para Casa Morra; hash del contenido LF canónico. |
 | `dist/assets/hero-ajedrez.png` | `17FD0E195F23D3E83E463880899EBE99ACC931B7E948F1CFCD4E33774614E11F` | Imagen generada para el proyecto con una herramienta de OpenAI. |
 | `dist/assets/galeria-estudio.png` | `6F4879D1DC92FBD354C14DB0F7D971EFB4538C99889CBD661C3F619801103429` | Imagen generada para el proyecto con una herramienta de OpenAI. |
 | `dist/assets/galeria-sala.png` | `7AA62F2D1CA5233418E1C95B66F9DBB75375740A6B844AC677F996FE0D9FB36D` | Imagen generada para el proyecto con una herramienta de OpenAI. |
