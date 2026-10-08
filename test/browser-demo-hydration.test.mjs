@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import * as demo from '../dist/data/demo.js';
 import { createDemoSource, validatePublicDemo } from '../dist/assets/demo-source.js';
 import { validateDemoSnapshot } from '../scripts/demo-snapshot.mjs';
+import { verifyData } from '../scripts/verify-data.mjs';
 
 const snapshot = { format: 'casa-morra.demo-snapshot', version: 1,
   provenance: 'casa-morra-original-demo', classification: 'public-demo',
@@ -36,6 +37,33 @@ test('rechaza rango y calendario inválidos aunque bytes y SHA-256 coincidan', a
     assert.equal(events.at(-1).kind, 'fixture');
     assert.equal(events.at(-1).warning, 'demo.fallback');
   }
+});
+
+test('rechaza partida contradictoria con tabla oficial aun con SHA-256 correcto', async () => {
+  const value = signedMutation((data) => {
+    const game = data.games.find((row) => row.id === 'patio-2025-r2-p1');
+    assert.equal(game.result, '1-0');
+    game.result = '0-1';
+  });
+  assert.ok(verifyData(value.snapshot.data).errors.some((error) =>
+    ['STANDING_POINTS', 'STANDING_WDL'].includes(error.code)));
+  await assert.rejects(validatePublicDemo(value, webcrypto), /inválid|alterad/i);
+  const events = [];
+  const source = createDemoSource({ fixture: demo, crypto: webcrypto,
+    fetch: async () => ({ ok: true, json: async () => value }), onChange: (state) => events.push(state) });
+  await source.refresh();
+  assert.equal(events.at(-1).kind, 'fixture');
+  assert.equal(events.at(-1).warning, 'demo.fallback');
+});
+
+test('acepta la tabla oficial sin partidas individuales como dato independiente', async () => {
+  const value = exported();
+  const tableOnly = value.snapshot.data.tournaments.find((event) => event.id === 'archivo-2025');
+  assert.ok(tableOnly);
+  assert.equal(value.snapshot.data.games.filter((game) => game.tournamentId === tableOnly.id).length, 0);
+  assert.equal(validateDemoSnapshot(value.snapshot).ok, true);
+  assert.equal((await validatePublicDemo(value, webcrypto)).tournaments.find((event) =>
+    event.id === tableOnly.id), tableOnly);
 });
 
 test('el sobre público íntegro carga datos antes del primer render', async () => {

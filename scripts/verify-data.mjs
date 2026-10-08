@@ -7,6 +7,7 @@ import { renderHome } from '../dist/views/home.js';
 import { renderPlayerProfile, renderPlayersDirectory } from '../dist/views/players.js';
 import { renderClassic } from '../dist/views/records.js';
 import { renderTournamentList } from '../dist/views/tournaments.js';
+import { validateOfficialStandings } from '../dist/domain/official-integrity.js';
 import { validateOfficialFields } from './data-integrity.mjs';
 
 const EPSILON = 1e-7;
@@ -19,23 +20,6 @@ function unique(rows, name, errors) {
     if (!row?.id || ids.has(row.id)) errors.push({ code: 'DUPLICATE_ID', detail: `${name}: ${row?.id ?? '(sin ID)'}` });
     ids.add(row?.id);
   }
-}
-
-function boardTotals(games, byes) {
-  const totals = new Map();
-  const get = (id) => {
-    if (!totals.has(id)) totals.set(id, { wins: 0, draws: 0, losses: 0, points: 0 });
-    return totals.get(id);
-  };
-  for (const game of games) {
-    const white = get(game.whiteId);
-    const black = get(game.blackId);
-    if (game.result === '1-0') { white.wins++; white.points++; black.losses++; }
-    if (game.result === '0-1') { black.wins++; black.points++; white.losses++; }
-    if (game.result === '1/2-1/2') { white.draws++; black.draws++; white.points += 0.5; black.points += 0.5; }
-  }
-  for (const bye of byes) get(bye.playerId).points += bye.points;
-  return totals;
 }
 
 function validateForeignKeys(data, errors) {
@@ -66,26 +50,6 @@ function validateForeignKeys(data, errors) {
   for (const title of data.titles) {
     if (!playerIds.has(title.playerId)) errors.push({ code: 'UNKNOWN_PLAYER', detail: `${title.id}/${title.playerId}` });
     if (!eventIds.has(title.tournamentId)) errors.push({ code: 'UNKNOWN_TOURNAMENT', detail: title.id });
-  }
-}
-
-function validateStandings(data, errors) {
-  for (const event of data.tournaments) {
-    const games = data.games.filter((game) => game.tournamentId === event.id);
-    const byes = data.byes.filter((bye) => bye.tournamentId === event.id);
-    // Una tabla oficial sin partidas individuales no permite reconstruir WDL ni puntos.
-    if (!games.length) continue;
-    const totals = boardTotals(games, byes);
-    const standingIds = new Set((event.standings ?? []).map((row) => row.playerId));
-    for (const id of totals.keys())
-      if (!standingIds.has(id)) errors.push({ code: 'MISSING_STANDING', detail: `${event.id}/${id}` });
-    for (const row of event.standings ?? []) {
-      const expected = totals.get(row.playerId);
-      if (!expected) { errors.push({ code: 'UNEXPLAINED_STANDING', detail: `${event.id}/${row.playerId}` }); continue; }
-      if (!close(row.points, expected.points)) errors.push({ code: 'STANDING_POINTS', detail: `${event.id}/${row.playerId}: ${row.points} ≠ ${expected.points}` });
-      for (const key of ['wins', 'draws', 'losses'])
-        if (row[key] !== expected[key]) errors.push({ code: 'STANDING_WDL', detail: `${event.id}/${row.playerId}/${key}` });
-    }
   }
 }
 
@@ -271,7 +235,7 @@ export function verifyData(data, overrides = {}) {
   validateOfficialFields(data, errors);
   validateForeignKeys(data, errors);
   if (!errors.length) {
-    validateStandings(data, errors);
+    validateOfficialStandings(data, errors);
     validateElo(data, errors, overrides.calculateElo ?? calculateElo);
     validateAnnual(data, errors);
     validateProfiles(data, errors);
