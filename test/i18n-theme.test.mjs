@@ -70,3 +70,31 @@ test('el tema usa almacenamiento propio y funciona aunque el navegador lo bloque
   assert.equal(root.documentElement.dataset.theme, 'oscuro');
   assert.equal(root.documentElement.style.colorScheme, 'dark');
 });
+
+test('el control de tema conserva su nombre accesible y anuncia el estado actual', async () => {
+  const { renderThemeToggle } = await import('../dist/assets/app.js');
+  const attributes = {};
+  const labelNode = { textContent: '' };
+  const button = {
+    setAttribute(name, value) { attributes[name] = value; },
+    querySelector(selector) { return selector === '[data-theme-label]' ? labelNode : null; },
+  };
+
+  renderThemeToggle(button, 'claro');
+  assert.equal(attributes['aria-label'], 'Modo oscuro');
+  assert.equal(labelNode.textContent, 'Modo oscuro');
+  assert.equal(attributes['aria-pressed'], 'false');
+
+  renderThemeToggle(button, 'oscuro');
+  assert.equal(attributes['aria-label'], 'Modo oscuro');
+  assert.equal(labelNode.textContent, 'Modo oscuro');
+  assert.equal(attributes['aria-pressed'], 'true');
+
+  const catalogs = { es: { 'theme.dark': 'Modo oscuro' }, en: { 'theme.dark': 'Dark mode' } };
+  renderThemeToggle(button, 'claro', 'en-US', catalogs);
+  assert.equal(attributes['aria-label'], 'Dark mode');
+  assert.equal(attributes['aria-pressed'], 'false');
+  renderThemeToggle(button, 'oscuro', 'en-US', catalogs);
+  assert.equal(attributes['aria-label'], 'Dark mode');
+  assert.equal(attributes['aria-pressed'], 'true');
+});

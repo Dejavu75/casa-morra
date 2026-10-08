@@ -72,6 +72,15 @@ export function closeMenuOnEscape(event, button, navigation, close) {
   return true;
 }
 
+export function renderThemeToggle(button, theme, locale = 'es', catalogs = defaultCatalogs) {
+  if (!button) return;
+  const label = translate('theme.dark', locale, catalogs);
+  button.setAttribute('aria-pressed', String(theme === 'oscuro'));
+  button.setAttribute('aria-label', label);
+  const labelNode = button.querySelector('[data-theme-label]');
+  if (labelNode) labelNode.textContent = label;
+}
+
 function startApp() {
   const locale = applyTranslations(document, document.documentElement.lang);
   const main = document.querySelector('#contenido');
@@ -89,13 +98,7 @@ function startApp() {
 
   function renderTheme() {
     applyTheme(document, theme);
-    if (!themeButton) return;
-    const targetTheme = nextTheme(theme);
-    const label = translate(`theme.${targetTheme === 'oscuro' ? 'dark' : 'light'}`, locale);
-    themeButton.setAttribute('aria-pressed', String(theme === 'oscuro'));
-    themeButton.setAttribute('aria-label', label);
-    const labelNode = themeButton.querySelector('[data-theme-label]');
-    if (labelNode) labelNode.textContent = label;
+    renderThemeToggle(themeButton, theme, locale);
   }
 
   function setMenuOpen(open) {
