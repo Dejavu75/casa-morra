@@ -66,4 +66,23 @@ const anterior = restorePreparedDemoSnapshotImport(preparado, datosSiguientes);
 
 La reversión devuelve exactamente el snapshot canónico anterior **solo si** el estado vigente coincide con `afterSnapshot` y los hashes del diario coinciden. El diario identifica vistas de `renderRoute` que habría que recalcular; no invalida cachés ni actualiza pantallas por sí mismo. Es una guía conservadora: por ejemplo, una noticia afecta portada y noticias, mientras un bye afecta los resultados del torneo sin recalcular la clasificación oficial desde las partidas.
 
-Esta porción de CC-03 **no** es un importador transaccional ni un circuito de correcciones. No escribe fixtures, archivos, base de datos o API; tampoco publica datos, ejecuta una reversión persistente, resuelve conflictos ni fabrica PGN. Quedan pendientes almacenamiento, permisos, auditoría de correcciones con antes/después, invalidación efectiva, respaldos y restauración. No se deben añadir cuentas, fotos, inscripciones o datos personales reales a este sobre sin un contrato y una decisión de seguridad específicos.
+La preparación en memoria no escribe fixtures ni publica datos. El siguiente almacén local es una operación **explícita y separada**; tampoco habilita correcciones de filas existentes ni una API.
+
+## Almacén local de demostración
+
+`scripts/demo-store.mjs` conserva snapshots `v1` ficticios en un archivo bajo `.demo-state/`, directorio ignorado por Git. El operador debe dar siempre `--store`; el programa no busca ni modifica un almacén automáticamente. `init` crea únicamente la raíz `.demo-state/` si falta; los subdirectorios personalizados deben existir previamente. Ejemplo desde la raíz del repositorio:
+
+```sh
+node scripts/demo-store.mjs init --store .demo-state/casa-morra.json
+node scripts/demo-store.mjs status --store .demo-state/casa-morra.json
+node scripts/demo-store.mjs apply --store .demo-state/casa-morra.json --input .demo-state/entrada.json
+node scripts/demo-store.mjs rollback --store .demo-state/casa-morra.json
+```
+
+`init` usa exclusivamente el fixture comprometido. `apply` lee un snapshot canónico provisto explícitamente y acepta **solo altas sin conflictos**; una repetición idéntica no escribe ni agrega un evento. `rollback` revierte únicamente la última aplicación cuando el estado vigente coincide; no borra la auditoría. `status` informa hash, tamaño y cantidad de eventos sin imprimir registros. Las operaciones no cambian el fixture, la imagen Docker ni el sitio web servido: las vistas listadas en la auditoría son una indicación para una invalidación **futura**, no una invalidación real.
+
+El archivo contiene un sobre versionado con snapshot vigente y eventos de origen `local-demo`. Cada evento guarda un ID, operación, bytes y SHA-256 antes/después, y el snapshot correspondiente; las aplicaciones guardan también las altas y vistas afectadas. Al reabrir, se valida la cadena y la relación entre snapshots. El hash detecta alteraciones accidentales, **no** autentica autoría: quien puede escribir el archivo puede reescribir toda la cadena. Los datos son exclusivamente ficticios; no coloques información personal ni credenciales en este directorio.
+
+Cada escritura usa un bloqueo exclusivo (`.lock`) que **no se elimina automáticamente** si queda abandonado; ante un lock previo la operación falla cerrada. Se escribe un temporal en el mismo directorio, se sincroniza el archivo y se sustituye por renombrado atómico, con comparación del contenido vigente antes de sustituir. Se rechazan rutas fuera de `.demo-state/` y enlaces simbólicos detectados en sus componentes. Es una protección operativa local, no una defensa contra otro proceso hostil que modifique rutas entre comprobación y renombrado; el bloqueo es cooperativo. En Windows, la sincronización del directorio y la persistencia tras un corte eléctrico no se pueden garantizar con esta implementación. Un fallo posterior al renombrado puede dejar la escritura efectuada aunque el proceso no haya terminado normalmente; reabrí con `status` antes de reintentar.
+
+El almacén no provee copia de seguridad/restauración verificada, acceso multiusuario, permisos de cuentas, correcciones auditadas de filas existentes, invalidación de derivados ni persistencia dentro de Docker. Esos criterios de `CC-03` siguen abiertos, junto con la verificación estadística integral de `CC-05/19`. Para probar esta unidad: `node --test test/demo-store.test.mjs`, `npm test` y `npm run verify:data`.
