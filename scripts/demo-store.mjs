@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { lstat, mkdir, open, readFile, rename, unlink } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -9,12 +9,15 @@ import { prepareDemoSnapshotImport } from './import-apply.mjs';
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const stateRoot = join(projectRoot, '.demo-state');
 const FORMAT = 'casa-morra.demo-store';
+const BACKUP_FORMAT = 'casa-morra.demo-backup';
 const VERSION = 1;
 const SOURCE = 'local-demo';
 const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 const sameMeta = (a, b) => object(a) && a.sha256 === b.sha256 && a.bytes === b.bytes;
 const validMeta = (value) => object(value) && Number.isSafeInteger(value.bytes) && value.bytes > 0 &&
   typeof value.sha256 === 'string' && /^[a-f0-9]{64}$/.test(value.sha256);
+const rawMeta = (raw) => ({ bytes: Buffer.byteLength(raw),
+  sha256: createHash('sha256').update(raw).digest('hex') });
 
 async function statOrNull(path) {
   try { return await lstat(path); }
@@ -53,7 +56,7 @@ function validateEnvelope(value) {
   let previous = null;
   for (const [index, event] of value.audit.entries()) {
     if (!object(event) || typeof event.id !== 'string' || !event.id || ids.has(event.id) ||
-        event.source !== SOURCE || !['init', 'apply', 'rollback'].includes(event.operation) ||
+        event.source !== SOURCE || !['init', 'apply', 'rollback', 'restore'].includes(event.operation) ||
         !validMeta(event.after) || typeof event.afterSnapshot !== 'string' ||
         !sameMeta(snapshotMetadata(event.afterSnapshot), event.after))
       throw new Error('Auditoría del almacén inválida');
@@ -75,8 +78,17 @@ function validateEnvelope(value) {
             JSON.stringify(prepared.journal.added) !== JSON.stringify(event.added) ||
             JSON.stringify(prepared.journal.affectedViews) !== JSON.stringify(event.affectedViews))
           throw new Error('Auditoría de importación no coincide con las altas');
+      } else if (event.operation === 'restore') {
+        const ancestor = value.audit.slice(0, index).find(({ id }) => id === event.restores);
+        if (!ancestor || !validMeta(event.backup) ||
+            typeof event.beforeSnapshot !== 'string' ||
+            !sameMeta(snapshotMetadata(event.beforeSnapshot), event.before) ||
+            event.beforeSnapshot !== previous.afterSnapshot ||
+            !sameMeta(event.after, ancestor.after) ||
+            event.afterSnapshot !== ancestor.afterSnapshot)
+          throw new Error('Restauración de auditoría inválida');
       } else if (event.operation === 'rollback') {
-        if (previous.operation !== 'apply' || event.reverses !== previous.id ||
+        if (!['apply', 'restore'].includes(previous.operation) || event.reverses !== previous.id ||
             !sameMeta(event.after, previous.before) ||
             event.afterSnapshot !== previous.beforeSnapshot)
           throw new Error('Reversión de auditoría inválida');
@@ -97,6 +109,26 @@ async function readStore(target) {
   try { value = JSON.parse(raw); }
   catch { throw new Error('Sobre de almacén inválido: JSON'); }
   return { raw, value: validateEnvelope(value) };
+}
+
+async function readBackup(target) {
+  let raw;
+  try { raw = await readFile(target, 'utf8'); }
+  catch (error) { if (error.code === 'ENOENT') throw new Error('El respaldo no existe'); throw error; }
+  let value;
+  try { value = JSON.parse(raw); }
+  catch { throw new Error('Sobre de respaldo inválido: JSON'); }
+  if (!object(value) || Object.keys(value).sort().join(',') !==
+      'format,source,store,storeMeta,tip,version' ||
+      value.format !== BACKUP_FORMAT || value.version !== VERSION || value.source !== SOURCE ||
+      typeof value.store !== 'string' || !validMeta(value.storeMeta) ||
+      !sameMeta(rawMeta(value.store), value.storeMeta) || typeof value.tip !== 'string')
+    throw new Error('Integridad o formato del respaldo inválido');
+  let store;
+  try { store = validateEnvelope(JSON.parse(value.store)); }
+  catch { throw new Error('Integridad del almacén respaldado inválida'); }
+  if (store.audit.at(-1).id !== value.tip) throw new Error('Linaje del respaldo alterado');
+  return { raw, value, store };
 }
 
 async function lockStore(target, action) {
@@ -161,6 +193,60 @@ export async function statusDemoStore(path) {
   return (await readStore(target)).value;
 }
 
+/** Copia explícita, exclusiva y comprobada de un almacén demo validado. */
+export async function backupDemoStore(path, destination, hooks = {}) {
+  const target = await checkedPath(path);
+  const backup = await checkedPath(destination);
+  if (target === backup) throw new Error('Origen y respaldo no pueden usar la misma ruta');
+  return lockStore(target, async () => {
+    const { raw, value } = await readStore(target);
+    const archive = { format: BACKUP_FORMAT, version: VERSION, source: SOURCE,
+      store: raw, storeMeta: rawMeta(raw), tip: value.audit.at(-1).id };
+    await hooks.beforeWrite?.();
+    let handle;
+    let created = false;
+    try {
+      try { handle = await open(backup, 'wx', 0o600); created = true; }
+      catch (error) { if (error.code === 'EEXIST') throw new Error('El destino del respaldo ya existe'); throw error; }
+      await handle.writeFile(JSON.stringify(archive));
+      await handle.sync();
+      await handle.close();
+      handle = null;
+      const checked = await readBackup(backup);
+      if (checked.value.store !== raw) throw new Error('Lectura de respaldo no coincide');
+      return value;
+    } catch (error) {
+      if (handle) await handle.close();
+      if (created) await unlink(backup);
+      throw error;
+    }
+  });
+}
+
+/** Restaura exclusivamente un ancestro del mismo linaje, conservando auditoría viva. */
+export async function restoreDemoStore(path, source, hooks) {
+  const target = await checkedPath(path);
+  const backup = await checkedPath(source);
+  if (target === backup) throw new Error('Origen y respaldo no pueden usar la misma ruta');
+  return lockStore(target, async () => {
+    const { raw, value } = await readStore(target);
+    const saved = await readBackup(backup);
+    const prefix = value.audit.slice(0, saved.store.audit.length);
+    if (JSON.stringify(prefix) !== JSON.stringify(saved.store.audit))
+      throw new Error('El respaldo no pertenece al linaje ancestro del almacén');
+    if (value.data === saved.store.data) return value;
+    const data = saved.store.data;
+    const snapshot = snapshotMetadata(data);
+    const next = { ...value, data, snapshot, audit: [...value.audit,
+      { id: randomUUID(), operation: 'restore', source: SOURCE,
+        restores: saved.value.tip, backup: rawMeta(saved.raw),
+        before: value.snapshot, beforeSnapshot: value.data,
+        after: snapshot, afterSnapshot: data }] };
+    await writeAtomic(target, next, raw, hooks);
+    return next;
+  });
+}
+
 /** Solo altas sin conflictos; una importación idéntica no escribe ni agrega evento. */
 export async function applyDemoStore(path, incoming, hooks) {
   const target = await checkedPath(path);
@@ -178,13 +264,13 @@ export async function applyDemoStore(path, incoming, hooks) {
   });
 }
 
-/** Revierte solo la última aplicación, sin borrar el historial. */
+/** Revierte solo la última aplicación o restauración, sin borrar el historial. */
 export async function rollbackDemoStore(path, hooks) {
   const target = await checkedPath(path);
   return lockStore(target, async () => {
     const { raw, value } = await readStore(target);
     const last = value.audit.at(-1);
-    if (last.operation !== 'apply') throw new Error('La última operación no admite reversión');
+    if (!['apply', 'restore'].includes(last.operation)) throw new Error('La última operación no admite reversión');
     if (!sameMeta(value.snapshot, last.after)) throw new Error('Deriva detectada antes de revertir');
     const data = last.beforeSnapshot;
     const snapshot = snapshotMetadata(data);
@@ -211,8 +297,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     if (operation === 'init') state = await initDemoStore(store);
     else if (operation === 'status') state = await statusDemoStore(store);
     else if (operation === 'apply') state = await applyDemoStore(store, await readFile(option(args, '--input'), 'utf8'));
+    else if (operation === 'backup') state = await backupDemoStore(store, option(args, '--backup'));
+    else if (operation === 'restore') state = await restoreDemoStore(store, option(args, '--backup'));
     else if (operation === 'rollback') state = await rollbackDemoStore(store);
-    else throw new Error('Uso: init|status|apply|rollback --store .demo-state/archivo.json [--input snapshot.json]');
+    else throw new Error('Uso: init|status|apply|backup|restore|rollback --store .demo-state/archivo.json [--input snapshot.json] [--backup .demo-state/respaldo.json]');
     console.log(JSON.stringify({ operation, sha256: state.snapshot.sha256,
       bytes: state.snapshot.bytes, auditEvents: state.audit.length }));
   } catch (error) {

@@ -7,7 +7,8 @@ import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import * as demo from '../dist/data/demo.js';
 import { decodeDemoSnapshot, encodeDemoSnapshot, snapshotMetadata } from '../scripts/demo-snapshot.mjs';
-import { applyDemoStore, initDemoStore, rollbackDemoStore, statusDemoStore } from '../scripts/demo-store.mjs';
+import { applyDemoStore, backupDemoStore, initDemoStore, restoreDemoStore,
+  rollbackDemoStore, statusDemoStore } from '../scripts/demo-store.mjs';
 
 const root = join(process.cwd(), '.demo-state');
 const fixture = encodeDemoSnapshot(demo);
@@ -161,4 +162,106 @@ test('CLI exige comando y ruta; init/status operan sin publicar datos', async (t
   assert.equal(JSON.parse(run('status', '--store', store).stdout).auditEvents, 2);
   assert.equal(run('rollback', '--store', store).status, 0);
   assert.equal(JSON.parse(run('status', '--store', store).stdout).auditEvents, 3);
+});
+
+test('respalda con destino exclusivo, restaura un ancestro y revierte la restauración', async (t) => {
+  const { dir, store } = await sandbox(t);
+  const backup = join(dir, 'backup.json');
+  const initial = await initDemoStore(store);
+  const saved = await backupDemoStore(store, backup);
+  assert.equal(saved.snapshot.sha256, initial.snapshot.sha256);
+  assert.equal((await readFile(backup, 'utf8')).includes('casa-morra.demo-backup'), true);
+  await assert.rejects(backupDemoStore(store, backup), /existe|destino/i);
+  const applied = await applyDemoStore(store, sample());
+  const restored = await restoreDemoStore(store, backup);
+  assert.equal(restored.audit.length, 3);
+  assert.equal(restored.audit[2].operation, 'restore');
+  assert.equal(restored.audit[2].restores, initial.audit[0].id);
+  assert.equal(restored.snapshot.sha256, initial.snapshot.sha256);
+  assert.equal((await statusDemoStore(store)).audit.length, 3);
+  const reversed = await rollbackDemoStore(store);
+  assert.equal(reversed.audit[3].operation, 'rollback');
+  assert.equal(reversed.audit[3].reverses, restored.audit[2].id);
+  assert.equal(reversed.snapshot.sha256, applied.snapshot.sha256);
+  assert.equal((await readFile(backup, 'utf8')).includes(restored.audit[2].id), false);
+  const repeated = await restoreDemoStore(store, backup);
+  assert.equal(repeated.audit.length, 5);
+  assert.deepEqual(await restoreDemoStore(store, backup), repeated);
+});
+
+test('restauración falla cerrada ante respaldo alterado o linaje ajeno', async (t) => {
+  const { dir, store } = await sandbox(t);
+  const backup = join(dir, 'backup.json');
+  await initDemoStore(store);
+  await backupDemoStore(store, backup);
+  await applyDemoStore(store, sample());
+  const before = await readFile(store, 'utf8');
+  const valid = await readFile(backup, 'utf8');
+  const tampered = JSON.parse(valid);
+  tampered.storeMeta.sha256 = '0'.repeat(64);
+  await writeFile(backup, JSON.stringify(tampered));
+  await assert.rejects(restoreDemoStore(store, backup), /integridad|hash/i);
+  assert.equal(await readFile(store, 'utf8'), before);
+  await writeFile(backup, valid);
+  const other = join(dir, 'other.json');
+  const foreign = join(dir, 'foreign.json');
+  await initDemoStore(other);
+  await backupDemoStore(other, foreign);
+  await assert.rejects(restoreDemoStore(store, foreign), /linaje|ancestro/i);
+  assert.equal(await readFile(store, 'utf8'), before);
+});
+
+test('rechaza rama divergente aunque comparta el evento inicial', async (t) => {
+  const { dir, store } = await sandbox(t);
+  const other = join(dir, 'other.json');
+  const backup = join(dir, 'backup.json');
+  await initDemoStore(store);
+  await writeFile(other, await readFile(store, 'utf8'));
+  await applyDemoStore(store, sample());
+  const alternate = decodeDemoSnapshot(fixture);
+  alternate.editorial.news.push({ id: 'otra-local', slug: 'otra-local', date: '2026-10-08',
+    title: 'Otra noticia ficticia', excerpt: 'Resumen', body: 'Contenido' });
+  await applyDemoStore(other, encodeDemoSnapshot(alternate));
+  await backupDemoStore(other, backup);
+  const before = await readFile(store, 'utf8');
+  await assert.rejects(restoreDemoStore(store, backup), /linaje|ancestro/i);
+  assert.equal(await readFile(store, 'utf8'), before);
+});
+
+test('CLI ejecuta backup y restore sin imprimir los datos', async (t) => {
+  const { dir, store } = await sandbox(t);
+  const backup = join(dir, 'backup.json');
+  const input = join(dir, 'incoming.json');
+  const run = (...args) => spawnSync(process.execPath, ['scripts/demo-store.mjs', ...args],
+    { cwd: process.cwd(), encoding: 'utf8' });
+  assert.equal(run('init', '--store', store).status, 0);
+  assert.equal(run('backup', '--store', store, '--backup', backup).status, 0);
+  assert.notEqual(run('backup', '--store', store, '--backup', backup).status, 0);
+  await writeFile(input, sample());
+  assert.equal(run('apply', '--store', store, '--input', input).status, 0);
+  const restored = run('restore', '--store', store, '--backup', backup);
+  assert.equal(restored.status, 0, restored.stderr);
+  assert.equal(JSON.parse(restored.stdout).auditEvents, 3);
+  assert.equal(restored.stdout.includes('Noticia ficticia'), false);
+  assert.equal(run('rollback', '--store', store).status, 0);
+});
+
+test('respaldo/restauración rechazan rutas inseguras, lock y fallos de escritura', async (t) => {
+  const { dir, store } = await sandbox(t);
+  const backup = join(dir, 'backup.json');
+  await initDemoStore(store);
+  await assert.rejects(backupDemoStore(store, store), /misma ruta|origen/i);
+  await assert.rejects(backupDemoStore(store, join(process.cwd(), 'fuera.json')), /demo-state|ruta/i);
+  await writeFile(`${store}.lock`, 'ocupado');
+  await assert.rejects(backupDemoStore(store, backup), /bloquead|lock/i);
+  await assert.rejects(restoreDemoStore(store, backup), /bloquead|lock/i);
+  await rm(`${store}.lock`);
+  await assert.rejects(backupDemoStore(store, backup, { beforeWrite: () => { throw new Error('fallo simulado'); } }), /fallo simulado/);
+  assert.equal(existsSync(backup), false);
+  await backupDemoStore(store, backup);
+  const link = join(dir, 'backup-link.json');
+  try { symlinkSync(backup, link, 'file'); }
+  catch (error) { if (error.code === 'EPERM') { t.skip('Windows no permite symlinks'); return; } throw error; }
+  await assert.rejects(restoreDemoStore(store, link), /enlace|simbólico/i);
+  await assert.rejects(backupDemoStore(store, link), /enlace|simbólico/i);
 });
