@@ -6,6 +6,7 @@ import { formatNumber } from '../dist/views/common.js';
 import { renderHome } from '../dist/views/home.js';
 import { renderPlayersDirectory } from '../dist/views/players.js';
 import { renderTournamentList } from '../dist/views/tournaments.js';
+import { validateOfficialFields } from './data-integrity.mjs';
 
 const EPSILON = 1e-7;
 const RESULTS = new Set(['1-0', '0-1', '1/2-1/2']);
@@ -193,6 +194,7 @@ export function verifyData(data, overrides = {}) {
   for (const [name, rows] of [['jugadores', data.players], ['torneos', data.tournaments],
     ['partidas', data.games], ['descansos', data.byes], ['títulos', data.titles], ['temporadas', data.seasons]])
     unique(rows, name, errors);
+  validateOfficialFields(data, errors);
   validateForeignKeys(data, errors);
   if (!errors.length) {
     validateStandings(data, errors);

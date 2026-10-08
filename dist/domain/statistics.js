@@ -214,6 +214,7 @@ export function getLeaderboards(data) {
     leaderboard(data, 'unbeatenStreak', 'Racha invicta', counts((p) => p.streaks.unbeaten)),
     leaderboard(data, 'peakElo', 'Mayor Elo demo', counts((p) => p.elo.played > 0 ? p.elo.peak : null)),
     leaderboard(data, 'tournamentsPlayed', 'Torneos jugados', counts((p) => p.tournaments.length)),
-    leaderboard(data, 'podiums', 'Podios', counts((p) => p.tournaments.filter((row) => row.rank <= 3).length)),
+    leaderboard(data, 'podiums', 'Podios', counts((p) => p.tournaments.filter((row) =>
+      Number.isInteger(row.rank) && row.rank >= 1 && row.rank <= 3).length)),
   ];
 }

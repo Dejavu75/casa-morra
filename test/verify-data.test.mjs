@@ -56,3 +56,19 @@ test('detecta contadores visibles que divergen del dataset', () => {
   assert.ok(codes(report).includes('DIRECTORY_VIEW_TOTAL'));
   assert.equal(verifyData(data, { renderHome, renderPlayersDirectory }).ok, true);
 });
+
+test('rechaza puestos oficiales imposibles y fechas calendario inválidas antes de calcular derivados', () => {
+  const tableOnly = tournaments.find((event) => event.format === 'table-only');
+  for (const rank of [-1, 0, 1.5, tableOnly.standings.length + 1]) {
+    const changed = tournaments.map((event) => event.id === tableOnly.id ? {
+      ...event, standings: event.standings.map((row, index) => index === 0 ? { ...row, rank } : row),
+    } : event);
+    const report = verifyData({ ...data, tournaments: changed });
+    assert.equal(report.ok, false, `rank=${rank}`);
+    assert.ok(codes(report).includes('STANDING_RANK'), `rank=${rank}`);
+  }
+  const invalid = verifyData({ ...data,
+    tournaments: tournaments.map((event, index) => index === 0 ? { ...event, date: '2030-99-99' } : event),
+  });
+  assert.ok(codes(invalid).includes('INVALID_DATE'));
+});

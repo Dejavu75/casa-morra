@@ -188,6 +188,16 @@ test('quince derrotas son elegibles para el récord porcentual con valor cero', 
   assert.equal(entries.some((row) => row.playerId === 'c'), false);
 });
 
+test('un puesto oficial inválido no se convierte en podio en el agregado defensivo', () => {
+  const data = fixture({
+    tournaments: [event('t', 's1', '2025-09-01', [
+      standing('a', 1, -1, 1), standing('b', 1, 1, 2),
+    ])],
+  });
+  const podiums = getLeaderboards(data).find((board) => board.id === 'podiums').entries;
+  assert.deepEqual(podiums.map((entry) => [entry.playerId, entry.value]), [['b', 1]]);
+});
+
 test('un clásico requiere dos jugadores existentes y distintos', () => {
   assert.equal(getHeadToHead(demo, 'ayla-neri', 'ayla-neri'), null);
   assert.equal(getHeadToHead(demo, 'ayla-neri', 'fantasma'), null);

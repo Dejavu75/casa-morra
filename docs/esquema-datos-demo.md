@@ -33,6 +33,8 @@ const datos = decodeDemoSnapshot(json);
 
 `decodeDemoSnapshot` valida formato, versión, forma de los registros, IDs y slugs únicos (incluidos los de las novedades), referencias entre temporadas/torneos/jugadores/partidas/byes/títulos, resultados y orden explícito de tabla. Devuelve las siete colecciones, sin escribir archivos ni modificar la entrada. Errores como `UNSUPPORTED_VERSION`, `UNKNOWN_PLAYER` o `UNEXPECTED_FIELD` impiden decodificar. Una versión futura deberá tener un migrador explícito: no se interpreta automáticamente con reglas de la versión 1.
 
+Las fechas de temporada, torneo, partida y novedad deben ser fechas reales en formato `AAAA-MM-DD`; no se comprueba aquí que una partida ocurra dentro de su temporada. El puesto oficial (`rank`) debe ser un entero entre 1 y la cantidad de filas de su tabla; se admiten empates y no se recalculan desempates. Estas comprobaciones semánticas son compartidas por el snapshot y `npm run verify:data`. Un puesto inválido tampoco cuenta como podio en el agregado defensivo.
+
 Para ver solamente metadatos y cantidades, sin volcar nombres ni generar un archivo: `node scripts/demo-snapshot.mjs`. Para probar el contrato: `node --test test/demo-snapshot.test.mjs`. La comprobación complementaria `npm run verify:data` revisa estadísticas, puntos y vistas; la validación del snapshot **no** la reemplaza ni verifica legalidad de cada jugada.
 
 La muestra comprometida en esta unidad codifica **20.184 bytes UTF-8** con SHA-256 `f8238289ac5ea38ded4911f0667fae32cfa7ef1b87d37affbaf5ff2438488a24`. Ese valor identifica el contenido actual, no es la versión del esquema; cualquier cambio legítimo de datos exige revisar esta referencia y la prueba correspondiente.

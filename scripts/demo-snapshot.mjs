@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import * as demo from '../dist/data/demo.js';
+import { validateOfficialFields } from './data-integrity.mjs';
 
 export const SNAPSHOT_FORMAT = 'casa-morra.demo-snapshot';
 export const SNAPSHOT_VERSION = 1;
@@ -133,6 +134,7 @@ export function validateDemoSnapshot(snapshot) {
     checkRows(data.editorial.classes, SHAPES.classes, 'data.editorial.classes', errors);
   }
   if (errors.length) return { ok: false, errors };
+  validateOfficialFields(data, errors);
   for (const key of ROW_KEYS) checkUnique(data[key], 'id', key, errors);
   for (const key of ['players', 'tournaments']) checkUnique(data[key], 'slug', key, errors);
   for (const key of ['news', 'classes']) checkUnique(data.editorial[key], 'id', `editorial.${key}`, errors);

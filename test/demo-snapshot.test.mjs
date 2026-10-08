@@ -90,3 +90,20 @@ test('rechaza slugs duplicados de novedades aunque sus ID sean distintos', () =>
   assert.throws(() => decodeDemoSnapshot(JSON.stringify(snapshot)), /DUPLICATE_KEY/);
   assert.throws(() => encodeDemoSnapshot(snapshot.data), /DUPLICATE_KEY/);
 });
+
+test('rechaza puestos oficiales fuera de rango y fechas inexistentes en el snapshot', () => {
+  const invalidRank = alteredSnapshot((snapshot) => {
+    snapshot.data.tournaments[0].standings[0].rank = -1;
+  });
+  assert.ok(validateDemoSnapshot(invalidRank).errors.some((error) => error.code === 'STANDING_RANK'));
+  assert.throws(() => decodeDemoSnapshot(JSON.stringify(invalidRank)), /STANDING_RANK/);
+  const invalidDate = alteredSnapshot((snapshot) => {
+    snapshot.data.editorial.news[0].date = '2030-99-99';
+  });
+  assert.ok(validateDemoSnapshot(invalidDate).errors.some((error) => error.code === 'INVALID_DATE'));
+  assert.throws(() => encodeDemoSnapshot(invalidDate.data), /INVALID_DATE/);
+  const leapDate = alteredSnapshot((snapshot) => {
+    snapshot.data.games[0].date = '2025-02-29';
+  });
+  assert.ok(validateDemoSnapshot(leapDate).errors.some((error) => error.code === 'INVALID_DATE'));
+});
