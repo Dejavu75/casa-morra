@@ -1,0 +1,141 @@
+.players-page {
+  padding-block: clamp(2rem, 5vw, 5rem);
+}
+
+.players-page h1,
+.players-page h2 {
+  color: var(--heading);
+  font-family: var(--font-serif);
+}
+
+.players-page h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.1;
+  margin-block: 0.3em;
+}
+
+.players-page section {
+  margin-block: 2rem;
+}
+
+.players-eyebrow {
+  color: var(--accent-text);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.players-back,
+.players-membership,
+.players-count {
+  font-weight: 700;
+}
+
+.players-achievements {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.8rem;
+  margin-block: 1.3rem;
+}
+
+.players-achievements > div {
+  border: 1px solid var(--line);
+  padding: 0.9rem 1rem;
+}
+
+.players-achievements dt {
+  color: var(--copy);
+  font-size: 0.9rem;
+}
+
+.players-achievements dd {
+  color: var(--heading);
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0.4rem 0 0;
+}
+
+.players-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.75rem 1rem;
+  margin-block: 2rem 1rem;
+}
+
+.players-search label {
+  flex-basis: 100%;
+  font-weight: 700;
+}
+
+.players-search input {
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  border-radius: 0.35rem;
+  color: var(--text);
+  flex: 1 1 18rem;
+  font: inherit;
+  min-height: 2.8rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.players-search button {
+  background: var(--heading);
+  border: 0;
+  border-radius: 0.35rem;
+  color: var(--surface);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  min-height: 2.8rem;
+  padding: 0.55rem 1.2rem;
+}
+
+.players-alphabet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-block: 1.5rem;
+}
+
+.players-alphabet a,
+.players-alphabet span {
+  border: 1px solid var(--line);
+  border-radius: 0.3rem;
+  display: inline-grid;
+  min-height: 2.3rem;
+  min-width: 2.3rem;
+  place-items: center;
+}
+
+.players-alphabet a {
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.players-alphabet span {
+  opacity: 0.5;
+}
+
+.players-groups {
+  display: grid;
+  gap: 0 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+}
+
+.players-letter {
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 2rem;
+}
+
+.players-letter ul {
+  list-style: none;
+  padding: 0;
+}
+
+.players-letter li {
+  border-bottom: 1px solid var(--line);
+  padding-block: 0.55rem;
+}
