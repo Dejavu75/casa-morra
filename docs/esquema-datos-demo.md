@@ -103,3 +103,16 @@ El archivo contiene un sobre versionado con snapshot vigente y eventos de origen
 Cada escritura usa un bloqueo exclusivo (`.lock`) que **no se elimina automáticamente** si queda abandonado; ante un lock previo la operación falla cerrada. Se escribe un temporal en el mismo directorio, se sincroniza el archivo y se sustituye por renombrado atómico, con comparación del contenido vigente antes de sustituir. Se rechazan rutas fuera de `.demo-state/` y enlaces simbólicos detectados en sus componentes. Es una protección operativa local, no una defensa contra otro proceso hostil que modifique rutas entre comprobación y renombrado; el bloqueo es cooperativo. En Windows, la sincronización del directorio y la persistencia tras un corte eléctrico no se pueden garantizar con esta implementación. Un fallo posterior al renombrado puede dejar la escritura efectuada aunque el proceso no haya terminado normalmente; reabrí con `status` antes de reintentar.
 
 El almacén no provee acceso multiusuario, permisos de cuentas, invalidación real de derivados ni persistencia dentro de Docker. Estos criterios de `CC-03` siguen abiertos, junto con la verificación estadística integral de `CC-05/19`. Para probar esta unidad: `node --test test/demo-store.test.mjs`, `npm test` y `npm run verify:data`.
+
+### Exportación pública manual
+
+El almacén `.demo-state/` contiene auditoría, propuestas y respaldos; **nunca** debe montarse ni servirse por HTTP. La exportación crea un único JSON ficticio separado bajo `.demo-public/`, también ignorado por Git. Son dos pasos explícitos desde la raíz del repositorio:
+
+```sh
+node scripts/demo-public.mjs publish --store .demo-state/casa-morra.json --output .demo-public/snapshot.json
+node scripts/demo-public.mjs status --store .demo-state/casa-morra.json --output .demo-public/snapshot.json
+```
+
+`publish` exige un almacén válido y exporta únicamente `format`, `version`, `source` (SHA-256 y bytes del snapshot canónico) y `snapshot` público `v1`. No exporta el sobre, la auditoría, los respaldos ni los locks. Repetir una publicación idéntica deja los bytes intactos. `status` informa `exists` y `fresh`; un cambio de contenido tras `apply`, `correct`, `restore` o `rollback` vuelve obsoleta la exportación hasta repetir `publish`. La frescura compara contenido, no la secuencia de eventos; una restauración a los mismos bytes publicados puede seguir fresca.
+
+El destino debe estar dentro de `.demo-public/`; se rechazan enlaces simbólicos detectados y exportaciones previas corruptas. La sustitución de **ese archivo** usa temporal, sincronización, comparación contra la versión previa y renombrado. No es una transacción multiarchivo con el almacén ni protege contra procesos hostiles o cortes eléctricos en Windows. Después de un error, repetí `status` antes de decidir si reintentar. Esta exportación **no** conecta todavía Docker ni la interfaz web, ni realiza invalidación viva; `CC-03` permanece abierta. Nunca publiques datos personales o reales mediante este canal.
