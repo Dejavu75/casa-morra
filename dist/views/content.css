@@ -1,0 +1,92 @@
+.content-page {
+  min-height: 60vh;
+  padding-block: clamp(2rem, 6vw, 5rem);
+}
+.content-page h1,
+.content-page h2,
+.content-page h3 { color: var(--heading); font-family: var(--font-serif); line-height: 1.18; }
+.content-page h1 { font-size: clamp(2.5rem, 7vw, 5rem); margin: .5rem 0 1rem; }
+.content-page h2 { font-size: clamp(1.7rem, 4vw, 2.6rem); margin: 2.5rem 0 1rem; }
+.content-page h3 { font-size: 1.5rem; margin: .2rem 0; }
+.content-page a { color: var(--accent-text); text-underline-offset: .2em; }
+.content-page > p,
+.content-page article { max-width: 75ch; }
+.content-eyebrow { color: var(--accent-text); font-size: .82rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.content-lead { font-size: clamp(1.15rem, 2vw, 1.5rem); }
+.content-note { color: var(--copy); font-size: .95rem; }
+.content-error { border-left: 4px solid var(--copper); padding: 1rem; }
+.content-hero { max-width: 73rem; padding-block: 2rem 3rem; }
+.content-hero h1 { max-width: 15ch; }
+.content-hero > p:not(.content-eyebrow) { max-width: 60ch; font-size: 1.2rem; }
+.content-hero nav,
+.content-end-links { display: flex; flex-wrap: wrap; gap: 1rem; margin-block: 1.5rem; }
+.content-hero nav a,
+.content-end-links a { border-bottom: 2px solid var(--accent-text); padding-block: .4rem; }
+
+.home-totals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-block: 1rem 3rem; border-block: 1px solid var(--line); }
+.home-totals p { margin: 0; padding: 1.5rem .7rem; }
+.home-totals strong { display: block; color: var(--heading); font-family: var(--font-serif); font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1; }
+.home-gallery { margin-block: 1rem 3rem; }
+.editorial-carousel { min-width: 0; border: 1px solid var(--line); padding: 1rem; }
+.editorial-carousel legend { padding-inline: .4rem; font-weight: 700; }
+.editorial-carousel input { margin: .6rem .2rem .6rem 1rem; accent-color: var(--teal); cursor: pointer; }
+.editorial-carousel input:first-of-type { margin-left: 0; }
+.editorial-carousel input:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+.editorial-carousel label { cursor: pointer; padding: .45rem .2rem; }
+.editorial-carousel input:checked + label { color: var(--heading); font-weight: 700; text-decoration: underline; text-underline-offset: .25em; }
+.gallery-frames { margin-top: 1rem; }
+.gallery-slide { display: none; }
+#gallery-home-1:checked ~ .gallery-frames .gallery-slide-1,
+#gallery-home-2:checked ~ .gallery-frames .gallery-slide-2 { display: block; }
+.gallery-slide,
+.institution-gallery figure { margin: 0; }
+.gallery-slide img,
+.institution-gallery img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: .2rem; }
+.gallery-slide figcaption,
+.institution-gallery figcaption { padding-block: .8rem; color: var(--copy); }
+.gallery-slide figcaption span { display: block; font-size: .9rem; }
+.institution-gallery { margin-block: 3rem; }
+.institution-gallery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.institution-gallery figure { border: 1px solid var(--line); padding: .65rem; }
+.home-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1rem, 4vw, 4rem); }
+.home-annual { list-style: none; padding: 0; }
+.home-annual-row { display: flex; gap: .7rem; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--line); padding: .65rem 0; }
+.home-annual-row strong { margin-left: auto; white-space: nowrap; }
+.content-card-grid { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 1rem; padding: 0; }
+.content-card-grid li { border: 1px solid var(--line); padding: 1.3rem; }
+.content-card-grid article { max-width: none; }
+.content-table-wrap { overflow-x: auto; }
+.content-page table:not(.game-board) { border-collapse: collapse; min-width: 45rem; width: 100%; text-align: left; }
+.content-page table:not(.game-board) caption { text-align: left; font-weight: 700; padding-block: .8rem; }
+.content-page table:not(.game-board) th,
+.content-page table:not(.game-board) td { border-bottom: 1px solid var(--line); padding: .7rem .6rem; }
+.content-page table:not(.game-board) thead { background: var(--indigo); color: var(--paper); }
+
+.game-board-wrap { max-width: min(100%, 35rem); overflow-x: auto; }
+.game-board { border-collapse: collapse; width: min(100%, 35rem); table-layout: fixed; font-variant-numeric: tabular-nums; }
+.game-board caption { text-align: left; font-weight: 700; padding-block: .5rem; }
+.game-board th { color: var(--copy); font-size: .82rem; }
+.game-board td { width: 11%; aspect-ratio: 1; text-align: center; font-size: clamp(1.2rem, 4vw, 2.5rem); line-height: 1; }
+.game-board tbody tr:nth-child(odd) td:nth-of-type(odd),
+.game-board tbody tr:nth-child(even) td:nth-of-type(even) { background: #a5b8b1; color: #111a2c; }
+.game-board tbody tr:nth-child(odd) td:nth-of-type(even),
+.game-board tbody tr:nth-child(even) td:nth-of-type(odd) { background: #e8ded0; color: #111a2c; }
+.game-controls { display: flex; flex-wrap: wrap; gap: .5rem; margin-block: 1rem; }
+.game-controls button { min-height: 2.75rem; border: 1px solid var(--line); background: var(--indigo); color: var(--paper); cursor: pointer; padding: .5rem .8rem; font: inherit; }
+.game-controls button:disabled { opacity: .5; cursor: not-allowed; }
+.game-transcript { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; list-style-position: inside; }
+.game-transcript li { border: 1px solid var(--line); padding: .3rem .45rem; }
+.game-transcript [aria-current="step"] { border-color: var(--accent-text); font-weight: 700; }
+.content-page .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 700px) {
+  .home-grid { grid-template-columns: 1fr; }
+  .home-totals { grid-template-columns: 1fr 1fr; }
+  .home-annual-row { flex-wrap: wrap; }
+  .institution-gallery-grid { grid-template-columns: 1fr; }
+  .editorial-carousel input { margin-left: .5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editorial-carousel *, .institution-gallery * { scroll-behavior: auto; transition-duration: 0s; animation-duration: 0s; }
+}
