@@ -1,0 +1,126 @@
+:root {
+  color-scheme: light;
+  --surface-light: #f5f0e6;
+  --surface-dark: #17213a;
+  --text-light: #202633;
+  --text-dark: #fffdf8;
+  --indigo: #17213a;
+  --indigo-deep: #111a2c;
+  --ivory: #f5f0e6;
+  --paper: #fffdf8;
+  --teal: #3d7772;
+  --copper: #b46f42;
+  --ink: #202633;
+  --muted: #59606b;
+  --line: rgba(23, 33, 58, 0.16);
+  --surface: var(--surface-light);
+  --text: var(--text-light);
+  --heading: var(--indigo);
+  --copy: #424957;
+  --accent-text: #345f5b;
+  --focus: #2c625d;
+  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+:root[data-theme="oscuro"] {
+  color-scheme: dark;
+  --surface: #1d2b43;
+  --text: var(--text-dark);
+  --heading: var(--paper);
+  --copy: #e1e5eb;
+  --accent-text: #a6dfd5;
+  --muted: #d1d8e2;
+  --line: rgba(255, 253, 248, 0.25);
+  --focus: #74c7bc;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.55;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.container {
+  width: min(100% - 2.5rem, 1260px);
+  margin-inline: auto;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: -6rem;
+  left: 1rem;
+  padding: 0.7rem 1rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+.hero h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+}
+
+.hero h1 em,
+h2 em {
+  font-weight: 400;
+}
+h2 {
+  margin: 0;
+  color: var(--heading);
+  font-size: clamp(3rem, 5.2vw, 5.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+}
+
+h2 em {
+  color: var(--accent-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
