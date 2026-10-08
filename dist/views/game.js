@@ -7,7 +7,7 @@ export const gameEs = Object.freeze({
   noMoves: 'Sin jugadas registradas. El resultado permanece disponible, pero no hay tablero para reproducir.',
   invalid: 'La secuencia no se puede reproducir con este visor limitado.',
   scope: 'Secuencia de coordenadas UCI preparada para esta muestra. No es un archivo PGN ni un validador general de legalidad ajedrecística.',
-  boardAt: (ply) => `Tablero tras ${ply} jugadas`, white: 'blanco', black: 'negro',
+  boardAt: (ply) => `Tablero tras ${ply} ${ply === 1 ? 'jugada' : 'jugadas'}`, white: 'blanco', black: 'negro',
   whiteFeminine: 'blanca', blackFeminine: 'negra', empty: 'casilla vacía',
   first: 'Primera posición', previous: 'Jugada anterior', next: 'Siguiente jugada', last: 'Última posición',
   transcript: 'Secuencia disponible', current: 'Jugada actual', initial: 'Posición inicial',
@@ -153,7 +153,9 @@ export function attachGameReplay(root, data, id, messages = gameEs) {
     root.innerHTML = renderReplay(game, next, messages);
     root.dataset.ply = String(next);
     const preferred = root.querySelector?.(`[data-replay-action="${action}"]:not(:disabled)`);
-    (preferred ?? root.querySelector?.('.game-controls button:not(:disabled)'))?.focus?.();
+    const fallbackAction = next === 0 ? 'next' : 'prev';
+    const fallback = root.querySelector?.(`[data-replay-action="${fallbackAction}"]:not(:disabled)`);
+    (preferred ?? fallback ?? root.querySelector?.('.game-controls button:not(:disabled)'))?.focus?.();
   };
   root.addEventListener('click', onClick);
   return () => root.removeEventListener('click', onClick);
