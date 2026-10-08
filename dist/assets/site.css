@@ -479,6 +479,16 @@ h2 em {
   font-variant-numeric: tabular-nums;
 }
 
+.classic-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.classic-table-scroll:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: -3px;
+}
+
 .record-board caption,
 .classic-detail caption {
   padding-block: 0.6rem;
