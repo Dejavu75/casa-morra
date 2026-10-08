@@ -1,5 +1,5 @@
 import { routeHref } from '../router.js';
-import { getPlayerProfile } from '../domain/statistics.js';
+import { getHeadToHead, getPlayerProfile } from '../domain/statistics.js';
 import { escapeHtml as h, formatDate, formatNumber, playerName, safeRouteHref } from './common.js';
 
 // Las etiquetas se inyectan en vez de mezclarse con datos o lógica de cálculo.
@@ -33,7 +33,15 @@ export const playersEs = Object.freeze({
   winningStreak: 'Racha máxima de victorias', unbeatenStreak: 'Racha máxima sin perder',
   titleCount: 'Títulos registrados',
   careerExplanation: 'Puntos y puestos provienen de tablas oficiales, aun sin partidas detalladas. Las rachas cuentan solo partidas al tablero; los byes no son partidas. Los títulos se registran por separado y no se infieren de un puesto.',
-
+  comparisons: 'Comparativos propios de demostración',
+  comparisonsRule: 'Reglas propias de Casa Morra, no una réplica de otro club. Rendimiento = (G + 0,5 × E) / partidas al tablero; no se suman descansos ni tablas sin partidas. Ante igual rendimiento prevalece la mayor muestra, luego la fecha más antigua y el ID ascendente del torneo.',
+  bestEvent: 'Mejor evento al tablero', worstEvent: 'Peor evento al tablero',
+  noBoardEvents: 'Sin eventos con partidas al tablero.',
+  favorable: 'Balance favorable', adverse: 'Balance adverso',
+  rivalRule: 'Balance = victorias menos derrotas frente a cada rival. Solo se comparan parejas con al menos dos partidas al tablero; los empates son neutros. No son categorías por Elo.',
+  noEligibleRivals: 'Sin rivales con al menos dos partidas al tablero.',
+  noFavorable: 'Sin rival con balance favorable.', noAdverse: 'Sin rival con balance adverso.',
+  gamesSample: (played) => `${formatNumber(played)} partida${played === 1 ? '' : 's'}`,
 });
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -140,6 +148,73 @@ function officialAchievements(profile, titleCount, messages) {
     <p>${h(message(messages, 'careerExplanation'))}</p><dl class="players-achievements">${items}</dl></section>`;
 }
 
+function eventCandidates(data, playerId) {
+  const byEvent = new Map((data.tournaments ?? []).map((event) => [event.id, {
+    event, wins: 0, draws: 0, losses: 0, played: 0,
+  }]));
+  for (const game of data.games ?? []) {
+    if (game.whiteId !== playerId && game.blackId !== playerId) continue;
+    const row = byEvent.get(game.tournamentId);
+    if (!row) continue;
+    if (game.result === '1/2-1/2') row.draws += 1;
+    else if ((game.whiteId === playerId && game.result === '1-0') ||
+             (game.blackId === playerId && game.result === '0-1')) row.wins += 1;
+    else if (game.result === '1-0' || game.result === '0-1') row.losses += 1;
+    else continue;
+    row.played += 1;
+  }
+  return [...byEvent.values()].filter((row) => row.played > 0);
+}
+
+function compareEventRate(a, b) {
+  return (2 * a.wins + a.draws) * b.played - (2 * b.wins + b.draws) * a.played;
+}
+
+function compareEventTie(a, b) {
+  return b.played - a.played || a.event.date.localeCompare(b.event.date) || a.event.id.localeCompare(b.event.id);
+}
+
+function eventComparison(row, messages) {
+  if (!row) return `<p>${h(message(messages, 'noBoardEvents'))}</p>`;
+  const href = safeRouteHref(routeHref, 'tournament', { slug: row.event.slug });
+  const name = h(row.event.name);
+  const linked = href ? `<a href="${h(href)}">${name}</a>` : name;
+  const rate = 100 * (row.wins + row.draws * 0.5) / row.played;
+  return `<p>${linked} · ${h(formatNumber(rate))} % · ${h(message(messages, 'gamesSample')(row.played))} · G–E–P ${h(recordText(row))}</p>`;
+}
+
+function rivalCandidates(data, playerId) {
+  return (data.players ?? []).filter((person) => person.id !== playerId).map((person) => {
+    const pair = getHeadToHead(data, playerId, person.id);
+    return pair && { person, ...pair.record, balance: pair.record.wins - pair.record.losses };
+  }).filter((row) => row && row.played >= 2);
+}
+
+function rivalComparison(row, emptyKey, messages) {
+  if (!row) return `<p>${h(message(messages, emptyKey))}</p>`;
+  return `<p>${h(row.person.name)} · G–E–P ${h(recordText(row))} · ${h(message(messages, 'gamesSample')(row.played))}</p>`;
+}
+
+function personalComparisons(data, playerId, messages) {
+  const events = eventCandidates(data, playerId);
+  const best = [...events].sort((a, b) => -compareEventRate(a, b) || compareEventTie(a, b))[0];
+  const worst = [...events].sort((a, b) => compareEventRate(a, b) || compareEventTie(a, b))[0];
+  const rivals = rivalCandidates(data, playerId);
+  const favorable = rivals.filter((row) => row.balance > 0)
+    .sort((a, b) => b.balance - a.balance || b.played - a.played || a.person.id.localeCompare(b.person.id))[0];
+  const adverse = rivals.filter((row) => row.balance < 0)
+    .sort((a, b) => a.balance - b.balance || b.played - a.played || a.person.id.localeCompare(b.person.id))[0];
+  return `<section aria-labelledby="players-comparisons"><h2 id="players-comparisons">${h(message(messages, 'comparisons'))}</h2>
+    <p>${h(message(messages, 'comparisonsRule'))}</p>
+    <div class="players-summary"><div><h3>${h(message(messages, 'bestEvent'))}</h3>${eventComparison(best, messages)}</div>
+      <div><h3>${h(message(messages, 'worstEvent'))}</h3>${eventComparison(worst, messages)}</div></div>
+    <p>${h(message(messages, 'rivalRule'))}</p>
+    ${rivals.length ? '' : `<p>${h(message(messages, 'noEligibleRivals'))}</p>`}
+    <div class="players-summary"><div><h3>${h(message(messages, 'favorable'))}</h3>${rivalComparison(favorable, 'noFavorable', messages)}</div>
+      <div><h3>${h(message(messages, 'adverse'))}</h3>${rivalComparison(adverse, 'noAdverse', messages)}</div></div>
+  </section>`;
+}
+
 export function renderPlayerProfile(data, slug, messages = playersEs) {
   const player = data.players?.find((person) => person.slug === slug);
   if (!player) return { title: titleFor(message(messages, 'notFound')),
@@ -160,6 +235,7 @@ export function renderPlayerProfile(data, slug, messages = playersEs) {
       <dl class="players-colors"><div><dt>${h(message(messages, 'white'))}</dt><dd>${h(formatNumber(colors.white.played))} · ${h(message(messages, 'record'))} ${h(recordText(colors.white))}</dd></div>
       <div><dt>${h(message(messages, 'black'))}</dt><dd>${h(formatNumber(colors.black.played))} · ${h(message(messages, 'record'))} ${h(recordText(colors.black))}</dd></div></dl></section>
     ${officialAchievements(profile, badges.length, messages)}
+    ${personalComparisons(data, player.id, messages)}
     <section aria-labelledby="players-titles"><h2 id="players-titles">${h(message(messages, 'titles'))}</h2>${badges.length ? `<ul>${badgeItems}</ul>` : `<p>${h(message(messages, 'noTitles'))}</p>`}</section>
     <section aria-labelledby="players-official"><h2 id="players-official">${h(message(messages, 'officialHistory'))}</h2><p>${h(message(messages, 'officialHistoryInfo'))}</p>${officialHistory(data, profile, messages)}</section>
     <section aria-labelledby="players-elo"><h2 id="players-elo">${h(message(messages, 'eloHistory'))}</h2><p>${h(message(messages, 'eloHistoryInfo'))}</p>${ratingHistory(data, profile, messages)}</section></div>`;
