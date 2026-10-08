@@ -1,0 +1,37 @@
+.puzzle {
+  --puzzle-light: #e8ded0;
+  --puzzle-dark: #a5b8b1;
+  --puzzle-ink: #111a2c;
+  max-width: 42rem;
+  padding: clamp(1rem, 3vw, 1.75rem);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.puzzle h2 { margin: .35rem 0 .75rem; color: var(--heading); font-family: var(--font-serif); }
+.puzzle-eyebrow { margin: 0; color: var(--accent-text); font-size: .85rem; font-weight: 700; }
+.puzzle-board-wrap { max-width: 34rem; overflow-x: auto; }
+.content-page table.puzzle-board,
+.puzzle-board { min-width: 0; width: 100%; border-collapse: collapse; table-layout: fixed; }
+.content-page table.puzzle-board thead { background: transparent; color: var(--text); }
+.content-page table.puzzle-board td { padding: .15rem; border: 0; }
+.puzzle-board caption { padding: .5rem 0; text-align: left; font-weight: 700; }
+.puzzle-board th { width: 10%; padding: .2rem; text-align: center; color: var(--text); }
+.puzzle-board td { width: 11.25%; aspect-ratio: 1; padding: .15rem; text-align: center; font-size: clamp(1.25rem, 5vw, 2.6rem); line-height: 1; }
+.puzzle-square--light { background: var(--puzzle-light); color: var(--puzzle-ink); }
+.puzzle-square--dark { background: var(--puzzle-dark); color: var(--puzzle-ink); }
+.puzzle-form { display: flex; flex-wrap: wrap; align-items: end; gap: .6rem; margin-top: 1rem; }
+.puzzle-form label { flex-basis: 100%; font-weight: 700; }
+.puzzle-form input { width: 8rem; min-height: 2.75rem; padding: .5rem; border: 1px solid var(--line); border-radius: 0; background: var(--surface); color: var(--text); font: inherit; }
+.puzzle button { min-height: 2.75rem; padding: .5rem .8rem; border: 1px solid var(--accent-text); background: var(--surface); color: var(--text); cursor: pointer; font: inherit; }
+.puzzle button:disabled { opacity: .6; cursor: not-allowed; }
+.puzzle-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .6rem; }
+.puzzle-feedback { margin: 1rem 0 0; padding: .7rem; border-inline-start: 3px solid var(--accent-text); }
+.puzzle-feedback:focus { outline: 3px solid var(--focus); outline-offset: 3px; }
+.puzzle-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 430px) {
+  .puzzle-board td { font-size: 1.3rem; }
+  .puzzle-form input { flex: 1 1 7rem; }
+}
