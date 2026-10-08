@@ -139,3 +139,64 @@
   border-bottom: 1px solid var(--line);
   padding-block: 0.55rem;
 }
+
+.players-summary,
+.players-colors {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+}
+
+.players-summary > div,
+.players-colors > div {
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  margin: 0;
+  padding: 1rem 1.25rem;
+}
+
+.players-summary h2 {
+  margin-top: 0;
+}
+
+.players-summary strong {
+  font-size: 2rem;
+}
+
+.players-colors dt {
+  font-weight: 700;
+}
+
+.players-colors dd {
+  margin: 0.3rem 0 0;
+}
+
+.players-table-wrap {
+  overflow-x: auto;
+}
+
+.players-page table {
+  border-collapse: collapse;
+  min-width: 38rem;
+  width: 100%;
+}
+
+.players-page caption {
+  font-weight: 700;
+  padding-block: 0.5rem;
+  text-align: left;
+}
+
+.players-page th,
+.players-page td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.players-page meter {
+  max-width: 8rem;
+  vertical-align: middle;
+  width: 25vw;
+}
