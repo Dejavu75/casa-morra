@@ -31,7 +31,7 @@ const { bytes, sha256 } = snapshotMetadata(json);
 const datos = decodeDemoSnapshot(json);
 ```
 
-`decodeDemoSnapshot` valida formato, versión, forma de los registros, IDs y slugs únicos, referencias entre temporadas/torneos/jugadores/partidas/byes/títulos, resultados y orden explícito de tabla. Devuelve las siete colecciones, sin escribir archivos ni modificar la entrada. Errores como `UNSUPPORTED_VERSION`, `UNKNOWN_PLAYER` o `UNEXPECTED_FIELD` impiden decodificar. Una versión futura deberá tener un migrador explícito: no se interpreta automáticamente con reglas de la versión 1.
+`decodeDemoSnapshot` valida formato, versión, forma de los registros, IDs y slugs únicos (incluidos los de las novedades), referencias entre temporadas/torneos/jugadores/partidas/byes/títulos, resultados y orden explícito de tabla. Devuelve las siete colecciones, sin escribir archivos ni modificar la entrada. Errores como `UNSUPPORTED_VERSION`, `UNKNOWN_PLAYER` o `UNEXPECTED_FIELD` impiden decodificar. Una versión futura deberá tener un migrador explícito: no se interpreta automáticamente con reglas de la versión 1.
 
 Para ver solamente metadatos y cantidades, sin volcar nombres ni generar un archivo: `node scripts/demo-snapshot.mjs`. Para probar el contrato: `node --test test/demo-snapshot.test.mjs`. La comprobación complementaria `npm run verify:data` revisa estadísticas, puntos y vistas; la validación del snapshot **no** la reemplaza ni verifica legalidad de cada jugada.
 

@@ -78,3 +78,15 @@ test('impide campos no versionados y duplicados; no inventa PGN en tabla aislada
   assert.equal(data.games.some((game) => game.tournamentId === tableOnly.id), false);
   assert.equal(data.byes.some((bye) => bye.tournamentId === tableOnly.id), false);
 });
+
+test('rechaza slugs duplicados de novedades aunque sus ID sean distintos', () => {
+  const snapshot = alteredSnapshot((value) => {
+    value.data.editorial.news[1].slug = value.data.editorial.news[0].slug;
+  });
+  const report = validateDemoSnapshot(snapshot);
+  assert.equal(report.ok, false);
+  assert.ok(report.errors.some((error) => error.code === 'DUPLICATE_KEY' &&
+    error.detail.includes('editorial.news.slug')));
+  assert.throws(() => decodeDemoSnapshot(JSON.stringify(snapshot)), /DUPLICATE_KEY/);
+  assert.throws(() => encodeDemoSnapshot(snapshot.data), /DUPLICATE_KEY/);
+});

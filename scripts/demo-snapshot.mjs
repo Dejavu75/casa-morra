@@ -136,6 +136,7 @@ export function validateDemoSnapshot(snapshot) {
   for (const key of ROW_KEYS) checkUnique(data[key], 'id', key, errors);
   for (const key of ['players', 'tournaments']) checkUnique(data[key], 'slug', key, errors);
   for (const key of ['news', 'classes']) checkUnique(data.editorial[key], 'id', `editorial.${key}`, errors);
+  checkUnique(data.editorial.news, 'slug', 'editorial.news', errors);
   checkReferences(data, errors);
   return { ok: errors.length === 0, errors };
 }
