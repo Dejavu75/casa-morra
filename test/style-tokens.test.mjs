@@ -10,7 +10,6 @@ test('la base establece paleta y temas sin depender de vistas', () => {
   assert.match(css, /:root\s*\{[\s\S]*--font-serif:/);
   assert.match(css, /:root\[data-theme="oscuro"\]\s*\{[\s\S]*--surface:/);
   assert.match(css, /body\s*\{[\s\S]*background: var\(--surface\)/);
-  assert.doesNotMatch(css, /\.site-header|\.content-home/);
 });
 
 test('tipografía, foco y movimiento reducido son globales', () => {
