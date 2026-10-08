@@ -21,6 +21,7 @@ export const playersEs = Object.freeze({
   scoreRate: 'Puntos/partidas', rateExplanation: 'Victorias/partidas cuenta solo triunfos. Puntos/partidas también incorpora medio punto por empate.',
   white: 'Con blancas', black: 'Con negras',
   officialHistory: 'Historial oficial de torneos', officialHistoryInfo: 'La clasificación oficial conserva puntos y puesto aun cuando no haya resultados individuales.',
+  scrollHint: 'Desplace la tabla con las flechas del teclado o con un gesto horizontal para ver todas las columnas.',
   tournament: 'Torneo', date: 'Fecha', rank: 'Puesto', points: 'Puntos',
   wins: 'Ganadas', draws: 'Empatadas', losses: 'Perdidas', noDetail: 'Sin detalle',
   noEvents: 'Todavía no hay torneos oficiales para este jugador.',
@@ -113,7 +114,7 @@ function officialHistory(data, profile, messages) {
       `<td>${value == null ? h(message(messages, 'noDetail')) : h(formatNumber(value))}</td>`).join('');
     return `<tr><th scope="row">${linked}</th><td>${h(formatDate(standing.date))}</td><td>${h(formatNumber(standing.rank))}</td><td>${h(formatNumber(standing.points))}</td>${results}</tr>`;
   }).join('');
-  return `<div class="players-table-wrap"><table><caption>${h(message(messages, 'officialHistory'))}</caption><thead><tr>
+  return `<p id="players-official-scroll-hint" class="players-scroll-hint">${h(message(messages, 'scrollHint'))}</p><div class="players-table-wrap" role="region" aria-labelledby="players-official" aria-describedby="players-official-scroll-hint" tabindex="0"><table><caption>${h(message(messages, 'officialHistory'))}</caption><thead><tr>
     <th scope="col">${h(message(messages, 'tournament'))}</th><th scope="col">${h(message(messages, 'date'))}</th><th scope="col">${h(message(messages, 'rank'))}</th><th scope="col">${h(message(messages, 'points'))}</th>
     <th scope="col"><abbr title="${h(message(messages, 'wins'))}">G</abbr></th><th scope="col"><abbr title="${h(message(messages, 'draws'))}">E</abbr></th><th scope="col"><abbr title="${h(message(messages, 'losses'))}">P</abbr></th>
     </tr></thead><tbody>${rows}</tbody></table></div>`;
@@ -127,7 +128,7 @@ function ratingHistory(data, profile, messages) {
     return `<tr><th scope="row">${h(step.gameId)}</th><td>${h(formatDate(step.date))}</td><td>${h(playerName(data, step.opponentId))}</td>
       <td>${h(formatNumber(Math.round(step.before)))}</td><td><meter min="0" max="${h(max)}" value="${h(after)}">${h(formatNumber(after))}</meter> <span>${h(formatNumber(after))}</span></td></tr>`;
   }).join('');
-  return `<div class="players-table-wrap"><table><caption>${h(message(messages, 'eloHistory'))}</caption><thead><tr>
+  return `<p id="players-elo-scroll-hint" class="players-scroll-hint">${h(message(messages, 'scrollHint'))}</p><div class="players-table-wrap" role="region" aria-labelledby="players-elo" aria-describedby="players-elo-scroll-hint" tabindex="0"><table><caption>${h(message(messages, 'eloHistory'))}</caption><thead><tr>
     <th scope="col">${h(message(messages, 'game'))}</th><th scope="col">${h(message(messages, 'date'))}</th><th scope="col">${h(message(messages, 'opponent'))}</th><th scope="col">${h(message(messages, 'before'))}</th><th scope="col">${h(message(messages, 'after'))}</th>
     </tr></thead><tbody>${rows}</tbody></table></div>`;
 }

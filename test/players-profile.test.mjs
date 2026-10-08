@@ -1,10 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { players, tournaments, games, byes, titles, seasons } from '../dist/data/demo.js';
 import { getPlayerProfile } from '../dist/domain/statistics.js';
-import { renderPlayerProfile } from '../dist/views/players.js';
+import { playersEs, renderPlayerProfile } from '../dist/views/players.js';
 
 const data = { players, tournaments, games, byes, titles, seasons };
+const css = readFileSync(new URL('../dist/views/players.css', import.meta.url), 'utf8');
+
+test('las tablas anchas del perfil tienen regiones de desplazamiento identificables', () => {
+  const html = renderPlayerProfile(data, 'celia-montiel').html;
+  for (const [section, hint, caption] of [
+    ['official', 'players-official-scroll-hint', 'Historial oficial de torneos'],
+    ['elo', 'players-elo-scroll-hint', 'Historial Elo'],
+  ]) {
+    const namedRegion = `<div class="players-table-wrap" role="region" aria-labelledby="players-${section}" aria-describedby="${hint}" tabindex="0">`;
+    assert.match(html, new RegExp(`<p id="${hint}" class="players-scroll-hint">[^<]+<\\/p>${namedRegion}<table><caption>${caption}<\\/caption>`));
+  }
+  assert.equal((html.match(/class="players-table-wrap" role="region"/g) ?? []).length, 2);
+  assert.match(css, /\.players-table-wrap\s*\{[^}]*max-width:\s*100%;[^}]*overflow-x:\s*auto;/);
+  assert.match(css, /\.players-table-wrap:focus-visible\s*\{[^}]*outline:/);
+});
+
+test('la pista de desplazamiento del perfil se puede traducir', () => {
+  const html = renderPlayerProfile(data, 'celia-montiel', { ...playersEs, scrollHint: 'Move the table horizontally.' }).html;
+  assert.equal((html.match(/Move the table horizontally\./g) ?? []).length, 2);
+});
 
 test('el perfil separa partidas, puntos, colores, Elo e historial oficial', () => {
   const profile = getPlayerProfile(data, 'celia-montiel');

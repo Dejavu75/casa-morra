@@ -172,7 +172,18 @@
 }
 
 .players-table-wrap {
+  max-width: 100%;
   overflow-x: auto;
+}
+
+.players-table-wrap:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: -3px;
+}
+
+.players-scroll-hint {
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
 .players-page table {
