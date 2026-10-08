@@ -1,10 +1,11 @@
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import * as demo from '../dist/data/demo.js';
-import { calculateElo, getAnnualStandings, getHomeTotals, getPlayerProfile } from '../dist/domain/statistics.js';
+import { calculateElo, getAnnualStandings, getHeadToHead, getHomeTotals, getLeaderboards, getPlayerProfile } from '../dist/domain/statistics.js';
 import { formatNumber } from '../dist/views/common.js';
 import { renderHome } from '../dist/views/home.js';
-import { renderPlayersDirectory } from '../dist/views/players.js';
+import { renderPlayerProfile, renderPlayersDirectory } from '../dist/views/players.js';
+import { renderClassic } from '../dist/views/records.js';
 import { renderTournamentList } from '../dist/views/tournaments.js';
 import { validateOfficialFields } from './data-integrity.mjs';
 
@@ -187,6 +188,79 @@ function validateViews(data, errors, deps) {
     errors.push({ code: 'TOURNAMENT_VIEW_TOTAL', detail: 'torneos' });
 }
 
+function validateOfficialRecords(data, errors, deps) {
+  const boards = new Map(deps.getLeaderboards(data).map((board) => [board.id, board]));
+  for (const player of data.players) {
+    const ranks = data.tournaments.flatMap((event) => (event.standings ?? [])
+      .filter((row) => row.playerId === player.id).map((row) => row.rank));
+    const firstPlaces = ranks.filter((rank) => rank === 1).length;
+    const podiums = ranks.filter((rank) => Number.isInteger(rank) && rank >= 1 && rank <= 3).length;
+    for (const [boardId, expected, code] of [
+      ['tournamentsWon', firstPlaces, 'RECORD_TOURNAMENT_WINS'],
+      ['podiums', podiums, 'RECORD_PODIUMS'],
+    ]) {
+      const entry = boards.get(boardId)?.entries.find((row) => row.playerId === player.id);
+      if ((entry?.value ?? 0) !== expected || Boolean(entry) !== (expected > 0))
+        errors.push({ code, detail: player.id });
+    }
+    const html = deps.renderPlayerProfile(data, player.slug).html;
+    for (const [label, expected, code] of [
+      ['Primeros puestos oficiales', firstPlaces, 'PROFILE_FIRST_PLACES_VIEW'],
+      ['Podios oficiales', podiums, 'PROFILE_PODIUMS_VIEW'],
+    ]) {
+      if (!html.includes(`${label}</dt><dd>${formatNumber(expected)}</dd>`))
+        errors.push({ code, detail: player.id });
+    }
+  }
+}
+
+function rawPair(games, firstId, secondId) {
+  const counts = { wins: 0, draws: 0, losses: 0, played: 0, white: 0, black: 0 };
+  for (const game of games) {
+    if (!((game.whiteId === firstId && game.blackId === secondId) ||
+      (game.whiteId === secondId && game.blackId === firstId))) continue;
+    counts.played++;
+    counts[game.whiteId === firstId ? 'white' : 'black']++;
+    if (game.result === '1/2-1/2') counts.draws++;
+    else if ((game.whiteId === firstId && game.result === '1-0') ||
+      (game.blackId === firstId && game.result === '0-1')) counts.wins++;
+    else counts.losses++;
+  }
+  return counts;
+}
+
+function validateClassics(data, errors, deps) {
+  for (let i = 0; i < data.players.length; i++) {
+    for (let j = i + 1; j < data.players.length; j++) {
+      const first = data.players[i];
+      const second = data.players[j];
+      const expected = rawPair(data.games, first.id, second.id);
+      if (expected.played < 4) continue;
+      for (const [left, right, raw] of [[first, second, expected],
+        [second, first, rawPair(data.games, second.id, first.id)]]) {
+        const pair = deps.getHeadToHead(data, left.id, right.id);
+        const detail = `${left.id}/${right.id}`;
+        if (!pair || pair.games.length !== raw.played ||
+          ['wins', 'draws', 'losses', 'played'].some((key) => pair.record[key] !== raw[key])) {
+          errors.push({ code: 'CLASSIC_RECORD', detail }); continue;
+        }
+        if (pair.colors.white.played !== raw.white || pair.colors.black.played !== raw.black)
+          errors.push({ code: 'CLASSIC_COLORS', detail });
+        const points = raw.wins + raw.draws / 2;
+        if (!close(pair.record.points, points) ||
+          !close(pair.record.winRate, 100 * raw.wins / raw.played) ||
+          !close(pair.record.scoreRate, 100 * points / raw.played))
+          errors.push({ code: 'CLASSIC_RATES', detail });
+        const html = deps.renderClassic(data, left.slug, right.slug).html;
+        if (!html.includes(`G-E-P: ${raw.wins}-${raw.draws}-${raw.losses}`) ||
+          !html.includes(`Rendimiento por puntos: ${formatNumber(points)} / ${raw.played} (${Math.round(100 * points / raw.played)} %)`) ||
+          !html.includes(`Porcentaje de victorias: ${Math.round(100 * raw.wins / raw.played)} %`))
+          errors.push({ code: 'CLASSIC_VIEW', detail });
+      }
+    }
+  }
+}
+
 export function verifyData(data, overrides = {}) {
   const errors = [];
   const counts = { players: data.players.length, tournaments: data.tournaments.length,
@@ -201,6 +275,14 @@ export function verifyData(data, overrides = {}) {
     validateElo(data, errors, overrides.calculateElo ?? calculateElo);
     validateAnnual(data, errors);
     validateProfiles(data, errors);
+    validateOfficialRecords(data, errors, {
+      getLeaderboards: overrides.getLeaderboards ?? getLeaderboards,
+      renderPlayerProfile: overrides.renderPlayerProfile ?? renderPlayerProfile,
+    });
+    validateClassics(data, errors, {
+      getHeadToHead: overrides.getHeadToHead ?? getHeadToHead,
+      renderClassic: overrides.renderClassic ?? renderClassic,
+    });
     validateViews(data, errors, {
       renderHome: overrides.renderHome ?? renderHome,
       renderPlayersDirectory: overrides.renderPlayersDirectory ?? renderPlayersDirectory,

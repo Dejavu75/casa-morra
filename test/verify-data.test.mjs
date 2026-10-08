@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { players, tournaments, games, byes, titles, seasons, editorial } from '../dist/data/demo.js';
-import { calculateElo } from '../dist/domain/statistics.js';
+import { calculateElo, getHeadToHead, getLeaderboards } from '../dist/domain/statistics.js';
 import { renderHome } from '../dist/views/home.js';
-import { renderPlayersDirectory } from '../dist/views/players.js';
+import { renderPlayerProfile, renderPlayersDirectory } from '../dist/views/players.js';
+import { renderClassic } from '../dist/views/records.js';
 import { verifyData } from '../scripts/verify-data.mjs';
 
 const data = { players, tournaments, games, byes, titles, seasons, editorial };
@@ -71,4 +72,44 @@ test('rechaza puestos oficiales imposibles y fechas calendario inválidas antes 
     tournaments: tournaments.map((event, index) => index === 0 ? { ...event, date: '2030-99-99' } : event),
   });
   assert.ok(codes(invalid).includes('INVALID_DATE'));
+});
+
+test('concilia primeros puestos y podios de récords y perfil con tablas oficiales independientes', () => {
+  const changedBoards = (fixture) => getLeaderboards(fixture).map((board) => board.id === 'podiums'
+    ? { ...board, entries: board.entries.map((entry, index) => index === 0
+      ? { ...entry, value: entry.value - 1 } : entry) } : board);
+  assert.ok(codes(verifyData(data, { getLeaderboards: changedBoards })).includes('RECORD_PODIUMS'));
+
+  const changedWins = (fixture) => getLeaderboards(fixture).map((board) => board.id === 'tournamentsWon'
+    ? { ...board, entries: board.entries.map((entry, index) => index === 0
+      ? { ...entry, value: entry.value + 1 } : entry) } : board);
+  assert.ok(codes(verifyData(data, { getLeaderboards: changedWins })).includes('RECORD_TOURNAMENT_WINS'));
+
+  const changedProfile = (fixture, slug) => {
+    const view = renderPlayerProfile(fixture, slug);
+    return { ...view, html: view.html.replace(/(Podios oficiales<\/dt><dd>)\d+/, (_match, label) => `${label}999`) };
+  };
+  assert.ok(codes(verifyData(data, { renderPlayerProfile: changedProfile })).includes('PROFILE_PODIUMS_VIEW'));
+});
+
+test('concilia clásicos desde ambos jugadores y usa partidas reales como denominador', () => {
+  const changedPair = (fixture, firstId, secondId) => {
+    const pair = getHeadToHead(fixture, firstId, secondId);
+    if (!pair) return pair;
+    return { ...pair, record: { ...pair.record, played: pair.record.played + 1 } };
+  };
+  assert.ok(codes(verifyData(data, { getHeadToHead: changedPair })).includes('CLASSIC_RECORD'));
+
+  const changedReverse = (fixture, firstId, secondId) => {
+    const pair = getHeadToHead(fixture, firstId, secondId);
+    return pair && firstId > secondId
+      ? { ...pair, record: { ...pair.record, wins: pair.record.wins + 1 } } : pair;
+  };
+  assert.ok(codes(verifyData(data, { getHeadToHead: changedReverse })).includes('CLASSIC_RECORD'));
+
+  const changedView = (fixture, firstSlug, secondSlug) => {
+    const view = renderClassic(fixture, firstSlug, secondSlug);
+    return { ...view, html: view.html.replace(/(Porcentaje de victorias: )\d+ %/, '$1 999 %') };
+  };
+  assert.ok(codes(verifyData(data, { renderClassic: changedView })).includes('CLASSIC_VIEW'));
 });
