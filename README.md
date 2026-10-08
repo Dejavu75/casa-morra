@@ -25,3 +25,9 @@ La imagen usa una base Nginx fijada por digest y ejecuta el proceso como usuario
 El servidor entrega rutas de la SPA mediante `index.html`, pero responde 404 para un recurso inexistente bajo `/assets/`. Aplica una CSP de recursos del mismo origen y encabezados contra interpretación de tipos e incrustación. No aplica HSTS porque el despliegue local no usa HTTPS.
 
 El [esquema del snapshot demo](docs/esquema-datos-demo.md) describe el formato JSON determinista y sus límites; no hay importador ni base de datos. Las estadísticas se comprueban con `npm run verify:data`. Esto no sustituye el QA de navegador, teclado y lector de pantalla.
+
+## Integración continua
+
+`.github/workflows/verify.yml` ejecuta `npm test`, `npm run verify:data` y una construcción Docker en `push` y `pull_request`. La imagen de CI se construye solo para validar el paquete: no se publica ni se accede a secretos. El trabajo usa permisos de lectura y referencias SHA completas para [checkout](https://github.com/actions/checkout/commit/3d3c42e5aac5ba805825da76410c181273ba90b1) y [setup-node](https://github.com/actions/setup-node/commit/820762786026740c76f36085b0efc47a31fe5020), conforme a la [guía de seguridad de GitHub Actions](https://docs.github.com/en/actions/reference/security/secure-use).
+
+La configuración y los comandos pueden validarse localmente, pero **ninguna ejecución de GitHub Actions queda comprobada hasta que se publique esta rama y el servicio informe el resultado**. Tampoco reemplaza las pruebas visuales y de accesibilidad en un navegador real.
