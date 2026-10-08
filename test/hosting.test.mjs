@@ -34,6 +34,12 @@ test('Nginx entrega rutas SPA, no confunde activos ausentes con HTML y restringe
   assert.match(nginx, /location\s+=\s+\/health/);
 });
 
+test('los módulos y archivos estáticos ausentes no reciben el fallback de la SPA', () => {
+  const nginx = read('nginx.conf');
+  assert.match(nginx, /location\s+~\s+\^\/\(\?:views\|data\|domain\|i18n\)\/\s*\{\s*try_files\s+\$uri\s+=404;/);
+  assert.match(nginx, /location\s+~\*\s+.*js.*css.*\$\s*\{\s*try_files\s+\$uri\s+=404;/);
+});
+
 test('el contexto Docker excluye archivos internos y credenciales locales', () => {
   const ignore = read('.dockerignore');
   for (const path of ['.git', '.codegraph', 'test', 'scripts', 'docs', '.env*', 'node_modules'])
