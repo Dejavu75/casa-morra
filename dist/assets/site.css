@@ -541,3 +541,6 @@ h2 em {
   .classics-page,
   .classic-detail { width: min(100% - 2rem, 1260px); }
 }
+.demo-source-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; padding-block: .5rem; }
+.demo-source-controls button { cursor: pointer; }
+.demo-source-controls [role="status"] { margin: 0; font-weight: 600; color: #92400e; }

@@ -11,6 +11,7 @@ import { renderGame, attachGameReplay } from '../views/game.js';
 import { attachPuzzle } from '../views/puzzle.js';
 import { escapeHtml as h } from '../views/common.js';
 import { applyTheme, nextTheme, readTheme, saveTheme } from './theme.js';
+import { createDemoSource } from './demo-source.js';
 
 const demoData = { ...demo };
 const navGroup = Object.freeze({
@@ -81,12 +82,14 @@ export function renderThemeToggle(button, theme, locale = 'es', catalogs = defau
   if (labelNode) labelNode.textContent = label;
 }
 
-function startApp() {
+async function startApp() {
   const locale = applyTranslations(document, document.documentElement.lang);
   const main = document.querySelector('#contenido');
   const menuButton = document.querySelector('[data-menu-toggle]');
   const navigation = document.querySelector('#navegacion-principal');
   const themeButton = document.querySelector('[data-theme-toggle]');
+  const refreshButton = document.querySelector('[data-demo-refresh]');
+  const warning = document.querySelector('[data-demo-warning]');
   if (!main) return;
   main.tabIndex = -1;
 
@@ -95,6 +98,16 @@ function startApp() {
   let theme = readTheme(storage) ?? (window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? 'oscuro' : 'claro');
   let detachReplay = () => {};
   let detachPuzzle = () => {};
+  let activeData = demoData;
+  const source = createDemoSource({ fixture: demoData, fetch: (...args) => window.fetch(...args),
+    crypto: window.crypto, onChange(state) {
+      activeData = state.data;
+      if (warning) {
+        warning.hidden = !state.warning;
+        warning.textContent = state.warning ? translate(state.warning, locale) : '';
+      }
+      renderLocation();
+    } });
 
   function renderTheme() {
     applyTheme(document, theme);
@@ -109,7 +122,7 @@ function startApp() {
 
   function renderLocation({ focus = false, scroll = false } = {}) {
     const route = parseRoute(window.location.pathname, window.location.search);
-    const page = renderRoute(route, demoData, { locale });
+    const page = renderRoute(route, activeData, { locale });
     detachReplay();
     detachPuzzle();
     detachReplay = () => {};
@@ -122,7 +135,7 @@ function startApp() {
       else link.removeAttribute('aria-current');
     }
     if (route.name === 'game') {
-      detachReplay = attachGameReplay(main.querySelector('[data-game-replay]'), demoData, route.params.id);
+      detachReplay = attachGameReplay(main.querySelector('[data-game-replay]'), activeData, route.params.id);
     }
     if (route.name === 'home') {
       detachPuzzle = attachPuzzle(main.querySelector('[data-puzzle-host]'), {
@@ -135,7 +148,7 @@ function startApp() {
   }
 
   renderTheme();
-  renderLocation();
+  await source.refresh();
 
   themeButton?.addEventListener('click', () => {
     theme = nextTheme(theme);
@@ -145,6 +158,7 @@ function startApp() {
   menuButton?.addEventListener('click', () => {
     setMenuOpen(menuButton.getAttribute('aria-expanded') !== 'true');
   });
+  refreshButton?.addEventListener('click', () => { void source.refresh(); });
   document.addEventListener('keydown', (event) => {
     closeMenuOnEscape(event, menuButton, navigation, () => setMenuOpen(false));
   });
@@ -154,9 +168,13 @@ function startApp() {
     const url = new URL(anchor.href);
     event.preventDefault();
     window.history.pushState({}, '', `${url.pathname}${url.search}${url.hash}`);
-    renderLocation({ focus: true, scroll: true });
+    void source.refresh().then((state) => {
+      if (state) { main.focus({ preventScroll: true }); window.scrollTo(0, 0); }
+    });
   });
-  window.addEventListener('popstate', () => renderLocation({ focus: true }));
+  window.addEventListener('popstate', () => {
+    void source.refresh().then((state) => { if (state) main.focus({ preventScroll: true }); });
+  });
 
   const year = document.querySelector('[data-year]');
   if (year) year.textContent = String(new Date().getFullYear());

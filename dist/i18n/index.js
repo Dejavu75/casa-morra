@@ -29,6 +29,8 @@ export const es = Object.freeze({
   'hero.eyebrow': 'Una nueva casa para el ajedrez',
   'hero.action': 'Conocer el proyecto',
   'hero.demo': 'Datos de demostración · Sitio en desarrollo',
+  'demo.refresh': 'Actualizar datos',
+  'demo.fallback': 'No se pudo cargar la exportación pública. Se muestran datos de demostración incluidos en el sitio; pueden estar desactualizados.',
   'project.kicker': 'El proyecto',
   'project.note': 'Proyecto independiente · Contenido de demostración',
   'next.kicker': 'Lo que viene',
