@@ -398,3 +398,136 @@ h2 em {
   .site-nav a { padding: 0.8rem 0; }
   .brand { margin-right: auto; }
 }
+
+.content-home .content-hero {
+  --focus: #74c7bc;
+  position: relative;
+  isolation: isolate;
+  min-height: min(44rem, 85svh);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2rem, 7vw, 6rem);
+  background: var(--indigo-deep) url('/assets/hero-ajedrez.png') center / cover no-repeat;
+  color: var(--paper);
+}
+
+.content-home .content-hero::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(12, 19, 34, 0.96), rgba(12, 19, 34, 0.78) 48%, rgba(12, 19, 34, 0.3));
+  content: '';
+}
+
+.content-home .content-hero h1,
+.content-home .content-hero .content-eyebrow {
+  color: var(--paper);
+}
+
+.content-home .content-hero a {
+  color: var(--paper);
+  font-weight: 700;
+}
+
+.records-page,
+.classics-page,
+.classic-detail {
+  width: min(100% - 2.5rem, 1260px);
+  min-height: 60vh;
+  margin-inline: auto;
+  padding-block: clamp(2rem, 6vw, 5rem);
+}
+
+.records-page h1,
+.classics-page h1,
+.classic-detail h1 {
+  color: var(--heading);
+  font: 400 clamp(2.6rem, 7vw, 5rem)/1.12 var(--font-serif);
+  letter-spacing: -0.05em;
+}
+
+.record-board,
+.classic-pair {
+  margin-block: 1.5rem;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  border: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.record-board h2,
+.classic-pair h2,
+.classic-detail h2 {
+  margin: 0 0 0.8rem;
+  color: var(--heading);
+  font: 400 clamp(1.5rem, 3vw, 2.4rem)/1.2 var(--font-serif);
+}
+
+.records-page a,
+.classics-page a,
+.classic-detail a {
+  color: var(--accent-text);
+  text-underline-offset: 0.2em;
+}
+
+.record-board table,
+.classic-detail table {
+  width: 100%;
+  min-width: 37rem;
+  border-collapse: collapse;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+.record-board caption,
+.classic-detail caption {
+  padding-block: 0.6rem;
+  text-align: left;
+  font-weight: 700;
+}
+
+.record-board th,
+.record-board td,
+.classic-detail th,
+.classic-detail td {
+  padding: 0.7rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.record-board thead,
+.classic-detail thead {
+  background: var(--indigo);
+  color: var(--paper);
+}
+
+.record-board details {
+  margin-top: 0.8rem;
+}
+
+.record-board summary {
+  color: var(--accent-text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.classic-detail ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  padding: 0;
+  list-style: none;
+}
+
+
+@media (max-width: 560px) {
+  .content-home .content-hero {
+    min-height: 36rem;
+    background-position: 58% center;
+  }
+  .content-home .content-hero::before {
+    background: linear-gradient(90deg, rgba(12, 19, 34, 0.98), rgba(12, 19, 34, 0.74));
+  }
+  .records-page,
+  .classics-page,
+  .classic-detail { width: min(100% - 2rem, 1260px); }
+}
