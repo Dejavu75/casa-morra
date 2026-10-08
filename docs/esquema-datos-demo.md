@@ -41,4 +41,17 @@ La muestra comprometida en esta unidad codifica **20.184 bytes UTF-8** con SHA-2
 
 ## Límite de migración
 
-Esta porción de CC-03 es un formato de intercambio repetible, no un importador transaccional. Quedan pendientes almacenamiento, carga idempotente, correcciones con antes/después, reversión, invalidación de derivados, respaldos y permisos. No se deben añadir cuentas, fotos, inscripciones o datos personales reales a este sobre sin un contrato y una decisión de seguridad específicos.
+`planDemoSnapshotImport(json, datosVigentes)` agrega una **vista previa en memoria** para revisar un snapshot entrante. Si se omite `datosVigentes`, usa el fixture original incluido en el repositorio. Primero valida tanto la entrada como los datos vigentes mediante el contrato versión 1. Devuelve `counts` y tres listas: `added` (ID nuevo y registro propuesto), `unchanged` (mismo ID y contenido) y `conflicting` (mismo ID, contenido diferente, con `current` e `incoming` para revisión humana). El orden de cada lista es determinista por colección e ID; el orden interno de cada tabla oficial se conserva exactamente y nunca se recalculan desempates.
+
+```js
+import * as demo from './dist/data/demo.js';
+import { encodeDemoSnapshot } from './scripts/demo-snapshot.mjs';
+import { planDemoSnapshotImport } from './scripts/import-plan.mjs';
+
+const plan = planDemoSnapshotImport(encodeDemoSnapshot(demo));
+console.log(plan.counts); // { added: 0, unchanged: 97, conflicting: 0 }
+```
+
+Las colecciones con registros se comparan por su `id`. `editorial.club` es un documento único sin ID en el esquema; el plan usa la clave lógica fija `club`. Una fila vigente omitida en el snapshot entrante **no** se borra ni se representa como conflicto: este plan solo anticipa posibles altas y cambios. Un conflicto no autoriza ni aplica una corrección. La función no escribe archivos, no modifica los objetos recibidos, no cambia las vistas y no ofrece CLI de importación.
+
+Esta porción de CC-03 sigue sin ser un importador transaccional. Quedan pendientes almacenamiento, aplicación idempotente, resolución y auditoría de correcciones con antes/después, reversión, invalidación de derivados, respaldos y permisos. No se deben añadir cuentas, fotos, inscripciones o datos personales reales a este sobre sin un contrato y una decisión de seguridad específicos.
