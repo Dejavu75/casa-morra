@@ -54,4 +54,16 @@ console.log(plan.counts); // { added: 0, unchanged: 97, conflicting: 0 }
 
 Las colecciones con registros se comparan por su `id`. `editorial.club` es un documento único sin ID en el esquema; el plan usa la clave lógica fija `club`. Una fila vigente omitida en el snapshot entrante **no** se borra ni se representa como conflicto: este plan solo anticipa posibles altas y cambios. La omisión tampoco libera su slug para una nueva alta o edición. Un conflicto no autoriza ni aplica una corrección. La función no escribe archivos, no modifica los objetos recibidos, no cambia las vistas y no ofrece CLI de importación.
 
-Esta porción de CC-03 sigue sin ser un importador transaccional. Quedan pendientes almacenamiento, aplicación idempotente, resolución y auditoría de correcciones con antes/después, reversión, invalidación de derivados, respaldos y permisos. No se deben añadir cuentas, fotos, inscripciones o datos personales reales a este sobre sin un contrato y una decisión de seguridad específicos.
+`prepareDemoSnapshotImport(json, datosVigentes)` permite preparar **solo en memoria** una unión validada cuando el plan no tiene conflictos. Devuelve `beforeSnapshot` y `afterSnapshot` canónicos y un `journal` con SHA-256/tamaño de ambos, identidades agregadas y nombres de vistas potencialmente afectadas. Las filas omitidas se conservan; las altas se agregan en orden determinista y las tablas oficiales existentes permanecen intactas. Repetir la preparación contra el resultado no duplica filas. Un cambio de ID existente, un slug ocupado o cualquier otro conflicto **rechaza** toda la preparación: no se resuelve automáticamente.
+
+```js
+import { prepareDemoSnapshotImport, restorePreparedDemoSnapshotImport } from './scripts/import-apply.mjs';
+
+const preparado = prepareDemoSnapshotImport(json, datosVigentes);
+const datosSiguientes = decodeDemoSnapshot(preparado.afterSnapshot);
+const anterior = restorePreparedDemoSnapshotImport(preparado, datosSiguientes);
+```
+
+La reversión devuelve exactamente el snapshot canónico anterior **solo si** el estado vigente coincide con `afterSnapshot` y los hashes del diario coinciden. El diario identifica vistas de `renderRoute` que habría que recalcular; no invalida cachés ni actualiza pantallas por sí mismo. Es una guía conservadora: por ejemplo, una noticia afecta portada y noticias, mientras un bye afecta los resultados del torneo sin recalcular la clasificación oficial desde las partidas.
+
+Esta porción de CC-03 **no** es un importador transaccional ni un circuito de correcciones. No escribe fixtures, archivos, base de datos o API; tampoco publica datos, ejecuta una reversión persistente, resuelve conflictos ni fabrica PGN. Quedan pendientes almacenamiento, permisos, auditoría de correcciones con antes/después, invalidación efectiva, respaldos y restauración. No se deben añadir cuentas, fotos, inscripciones o datos personales reales a este sobre sin un contrato y una decisión de seguridad específicos.
