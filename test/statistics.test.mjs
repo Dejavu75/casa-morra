@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { players, tournaments, games, byes, titles, seasons } from '../dist/data/demo.js';
 import {
   getHomeTotals, getPlayerProfile, getAnnualStandings,
-  calculateElo,
+  getLeaderboards, getClassics, getHeadToHead, calculateElo,
 } from '../dist/domain/statistics.js';
 
 const demo = { players, tournaments, games, byes, titles, seasons };
@@ -126,4 +126,82 @@ test('racha cronológica: empate corta solo victorias; bye y tabla-only no corta
   });
   const profile = getPlayerProfile(data, 'a');
   assert.deepEqual(profile.streaks, { winning: 2, unbeaten: 4 });
+});
+
+test('clásicos: umbral 3/4, perspectiva invertida, colores y porcentaje por puntos', () => {
+  const data = fixture({
+    tournaments: [event('t', 's1', '2025-09-01', [])],
+    games: [
+      game('g1', 't', '2025-09-01', 1, 'a', 'b', '1-0'),
+      game('g2', 't', '2025-09-01', 2, 'b', 'a', '1/2-1/2'),
+      game('g3', 't', '2025-09-01', 3, 'a', 'b', '0-1'),
+    ],
+  });
+  assert.equal(getClassics(data).length, 0);
+  data.games.push(game('g4', 't', '2025-09-01', 4, 'b', 'a', '0-1'));
+  const classics = getClassics(data);
+  assert.equal(classics.length, 1);
+  const ab = getHeadToHead(data, 'a', 'b');
+  const ba = getHeadToHead(data, 'b', 'a');
+  assert.equal(ab.record.played, 4);
+  assert.deepEqual([ab.record.wins, ab.record.draws, ab.record.losses], [2, 1, 1]);
+  assert.equal(ab.record.winRate, 50);
+  assert.equal(ab.record.scoreRate, 62.5);
+  assert.deepEqual([ba.record.wins, ba.record.draws, ba.record.losses], [1, 1, 2]);
+  assert.equal(ab.colors.white.played, 2);
+  assert.equal(ab.colors.black.played, 2);
+  assert.equal(ba.colors.white.played, ab.colors.black.played);
+});
+
+test('diez récords: poblaciones, umbral 14/15 y empate de valor', () => {
+  const data = fixture({
+    players: [p('a'), p('b'), p('c')],
+    tournaments: [event('t', 's1', '2025-09-01', [
+      standing('a', 2, 1, 1), standing('b', 2, 1, 2), standing('c', 1, 3, 3),
+    ])],
+    games: Array.from({ length: 15 }, (_, i) => game(`g${i}`, 't', '2025-09-01', i + 1,
+      'a', 'b', i < 10 ? '1-0' : '1/2-1/2')),
+    titles: [{ id: 'title', playerId: 'b', tournamentId: 't', kind: 'campeonato-club' }],
+  });
+  const boards = getLeaderboards(data);
+  assert.equal(boards.length, 10);
+  assert.equal(new Set(boards.map((row) => row.id)).size, 10);
+  const find = (id) => boards.find((row) => row.id === id);
+  assert.deepEqual(find('tournamentsWon').entries.slice(0, 2).map((row) => row.rank), [1, 1]);
+  assert.equal(find('championships').entries[0].playerId, 'b');
+  assert.equal(find('winRate').entries.some((row) => row.playerId === 'c'), false);
+  assert.equal(find('winRate').entries.find((row) => row.playerId === 'a').value, 1000 / 15);
+  data.games.pop();
+  assert.equal(getLeaderboards(data).find((row) => row.id === 'winRate').entries.length, 0);
+});
+
+test('quince derrotas son elegibles para el récord porcentual con valor cero', () => {
+  const data = fixture({
+    tournaments: [event('t', 's1', '2025-09-01', [])],
+    games: Array.from({ length: 15 }, (_, index) =>
+      game(`g${index}`, 't', '2025-09-01', index + 1, 'a', 'b', '0-1')),
+  });
+  const entries = getLeaderboards(data).find((board) => board.id === 'winRate').entries;
+  assert.deepEqual(entries.map((row) => [row.playerId, row.value, row.rank]), [
+    ['b', 100, 1], ['a', 0, 2],
+  ]);
+  assert.equal(entries.some((row) => row.playerId === 'c'), false);
+});
+
+test('un clásico requiere dos jugadores existentes y distintos', () => {
+  assert.equal(getHeadToHead(demo, 'ayla-neri', 'ayla-neri'), null);
+  assert.equal(getHeadToHead(demo, 'ayla-neri', 'fantasma'), null);
+});
+
+test('la muestra completa se calcula sin discrepancia entre perfil y listado', () => {
+  const boards = getLeaderboards(demo);
+  assert.equal(boards.length, 10);
+  assert.equal(boards.find((row) => row.id === 'gamesPlayed').entries.reduce((sum, row) => sum + row.value, 0), 140);
+  assert.equal(getClassics(demo).length, 15);
+  assert.equal(getAnnualStandings(demo, '26-27').events.length, 2);
+  for (const player of players) {
+    const profile = getPlayerProfile(demo, player.id);
+    assert.equal(profile.colors.white.played + profile.colors.black.played, profile.record.played);
+    assert.ok(profile.record.played >= 20);
+  }
 });

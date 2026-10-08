@@ -158,3 +158,62 @@ export function getAnnualStandings(data, seasonId) {
   }
   return { seasonId, events, snapshots, standings: snapshots.at(-1)?.standings ?? [] };
 }
+
+export function getHeadToHead(data, firstId, secondId) {
+  const knownPlayers = new Set(data.players.map((player) => player.id));
+  if (firstId === secondId || !knownPlayers.has(firstId) || !knownPlayers.has(secondId)) return null;
+  const matches = orderedGames(data).filter((game) =>
+    (game.whiteId === firstId && game.blackId === secondId) ||
+    (game.whiteId === secondId && game.blackId === firstId));
+  return { firstId, secondId, ...summarizeGames(matches, firstId), games: matches };
+}
+
+export function getClassics(data) {
+  const pairs = new Set(data.games.map((game) =>
+    [game.whiteId, game.blackId].sort(compareId).join('|')));
+  return [...pairs].sort(compareId).map((key) => {
+    const [firstId, secondId] = key.split('|');
+    return getHeadToHead(data, firstId, secondId);
+  }).filter((pair) => pair.record.played >= 4);
+}
+
+function leaderboard(data, id, label, values, isEligibleValue = (value) => value > 0) {
+  const names = new Map(data.players.map((player) => [player.id, player.name]));
+  const sorted = values.filter((row) => row.value !== null && isEligibleValue(row.value))
+    .sort((a, b) => b.value - a.value || compareId(names.get(a.playerId), names.get(b.playerId)));
+  let priorValue = null;
+  let rank = 0;
+  const entries = sorted.map((row, index) => {
+    if (row.value !== priorValue) rank = index + 1;
+    priorValue = row.value;
+    return { ...row, name: names.get(row.playerId), rank, order: index + 1 };
+  });
+  return { id, label, entries };
+}
+
+export function getLeaderboards(data) {
+  const gameOrder = orderedGames(data);
+  const eloByPlayer = calculateElo(data);
+  const profiles = data.players.map((player) =>
+    profileFromPrepared(data, player.id, gameOrder, eloByPlayer));
+  const counts = (value) => profiles.map((profile) => ({
+    playerId: profile.player.id, value: value(profile),
+  }));
+  const titleCounts = new Map();
+  for (const title of data.titles) {
+    if (title.kind === 'campeonato-club')
+      titleCounts.set(title.playerId, (titleCounts.get(title.playerId) ?? 0) + 1);
+  }
+  return [
+    leaderboard(data, 'tournamentsWon', 'Torneos ganados', counts((p) => p.tournaments.filter((row) => row.rank === 1).length)),
+    leaderboard(data, 'championships', 'Campeonatos del club', counts((p) => titleCounts.get(p.player.id) ?? 0)),
+    leaderboard(data, 'gamesPlayed', 'Partidas jugadas', counts((p) => p.record.played)),
+    leaderboard(data, 'gamesWon', 'Partidas ganadas', counts((p) => p.record.wins)),
+    leaderboard(data, 'winRate', 'Porcentaje de victorias', counts((p) => p.record.played >= 15 ? p.record.winRate : null), (value) => value >= 0),
+    leaderboard(data, 'winningStreak', 'Racha ganadora', counts((p) => p.streaks.winning)),
+    leaderboard(data, 'unbeatenStreak', 'Racha invicta', counts((p) => p.streaks.unbeaten)),
+    leaderboard(data, 'peakElo', 'Mayor Elo demo', counts((p) => p.elo.played > 0 ? p.elo.peak : null)),
+    leaderboard(data, 'tournamentsPlayed', 'Torneos jugados', counts((p) => p.tournaments.length)),
+    leaderboard(data, 'podiums', 'Podios', counts((p) => p.tournaments.filter((row) => row.rank <= 3).length)),
+  ];
+}
