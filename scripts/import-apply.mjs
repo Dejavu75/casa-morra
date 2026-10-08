@@ -8,7 +8,7 @@ const OFFICIAL_STANDING_ERRORS = new Set([
 ]);
 
 // Nombres de renderRoute; la lista es conservadora y no dispara invalidación real.
-const AFFECTED_VIEWS = Object.freeze({
+export const AFFECTED_VIEWS = Object.freeze({
   byes: ['tournament'],
   games: ['home', 'tournament', 'player', 'statistics', 'classics', 'classic', 'game'],
   players: ['home', 'tournaments', 'tournament', 'annual', 'players', 'player',
@@ -18,6 +18,7 @@ const AFFECTED_VIEWS = Object.freeze({
   tournaments: ['home', 'tournaments', 'tournament', 'annual', 'player',
     'statistics', 'classics', 'classic', 'game'],
   'editorial.classes': ['classes'],
+  'editorial.club': ['home', 'about', 'membership'],
   'editorial.news': ['home', 'news', 'news-detail'],
 });
 

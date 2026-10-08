@@ -8,7 +8,7 @@ import test from 'node:test';
 import * as demo from '../dist/data/demo.js';
 import { decodeDemoSnapshot, encodeDemoSnapshot, snapshotMetadata } from '../scripts/demo-snapshot.mjs';
 import { applyDemoStore, backupDemoStore, initDemoStore, restoreDemoStore,
-  rollbackDemoStore, statusDemoStore } from '../scripts/demo-store.mjs';
+  rollbackDemoStore, statusDemoStore, correctDemoStore } from '../scripts/demo-store.mjs';
 
 const root = join(process.cwd(), '.demo-state');
 const fixture = encodeDemoSnapshot(demo);
@@ -18,6 +18,111 @@ const sample = () => {
     title: 'Noticia ficticia', excerpt: 'Resumen', body: 'Contenido' });
   return encodeDemoSnapshot(data);
 };
+
+const correction = () => {
+  const data = decodeDemoSnapshot(fixture);
+  const game = data.games[0];
+  game.result = '1-0';
+  game.moves = null;
+  game.finish = 'resultado oficial corregido';
+  const event = data.tournaments.find((row) => row.id === game.tournamentId);
+  const white = event.standings.find((row) => row.playerId === game.whiteId);
+  const black = event.standings.find((row) => row.playerId === game.blackId);
+  white.wins += 1; white.draws -= 1; white.points += 0.5;
+  black.losses += 1; black.draws -= 1; black.points -= 0.5;
+  return { data, allowlist: [
+    { collection: 'games', id: game.id },
+    { collection: 'tournaments', id: event.id },
+  ] };
+};
+
+test('corrige resultado y tabla oficial juntos, audita y revierte la última corrección', async (t) => {
+  const { store } = await sandbox(t);
+  await initDemoStore(store);
+  const { data, allowlist } = correction();
+  const expected = snapshotMetadata(fixture).sha256;
+  const changed = await correctDemoStore(store, encodeDemoSnapshot(data), expected, allowlist);
+  assert.equal(changed.audit[1].operation, 'correct');
+  assert.deepEqual(changed.audit[1].corrected, allowlist);
+  assert.equal(changed.audit[1].before.sha256, expected);
+  assert.deepEqual(await statusDemoStore(store), changed);
+  const raw = await readFile(store, 'utf8');
+  assert.deepEqual(await correctDemoStore(store, encodeDemoSnapshot(data), expected, allowlist), changed);
+  assert.equal(await readFile(store, 'utf8'), raw);
+  const undone = await rollbackDemoStore(store);
+  assert.equal(undone.snapshot.sha256, expected);
+  assert.equal(undone.audit[2].reverses, changed.audit[1].id);
+  assert.deepEqual(await statusDemoStore(store), undone);
+});
+
+test('rechaza partida aislada, CAS obsoleto, diferencia no autorizada y slug ocupado sin escribir', async (t) => {
+  const { store } = await sandbox(t);
+  await initDemoStore(store);
+  const before = await readFile(store, 'utf8');
+  const { data, allowlist } = correction();
+  const expected = snapshotMetadata(fixture).sha256;
+  await assert.rejects(correctDemoStore(store, encodeDemoSnapshot(data), '0'.repeat(64), allowlist), /hash|CAS|obsoleto/i);
+  const alone = decodeDemoSnapshot(fixture);
+  alone.games[0] = data.games[0];
+  await assert.rejects(correctDemoStore(store, encodeDemoSnapshot(alone), expected, [allowlist[0]]), /STANDING|tabla|verificación/i);
+  const unlisted = decodeDemoSnapshot(encodeDemoSnapshot(data));
+  unlisted.editorial.news[0].title = 'Cambio omitido en lista';
+  await assert.rejects(correctDemoStore(store, encodeDemoSnapshot(unlisted), expected, allowlist), /autorizad|lista/i);
+  const changedId = decodeDemoSnapshot(fixture);
+  changedId.games[0].id = 'id-distinto';
+  await assert.rejects(correctDemoStore(store, encodeDemoSnapshot(changedId), expected,
+    [{ collection: 'games', id: 'id-distinto' }]), /ID nuevo/i);
+  await assert.rejects(correctDemoStore(store, encodeDemoSnapshot(data), expected,
+    [...allowlist, allowlist[0]]), /duplicada/i);
+  const slug = JSON.parse(fixture);
+  slug.data.players[0].slug = slug.data.players[1].slug;
+  await assert.rejects(correctDemoStore(store, JSON.stringify(slug), expected,
+    [{ collection: 'players', id: slug.data.players[0].id }]), /DUPLICATE_KEY|slug/i);
+  assert.equal(await readFile(store, 'utf8'), before);
+});
+
+test('corrige conservando omitidos y orden, rechaza auditoría alterada y fallo previo al rename', async (t) => {
+  const { store } = await sandbox(t);
+  await initDemoStore(store);
+  const expected = snapshotMetadata(fixture).sha256;
+  const incoming = decodeDemoSnapshot(fixture);
+  incoming.editorial.news[0].title = 'Título corregido de demostración';
+  const allowed = [{ collection: 'editorial.news', id: incoming.editorial.news[0].id }];
+  incoming.editorial.news.splice(1);
+  const before = await readFile(store, 'utf8');
+  await assert.rejects(correctDemoStore(store, encodeDemoSnapshot(incoming), expected, allowed,
+    { beforeRename: () => { throw new Error('fallo simulado'); } }), /fallo simulado/);
+  assert.equal(await readFile(store, 'utf8'), before);
+  const changed = await correctDemoStore(store, encodeDemoSnapshot(incoming), expected, allowed);
+  const output = decodeDemoSnapshot(changed.data);
+  assert.equal(output.editorial.news.length, demo.editorial.news.length);
+  assert.deepEqual(output.editorial.news.map((row) => row.id), demo.editorial.news.map((row) => row.id));
+  const tampered = JSON.parse(await readFile(store, 'utf8'));
+  tampered.audit[1].corrected[0].id = 'no-corregido';
+  await writeFile(store, JSON.stringify(tampered));
+  await assert.rejects(statusDemoStore(store), /auditoría|corrección/i);
+});
+
+test('CLI exige snapshot, hash y lista; una corrección no imprime los registros', async (t) => {
+  const { dir, store } = await sandbox(t);
+  const input = join(dir, 'correccion.json');
+  const list = join(dir, 'lista.json');
+  const run = (...args) => spawnSync(process.execPath, ['scripts/demo-store.mjs', ...args],
+    { cwd: process.cwd(), encoding: 'utf8' });
+  const { data, allowlist } = correction();
+  assert.equal(run('init', '--store', store).status, 0);
+  await writeFile(input, encodeDemoSnapshot(data));
+  await writeFile(list, JSON.stringify(allowlist));
+  const expected = snapshotMetadata(fixture).sha256;
+  assert.notEqual(run('correct', '--store', store, '--input', input, '--allowlist', list).status, 0);
+  const args = ['correct', '--store', store, '--input', input, '--expected-sha', expected,
+    '--allowlist', list];
+  const first = run(...args);
+  assert.equal(first.status, 0, first.stderr);
+  assert.equal(JSON.parse(first.stdout).auditEvents, 2);
+  assert.equal(first.stdout.includes('resultado oficial'), false);
+  assert.equal(JSON.parse(run(...args).stdout).auditEvents, 2);
+});
 
 async function sandbox(t) {
   const dir = join(root, `test-${randomUUID()}`);

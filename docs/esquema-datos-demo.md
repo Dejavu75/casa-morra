@@ -76,12 +76,19 @@ La preparación en memoria no escribe fixtures ni publica datos. El siguiente al
 node scripts/demo-store.mjs init --store .demo-state/casa-morra.json
 node scripts/demo-store.mjs status --store .demo-state/casa-morra.json
 node scripts/demo-store.mjs apply --store .demo-state/casa-morra.json --input .demo-state/entrada.json
+node scripts/demo-store.mjs correct --store .demo-state/casa-morra.json --input .demo-state/correccion.json --expected-sha SHA256_VIGENTE --allowlist .demo-state/identidades.json
 node scripts/demo-store.mjs backup --store .demo-state/casa-morra.json --backup .demo-state/respaldo-01.json
 node scripts/demo-store.mjs restore --store .demo-state/casa-morra.json --backup .demo-state/respaldo-01.json
 node scripts/demo-store.mjs rollback --store .demo-state/casa-morra.json
 ```
 
-`init` usa exclusivamente el fixture comprometido. `apply` lee un snapshot canónico provisto explícitamente y acepta **solo altas sin conflictos**; una repetición idéntica no escribe ni agrega un evento. `rollback` revierte únicamente la última aplicación o restauración cuando el estado vigente coincide; no borra la auditoría. `status` informa hash, tamaño y cantidad de eventos sin imprimir registros. Las operaciones no cambian el fixture, la imagen Docker ni el sitio web servido: las vistas listadas en la auditoría son una indicación para una invalidación **futura**, no una invalidación real.
+`init` usa exclusivamente el fixture comprometido. `apply` lee un snapshot canónico provisto explícitamente y acepta **solo altas sin conflictos**; una repetición idéntica no escribe ni agrega un evento. `rollback` revierte únicamente la última aplicación, corrección o restauración cuando el estado vigente coincide; no borra la auditoría. `status` informa hash, tamaño y cantidad de eventos sin imprimir registros. Las operaciones no cambian el fixture, la imagen Docker ni el sitio web servido: las vistas listadas en la auditoría son una indicación para una invalidación **futura**, no una invalidación real.
+
+### Correcciones auditadas de registros ficticios
+
+`correct` cambia registros existentes únicamente si el operador aporta: el snapshot `v1` canónico de demostración, el SHA-256 que devolvió `status` para el estado vigente y un archivo JSON con la lista **exacta** de identidades a modificar, por ejemplo `[{"collection":"games","id":"patio-2025-r1-p1"},{"collection":"tournaments","id":"patio-2025"}]`. La lista no admite duplicados ni identidades sin cambio; `editorial.club` usa el ID lógico `club`. Un hash obsoleto, un ID nuevo o alterado, una diferencia fuera de la lista, un slug ocupado, una referencia inválida o cualquier error de `verify:data` rechaza toda la operación antes de sustituir el archivo. Los registros omitidos en la propuesta y el orden oficial previo se conservan. No se sintetizan desempates, puestos, Elo ni PGN.
+
+Al cambiar un resultado, el operador debe incluir **en la misma corrección** la tabla oficial completa y coherente del torneo. Corregir solo la partida falla por discrepancia entre puntos o G/E/P y tabla. El evento `correct` guarda antes/después, hashes, propuesta, identidades corregidas y vistas potencialmente afectadas; al reabrir se reproduce y verifica contra el estado anterior. Reintentar exactamente la última corrección con el hash original no agrega otro evento; `rollback` revierte la última corrección con un nuevo evento, sin borrar el historial. La lista de vistas es **declarativa**: no invalida la interfaz ni integra el almacén con Docker. `CC-03` sigue abierta para esa integración y las funciones de operación más amplias.
 
 ### Respaldo y restauración explícitos
 
@@ -95,4 +102,4 @@ El archivo contiene un sobre versionado con snapshot vigente y eventos de origen
 
 Cada escritura usa un bloqueo exclusivo (`.lock`) que **no se elimina automáticamente** si queda abandonado; ante un lock previo la operación falla cerrada. Se escribe un temporal en el mismo directorio, se sincroniza el archivo y se sustituye por renombrado atómico, con comparación del contenido vigente antes de sustituir. Se rechazan rutas fuera de `.demo-state/` y enlaces simbólicos detectados en sus componentes. Es una protección operativa local, no una defensa contra otro proceso hostil que modifique rutas entre comprobación y renombrado; el bloqueo es cooperativo. En Windows, la sincronización del directorio y la persistencia tras un corte eléctrico no se pueden garantizar con esta implementación. Un fallo posterior al renombrado puede dejar la escritura efectuada aunque el proceso no haya terminado normalmente; reabrí con `status` antes de reintentar.
 
-El almacén no provee acceso multiusuario, permisos de cuentas, correcciones auditadas de filas existentes, invalidación de derivados ni persistencia dentro de Docker. Estos criterios de `CC-03` siguen abiertos, junto con la verificación estadística integral de `CC-05/19`. Para probar esta unidad: `node --test test/demo-store.test.mjs`, `npm test` y `npm run verify:data`.
+El almacén no provee acceso multiusuario, permisos de cuentas, invalidación real de derivados ni persistencia dentro de Docker. Estos criterios de `CC-03` siguen abiertos, junto con la verificación estadística integral de `CC-05/19`. Para probar esta unidad: `node --test test/demo-store.test.mjs`, `npm test` y `npm run verify:data`.

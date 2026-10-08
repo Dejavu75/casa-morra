@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import * as demo from '../dist/data/demo.js';
 import { decodeDemoSnapshot, encodeDemoSnapshot, snapshotMetadata } from './demo-snapshot.mjs';
 import { prepareDemoSnapshotImport } from './import-apply.mjs';
+import { normalizeCorrectionAllowlist, prepareDemoSnapshotCorrection } from './demo-correct.mjs';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const stateRoot = join(projectRoot, '.demo-state');
@@ -56,7 +57,7 @@ function validateEnvelope(value) {
   let previous = null;
   for (const [index, event] of value.audit.entries()) {
     if (!object(event) || typeof event.id !== 'string' || !event.id || ids.has(event.id) ||
-        event.source !== SOURCE || !['init', 'apply', 'rollback', 'restore'].includes(event.operation) ||
+        event.source !== SOURCE || !['init', 'apply', 'correct', 'rollback', 'restore'].includes(event.operation) ||
         !validMeta(event.after) || typeof event.afterSnapshot !== 'string' ||
         !sameMeta(snapshotMetadata(event.afterSnapshot), event.after))
       throw new Error('Auditoría del almacén inválida');
@@ -78,6 +79,21 @@ function validateEnvelope(value) {
             JSON.stringify(prepared.journal.added) !== JSON.stringify(event.added) ||
             JSON.stringify(prepared.journal.affectedViews) !== JSON.stringify(event.affectedViews))
           throw new Error('Auditoría de importación no coincide con las altas');
+      } else if (event.operation === 'correct') {
+        if (typeof event.beforeSnapshot !== 'string' ||
+            !sameMeta(snapshotMetadata(event.beforeSnapshot), event.before) ||
+            event.beforeSnapshot !== previous.afterSnapshot ||
+            typeof event.incomingSnapshot !== 'string' || !Array.isArray(event.corrected) ||
+            !Array.isArray(event.affectedViews))
+          throw new Error('Auditoría de corrección inválida');
+        let prepared;
+        try { prepared = prepareDemoSnapshotCorrection(event.incomingSnapshot,
+          decodeDemoSnapshot(event.beforeSnapshot), event.before.sha256, event.corrected); }
+        catch { throw new Error('Auditoría de corrección inválida'); }
+        if (prepared.afterSnapshot !== event.afterSnapshot ||
+            JSON.stringify(prepared.journal.corrected) !== JSON.stringify(event.corrected) ||
+            JSON.stringify(prepared.journal.affectedViews) !== JSON.stringify(event.affectedViews))
+          throw new Error('Auditoría de corrección no coincide con los datos');
       } else if (event.operation === 'restore') {
         const ancestor = value.audit.slice(0, index).find(({ id }) => id === event.restores);
         if (!ancestor || !validMeta(event.backup) ||
@@ -88,7 +104,7 @@ function validateEnvelope(value) {
             event.afterSnapshot !== ancestor.afterSnapshot)
           throw new Error('Restauración de auditoría inválida');
       } else if (event.operation === 'rollback') {
-        if (!['apply', 'restore'].includes(previous.operation) || event.reverses !== previous.id ||
+        if (!['apply', 'correct', 'restore'].includes(previous.operation) || event.reverses !== previous.id ||
             !sameMeta(event.after, previous.before) ||
             event.afterSnapshot !== previous.beforeSnapshot)
           throw new Error('Reversión de auditoría inválida');
@@ -264,13 +280,35 @@ export async function applyDemoStore(path, incoming, hooks) {
   });
 }
 
-/** Revierte solo la última aplicación o restauración, sin borrar el historial. */
+/** Corrige solo identidades enumeradas, con CAS y tabla oficial aportada por el operador. */
+export async function correctDemoStore(path, incoming, expectedSha, allowlist, hooks) {
+  const target = await checkedPath(path);
+  return lockStore(target, async () => {
+    const { raw, value } = await readStore(target);
+    const corrected = normalizeCorrectionAllowlist(allowlist);
+    const last = value.audit.at(-1);
+    if (value.snapshot.sha256 !== expectedSha && last.operation === 'correct' &&
+        last.before.sha256 === expectedSha && last.incomingSnapshot === incoming &&
+        JSON.stringify(last.corrected) === JSON.stringify(corrected)) return value;
+    const prepared = prepareDemoSnapshotCorrection(incoming, decodeDemoSnapshot(value.data), expectedSha, corrected);
+    const next = { ...value, data: prepared.afterSnapshot, snapshot: prepared.journal.after,
+      audit: [...value.audit, { id: randomUUID(), operation: 'correct', source: SOURCE,
+        beforeSnapshot: prepared.beforeSnapshot, before: prepared.journal.before,
+        after: prepared.journal.after, afterSnapshot: prepared.afterSnapshot,
+        incomingSnapshot: incoming, corrected: prepared.journal.corrected,
+        affectedViews: prepared.journal.affectedViews }] };
+    await writeAtomic(target, next, raw, hooks);
+    return next;
+  });
+}
+
+/** Revierte solo la última aplicación, corrección o restauración, sin borrar el historial. */
 export async function rollbackDemoStore(path, hooks) {
   const target = await checkedPath(path);
   return lockStore(target, async () => {
     const { raw, value } = await readStore(target);
     const last = value.audit.at(-1);
-    if (!['apply', 'restore'].includes(last.operation)) throw new Error('La última operación no admite reversión');
+    if (!['apply', 'correct', 'restore'].includes(last.operation)) throw new Error('La última operación no admite reversión');
     if (!sameMeta(value.snapshot, last.after)) throw new Error('Deriva detectada antes de revertir');
     const data = last.beforeSnapshot;
     const snapshot = snapshotMetadata(data);
@@ -297,10 +335,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     if (operation === 'init') state = await initDemoStore(store);
     else if (operation === 'status') state = await statusDemoStore(store);
     else if (operation === 'apply') state = await applyDemoStore(store, await readFile(option(args, '--input'), 'utf8'));
+    else if (operation === 'correct') state = await correctDemoStore(store,
+      await readFile(option(args, '--input'), 'utf8'), option(args, '--expected-sha'),
+      JSON.parse(await readFile(option(args, '--allowlist'), 'utf8')));
     else if (operation === 'backup') state = await backupDemoStore(store, option(args, '--backup'));
     else if (operation === 'restore') state = await restoreDemoStore(store, option(args, '--backup'));
     else if (operation === 'rollback') state = await rollbackDemoStore(store);
-    else throw new Error('Uso: init|status|apply|backup|restore|rollback --store .demo-state/archivo.json [--input snapshot.json] [--backup .demo-state/respaldo.json]');
+    else throw new Error('Uso: init|status|apply|correct|backup|restore|rollback --store .demo-state/archivo.json [--input snapshot.json] [--expected-sha SHA256 --allowlist lista.json] [--backup .demo-state/respaldo.json]');
     console.log(JSON.stringify({ operation, sha256: state.snapshot.sha256,
       bytes: state.snapshot.bytes, auditEvents: state.audit.length }));
   } catch (error) {
