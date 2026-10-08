@@ -22,6 +22,32 @@ test('el listado ofrece filtros GET compartibles y distingue sus resultados del 
   assert.match(renderTournamentList(data, { tipo: 'candidatos' }).html, /No hay torneos/);
 });
 
+test('cada enlace de torneo anuncia su destino sin cambiar el texto visible', () => {
+  const html = renderTournamentList(data).html;
+  const links = [...html.matchAll(/<a href="([^"]+)" aria-label="([^"]+)">(.*?)<\/a>/g)]
+    .filter(([, href]) => href.startsWith('/torneos/'));
+  assert.equal(links.length, tournaments.length);
+  assert.equal(new Set(links.map(([, , accessibleName]) => accessibleName)).size, tournaments.length);
+  for (const event of tournaments) {
+    assert.ok(links.some(([, href, accessibleName, visibleText]) =>
+      href === `/torneos/${event.slug}` &&
+      accessibleName === `Ver clasificación y resultados de ${event.name}` &&
+      visibleText === 'Ver clasificación y resultados'), event.id);
+  }
+});
+
+test('el nombre accesible usa el catálogo y escapa el nombre del torneo', () => {
+  const unsafeName = 'Copa "<script>alert(1)</script>" & amigos';
+  const event = { ...tournaments[0], name: unsafeName };
+  const html = renderTournamentList({ ...data, tournaments: [event] }, {}, {
+    tournamentDetailLink: 'View standings',
+    tournamentDetailAccessible: (name) => `View standings for ${name}`,
+  }).html;
+  assert.match(html, /aria-label="View standings for Copa &quot;&lt;script&gt;alert\(1\)&lt;\/script&gt;&quot; &amp; amigos"/);
+  assert.match(html, />View standings<\/a>/);
+  assert.doesNotMatch(html, /<script>/);
+});
+
 test('el detalle conserva tabla oficial, resultados y byes sin inventar jugadas', () => {
   const tableOnly = renderTournamentDetail(data, 'archivo-de-verano-2025');
   assert.match(tableOnly.html, /<caption>Clasificación oficial/);

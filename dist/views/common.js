@@ -41,6 +41,7 @@ export const competitiveEs = Object.freeze({
   notFoundSeason: 'Temporada no encontrada', home: 'Inicio', players: 'Jugadores',
   tournamentIntro: 'Explorá las clasificaciones oficiales de los torneos ficticios. Una tabla puede existir aunque no haya partidas detalladas.',
   tournamentDetailLink: 'Ver clasificación y resultados', unavailableDetail: 'Detalle no disponible',
+  tournamentDetailAccessible: (name) => `Ver clasificación y resultados de ${name}`,
   filterTournaments: 'Filtrar torneos', type: 'Tipo', season: 'Temporada',
   eventsCount: (shown, total) => `${shown} de ${total} torneos`,
   participants: 'participantes', rounds: 'rondas', round: 'Ronda',

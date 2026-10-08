@@ -29,7 +29,7 @@ export function renderTournamentList(data, { tipo = '', temporada = '' } = {}, m
   const cards = selected.map((event) => {
     const url = tournamentUrl(event);
     const season = seasons.find((item) => item.id === event.seasonId);
-    const detail = url ? `<a href="${h(url)}">${h(label(messages, 'tournamentDetailLink'))}</a>` : `<span>${h(label(messages, 'unavailableDetail'))}</span>`;
+    const detail = url ? `<a href="${h(url)}" aria-label="${h(label(messages, 'tournamentDetailAccessible')(event.name))}">${h(label(messages, 'tournamentDetailLink'))}</a>` : `<span>${h(label(messages, 'unavailableDetail'))}</span>`;
     return `<li class="competition-card"><article><p class="competition-meta">${h(typeName(event.type, messages))} · ${h(season?.label ?? event.seasonId)}</p>
       <h2>${h(event.name)}</h2><p>${h(formatDate(event.date))} · ${h(formatNumber(event.standings?.length ?? 0))} ${h(label(messages, 'participants'))} · ${h(formatNumber(event.rounds))} ${h(label(messages, 'rounds'))}</p>
       ${detail}</article></li>`;
