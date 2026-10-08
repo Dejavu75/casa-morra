@@ -1,3 +1,5 @@
+import { validateOfficialFields } from '../domain/official-integrity.js';
+
 // Contrato público del exportador. El hash prueba integridad, no vigencia del almacén privado.
 const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 const exact = (value, keys) => object(value) &&
@@ -94,6 +96,9 @@ function validateSnapshot(snapshot) {
   for (const title of data.titles) {
     if (!tournaments.has(title.tournamentId) || !players.has(title.playerId)) throw invalid();
   }
+  const semanticErrors = [];
+  validateOfficialFields(data, semanticErrors);
+  if (semanticErrors.length) throw invalid();
   return data;
 }
 

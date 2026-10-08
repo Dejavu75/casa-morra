@@ -4,6 +4,7 @@ import { createHash, webcrypto } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import * as demo from '../dist/data/demo.js';
 import { createDemoSource, validatePublicDemo } from '../dist/assets/demo-source.js';
+import { validateDemoSnapshot } from '../scripts/demo-snapshot.mjs';
 
 const snapshot = { format: 'casa-morra.demo-snapshot', version: 1,
   provenance: 'casa-morra-original-demo', classification: 'public-demo',
@@ -12,6 +13,30 @@ const snapshot = { format: 'casa-morra.demo-snapshot', version: 1,
 const raw = JSON.stringify(snapshot);
 const exported = () => ({ format: 'casa-morra.demo-public', version: 1,
   source: { bytes: Buffer.byteLength(raw), sha256: createHash('sha256').update(raw).digest('hex') }, snapshot });
+const signedMutation = (mutate) => {
+  const value = structuredClone(exported());
+  mutate(value.snapshot.data);
+  const json = JSON.stringify(value.snapshot);
+  value.source = { bytes: Buffer.byteLength(json), sha256: createHash('sha256').update(json).digest('hex') };
+  return value;
+};
+
+test('rechaza rango y calendario inválidos aunque bytes y SHA-256 coincidan', async () => {
+  for (const [mutate, code] of [
+    [(data) => { data.tournaments[0].standings[0].rank = -1; }, 'STANDING_RANK'],
+    [(data) => { data.tournaments[0].date = '2026-02-30'; }, 'INVALID_DATE'],
+  ]) {
+    const value = signedMutation(mutate);
+    assert.ok(validateDemoSnapshot(value.snapshot).errors.some((error) => error.code === code));
+    await assert.rejects(validatePublicDemo(value, webcrypto), /inválid|alterad/i);
+    const events = [];
+    const source = createDemoSource({ fixture: demo, crypto: webcrypto,
+      fetch: async () => ({ ok: true, json: async () => value }), onChange: (state) => events.push(state) });
+    await source.refresh();
+    assert.equal(events.at(-1).kind, 'fixture');
+    assert.equal(events.at(-1).warning, 'demo.fallback');
+  }
+});
 
 test('el sobre público íntegro carga datos antes del primer render', async () => {
   const events = [];
