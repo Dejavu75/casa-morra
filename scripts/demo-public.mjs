@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { lstat, mkdir, open, readFile, rename, unlink } from 'node:fs/promises';
+import { chmod, lstat, mkdir, open, readFile, rename, unlink } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { snapshotMetadata } from './demo-snapshot.mjs';
@@ -83,13 +83,17 @@ export async function publishPublicDemo(store, output, hooks = {}) {
   const raw = JSON.stringify(value);
   validateExport(raw);
   const previous = await currentExport(target);
-  if (previous?.raw === raw) return value;
+  if (previous?.raw === raw) {
+    await chmod(target, 0o644);
+    return value;
+  }
 
   const temp = `${target}.${randomUUID()}.tmp`;
   let handle;
   try {
     handle = await open(temp, 'wx', 0o600);
     await handle.writeFile(raw);
+    await handle.chmod(0o644);
     await handle.sync();
     await handle.close();
     handle = null;

@@ -1,6 +1,8 @@
 .git
 .gitignore
 .codegraph
+.demo-state
+.demo-public
 node_modules
 test
 scripts

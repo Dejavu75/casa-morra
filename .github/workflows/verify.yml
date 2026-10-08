@@ -34,10 +34,15 @@ jobs:
 
       - name: Comprobar compresión y rutas en el contenedor
         run: |
-          docker run --detach --name casa-morra-gzip-ci --read-only --tmpfs /tmp:rw,nosuid,noexec,size=16m --cap-drop ALL --security-opt no-new-privileges --publish 127.0.0.1:18089:8080 casa-morra:ci >/dev/null
+          mkdir -p .demo-public
+          docker run --detach --name casa-morra-gzip-ci --read-only --tmpfs /tmp:rw,nosuid,noexec,size=16m --cap-drop ALL --security-opt no-new-privileges --mount type=bind,src="$PWD/.demo-public",dst=/srv/casa-morra-public,readonly --publish 127.0.0.1:18089:8080 casa-morra:ci >/dev/null
           trap 'docker rm -f casa-morra-gzip-ci >/dev/null 2>&1 || true' EXIT
           for intento in $(seq 1 20); do
             if curl --fail --silent http://127.0.0.1:18089/health >/dev/null; then break; fi
             sleep 1
           done
           CASA_MORRA_TEST_URL=http://127.0.0.1:18089 node --test test/gzip-runtime.test.mjs
+          CASA_MORRA_TEST_URL=http://127.0.0.1:18089 CASA_MORRA_PUBLIC_EXPECT=missing node --test test/public-demo-runtime.test.mjs
+          node scripts/demo-store.mjs init --store .demo-state/casa-morra.json
+          node scripts/demo-public.mjs publish --store .demo-state/casa-morra.json --output .demo-public/snapshot.json
+          CASA_MORRA_TEST_URL=http://127.0.0.1:18089 CASA_MORRA_PUBLIC_EXPECT=present node --test test/public-demo-runtime.test.mjs

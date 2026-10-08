@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, readFile, rm, stat, symlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
@@ -52,6 +52,13 @@ test('publica solo snapshot demo validado y metadatos públicos, sin auditoría'
   assert.deepEqual(published.source, value.source);
   await publishPublicDemo(store, output);
   assert.equal(await readFile(output, 'utf8'), raw);
+  if (process.platform !== 'win32') {
+    assert.equal((await stat(output)).mode & 0o777, 0o644);
+    await chmod(output, 0o600);
+    await publishPublicDemo(store, output);
+    assert.equal((await stat(output)).mode & 0o777, 0o644);
+    assert.equal(await readFile(output, 'utf8'), raw);
+  }
 });
 
 test('detecta exportación ausente y obsoleta después de importar, restaurar y revertir', async (t) => {
