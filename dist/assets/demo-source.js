@@ -113,18 +113,35 @@ export async function validatePublicDemo(value, crypto) {
   return data;
 }
 
-export function createDemoSource({ fixture, fetch, crypto, onChange }) {
+export function createDemoSource({ fixture, fetch, crypto, onChange, timeoutMs = 5000 }) {
   let generation = 0;
+  let inFlight = null;
   return {
     async refresh() {
       const current = ++generation;
+      inFlight?.abort();
+      const controller = new AbortController();
+      inFlight = controller;
+      let timer;
       let state;
       try {
-        const response = await fetch('/demo/snapshot.json', { cache: 'no-store' });
-        if (!response.ok) throw new Error('Exportación ausente');
-        state = { kind: 'export', data: await validatePublicDemo(await response.json(), crypto), warning: null };
+        const load = async () => {
+          const response = await fetch('/demo/snapshot.json', { cache: 'no-store', signal: controller.signal });
+          if (!response.ok) throw new Error('Exportación ausente');
+          return validatePublicDemo(await response.json(), crypto);
+        };
+        const timeout = new Promise((_, reject) => {
+          timer = setTimeout(() => {
+            controller.abort();
+            reject(new Error('Tiempo de espera agotado'));
+          }, timeoutMs);
+        });
+        state = { kind: 'export', data: await Promise.race([load(), timeout]), warning: null };
       } catch {
         state = { kind: 'fixture', data: fixture, warning: 'demo.fallback' };
+      } finally {
+        clearTimeout(timer);
+        if (inFlight === controller) inFlight = null;
       }
       if (current === generation) onChange(state);
       return current === generation ? state : null;

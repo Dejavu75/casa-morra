@@ -78,10 +78,40 @@ test('respuestas asíncronas viejas nunca sobrescriben la última recarga', asyn
   assert.deepEqual(events.map((event) => event.kind), ['export']);
 });
 
+test('una consulta que nunca termina usa el fixture y una respuesta tardía no lo reemplaza', async () => {
+  let release;
+  const events = [];
+  const source = createDemoSource({ fixture: demo, crypto: webcrypto, timeoutMs: 10,
+    fetch: async () => new Promise((resolve) => { release = resolve; }),
+    onChange: (state) => events.push(state) });
+  const state = await Promise.race([source.refresh(),
+    new Promise((resolve) => setTimeout(() => resolve({ kind: 'pending' }), 50))]);
+  assert.equal(state.kind, 'fixture');
+  assert.equal(events.length, 1);
+  assert.ok(events[0].warning);
+  release({ ok: true, json: async () => exported() });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(events.map((event) => event.kind), ['fixture']);
+});
+
+test('la recarga posterior gana aunque la consulta anterior expire después', async () => {
+  let calls = 0;
+  const events = [];
+  const source = createDemoSource({ fixture: demo, crypto: webcrypto, timeoutMs: 10,
+    fetch: async () => ++calls === 1 ? new Promise(() => {}) :
+      { ok: true, json: async () => exported() },
+    onChange: (state) => events.push(state) });
+  const pending = source.refresh();
+  await source.refresh();
+  assert.equal(await Promise.race([pending,
+    new Promise((resolve) => setTimeout(() => resolve('pending'), 50))]), null);
+  assert.deepEqual(events.map((event) => event.kind), ['export']);
+});
+
 test('la aplicación inicia desde exportación y ofrece recarga explícita accesible', async () => {
   const app = await readFile(new URL('../dist/assets/app.js', import.meta.url), 'utf8');
   const html = await readFile(new URL('../dist/index.html', import.meta.url), 'utf8');
-  assert.match(app, /await source\.refresh\(\)/);
+  assert.match(app, /renderLocation\(\);\s*void source\.refresh\(\)/);
   assert.match(app, /renderRoute\(route, activeData/);
   assert.match(app, /attachGameReplay\([^,]+, activeData/);
   assert.match(html, /data-demo-refresh/);

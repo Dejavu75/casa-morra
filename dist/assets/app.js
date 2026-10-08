@@ -82,7 +82,7 @@ export function renderThemeToggle(button, theme, locale = 'es', catalogs = defau
   if (labelNode) labelNode.textContent = label;
 }
 
-async function startApp() {
+function startApp() {
   const locale = applyTranslations(document, document.documentElement.lang);
   const main = document.querySelector('#contenido');
   const menuButton = document.querySelector('[data-menu-toggle]');
@@ -148,7 +148,6 @@ async function startApp() {
   }
 
   renderTheme();
-  await source.refresh();
 
   themeButton?.addEventListener('click', () => {
     theme = nextTheme(theme);
@@ -178,6 +177,8 @@ async function startApp() {
 
   const year = document.querySelector('[data-year]');
   if (year) year.textContent = String(new Date().getFullYear());
+  renderLocation();
+  void source.refresh();
 }
 
 if (typeof document !== 'undefined') startApp();
