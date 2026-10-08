@@ -371,7 +371,9 @@ h2 em {
 }
 
 #contenido {
-  min-height: 60vh;
+  /* Keep the footer below the first viewport while the fallback becomes a route. */
+  min-height: 100vh;
+  min-height: 100svh;
 }
 
 #contenido:focus {
@@ -544,3 +546,4 @@ h2 em {
 .demo-source-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; padding-block: .5rem; }
 .demo-source-controls button { cursor: pointer; }
 .demo-source-controls [role="status"] { margin: 0; font-weight: 600; color: #92400e; }
+:root[data-theme="oscuro"] .demo-source-controls [role="status"] { color: #ffd29b; }
