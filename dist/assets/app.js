@@ -1,16 +1,22 @@
 import * as demo from '../data/demo.js';
-import { catalogs as defaultCatalogs, resolveViewMessages, translate } from '../i18n/index.js';
-import { routeHref } from '../router.js';
+import { applyTranslations, catalogs as defaultCatalogs, resolveViewMessages, translate } from '../i18n/index.js';
+import { parseRoute, routeHref } from '../router.js';
 import { renderTournamentList, renderTournamentDetail } from '../views/tournaments.js';
 import { renderAnnual } from '../views/annual.js';
 import { renderPlayersDirectory, renderPlayerProfile } from '../views/players.js';
 import { renderStatistics, renderClassics, renderClassic } from '../views/records.js';
 import { renderHome } from '../views/home.js';
 import { renderAbout, renderNewsList, renderNewsDetail, renderClasses, renderMembership } from '../views/editorial.js';
-import { renderGame } from '../views/game.js';
+import { renderGame, attachGameReplay } from '../views/game.js';
+import { attachPuzzle } from '../views/puzzle.js';
 import { escapeHtml as h } from '../views/common.js';
+import { applyTheme, nextTheme, readTheme, saveTheme } from './theme.js';
 
 const demoData = { ...demo };
+const navGroup = Object.freeze({
+  tournament: 'tournaments', annual: 'tournaments', player: 'players',
+  classic: 'classics', 'news-detail': 'news',
+});
 
 export function renderRoute(route, source = demoData, { locale = 'es', catalogs = defaultCatalogs } = {}) {
   const messages = (namespace) => resolveViewMessages(namespace, locale, catalogs);
@@ -41,3 +47,116 @@ export function renderRoute(route, source = demoData, { locale = 'es', catalogs 
     }
   }
 }
+
+export function shouldClientNavigate(event, anchor, currentOrigin) {
+  if (!anchor || event.defaultPrevented || event.button !== 0 || event.metaKey ||
+      event.ctrlKey || event.shiftKey || event.altKey || anchor.hasAttribute('download') ||
+      (anchor.target && anchor.target.toLowerCase() !== '_self')) return false;
+  const rawHref = anchor.getAttribute('href');
+  if (!rawHref || rawHref.startsWith('#')) return false;
+  try {
+    const url = new URL(anchor.href);
+    return (url.protocol === 'http:' || url.protocol === 'https:') && url.origin === currentOrigin;
+  } catch {
+    return false;
+  }
+}
+
+export function closeMenuOnEscape(event, button, navigation, close) {
+  const expanded = button?.getAttribute('aria-expanded') === 'true';
+  const focusInside = event.target === button || navigation?.contains(event.target);
+  if (event.key !== 'Escape' || !expanded || !focusInside) return false;
+  close();
+  button.focus();
+  event.preventDefault();
+  return true;
+}
+
+function startApp() {
+  const locale = applyTranslations(document, document.documentElement.lang);
+  const main = document.querySelector('#contenido');
+  const menuButton = document.querySelector('[data-menu-toggle]');
+  const navigation = document.querySelector('#navegacion-principal');
+  const themeButton = document.querySelector('[data-theme-toggle]');
+  if (!main) return;
+  main.tabIndex = -1;
+
+  let storage = null;
+  try { storage = window.localStorage; } catch { /* El sitio sigue funcionando sin almacenamiento. */ }
+  let theme = readTheme(storage) ?? (window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? 'oscuro' : 'claro');
+  let detachReplay = () => {};
+  let detachPuzzle = () => {};
+
+  function renderTheme() {
+    applyTheme(document, theme);
+    if (!themeButton) return;
+    const targetTheme = nextTheme(theme);
+    const label = translate(`theme.${targetTheme === 'oscuro' ? 'dark' : 'light'}`, locale);
+    themeButton.setAttribute('aria-pressed', String(theme === 'oscuro'));
+    themeButton.setAttribute('aria-label', label);
+    const labelNode = themeButton.querySelector('[data-theme-label]');
+    if (labelNode) labelNode.textContent = label;
+  }
+
+  function setMenuOpen(open) {
+    if (!menuButton || !navigation) return;
+    menuButton.setAttribute('aria-expanded', String(open));
+    navigation.classList.toggle('is-open', open);
+  }
+
+  function renderLocation({ focus = false, scroll = false } = {}) {
+    const route = parseRoute(window.location.pathname, window.location.search);
+    const page = renderRoute(route, demoData, { locale });
+    detachReplay();
+    detachPuzzle();
+    detachReplay = () => {};
+    detachPuzzle = () => {};
+    main.innerHTML = page.html;
+    document.title = page.title.includes('Casa Morra') ? page.title : `${page.title} — Casa Morra`;
+    const active = navGroup[route.name] ?? route.name;
+    for (const link of navigation?.querySelectorAll('[data-route-name]') ?? []) {
+      if (link.dataset.routeName === active) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    }
+    if (route.name === 'game') {
+      detachReplay = attachGameReplay(main.querySelector('[data-game-replay]'), demoData, route.params.id);
+    }
+    if (route.name === 'home') {
+      detachPuzzle = attachPuzzle(main.querySelector('[data-puzzle-host]'), {
+        messages: resolveViewMessages('puzzle', locale),
+      });
+    }
+    setMenuOpen(false);
+    if (focus) main.focus({ preventScroll: true });
+    if (scroll) window.scrollTo(0, 0);
+  }
+
+  renderTheme();
+  renderLocation();
+
+  themeButton?.addEventListener('click', () => {
+    theme = nextTheme(theme);
+    saveTheme(storage, theme);
+    renderTheme();
+  });
+  menuButton?.addEventListener('click', () => {
+    setMenuOpen(menuButton.getAttribute('aria-expanded') !== 'true');
+  });
+  document.addEventListener('keydown', (event) => {
+    closeMenuOnEscape(event, menuButton, navigation, () => setMenuOpen(false));
+  });
+  document.addEventListener('click', (event) => {
+    const anchor = event.target?.closest?.('a[href]');
+    if (!shouldClientNavigate(event, anchor, window.location.origin)) return;
+    const url = new URL(anchor.href);
+    event.preventDefault();
+    window.history.pushState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    renderLocation({ focus: true, scroll: true });
+  });
+  window.addEventListener('popstate', () => renderLocation({ focus: true }));
+
+  const year = document.querySelector('[data-year]');
+  if (year) year.textContent = String(new Date().getFullYear());
+}
+
+if (typeof document !== 'undefined') startApp();

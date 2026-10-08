@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#17213a">
+    <meta name="description" content="Casa Morra: torneos, jugadores, estadísticas y partidas ficticias de ajedrez." data-i18n-content="meta.description">
+    <title>Casa Morra — Ajedrez de demostración</title>
+    <link rel="stylesheet" href="/assets/site.css">
+    <link rel="stylesheet" href="/views/competitive.css">
+    <link rel="stylesheet" href="/views/players.css">
+    <link rel="stylesheet" href="/views/content.css">
+    <link rel="stylesheet" href="/views/puzzle.css">
+    <script type="module" src="/assets/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido" data-i18n="skip.content">Saltar al contenido</a>
+    <header class="site-header">
+      <div class="header-inner container">
+        <a class="brand" href="/" aria-label="Casa Morra, ir al inicio" data-i18n-aria="brand.home">
+          <span class="brand-mark" aria-hidden="true">CM<span class="brand-point">.</span></span>
+          <span class="brand-name">Casa <strong>Morra</strong></span>
+        </a>
+        <button class="menu-toggle" type="button" aria-controls="navegacion-principal" aria-expanded="false" data-menu-toggle>
+          <span class="menu-icon" aria-hidden="true"></span><span data-i18n="nav.menu">Menú</span>
+        </button>
+        <nav class="site-nav" id="navegacion-principal" aria-label="Navegación principal" data-i18n-aria="nav.main">
+          <a href="/" data-route-name="home" data-i18n="nav.home">Inicio</a>
+          <a href="/torneos" data-route-name="tournaments" data-i18n="nav.tournaments">Torneos</a>
+          <a href="/jugadores" data-route-name="players" data-i18n="nav.players">Jugadores</a>
+          <a href="/estadisticas" data-route-name="statistics" data-i18n="nav.statistics">Estadísticas</a>
+          <a href="/clasicos" data-route-name="classics" data-i18n="nav.classics">Clásicos</a>
+          <a href="/novedades" data-route-name="news" data-i18n="nav.news">Novedades</a>
+          <a href="/clases" data-route-name="classes" data-i18n="nav.classes">Clases</a>
+          <a href="/nosotros" data-route-name="about" data-i18n="nav.about">Nosotros</a>
+          <a href="/socios" data-route-name="membership" data-i18n="nav.membership">Socios</a>
+        </nav>
+        <button class="theme-toggle" type="button" aria-pressed="false" aria-label="Modo oscuro" data-theme-toggle>
+          <span class="theme-icon" aria-hidden="true">◐</span><span data-theme-label>Modo oscuro</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="contenido">
+      <section class="content-page container" aria-labelledby="fallback-title">
+        <h1 id="fallback-title">Casa Morra</h1>
+        <p>Datos de demostración. Para consultar torneos, jugadores y partidas se necesita JavaScript.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div>
+          <a class="footer-brand" href="/">Casa Morra<span aria-hidden="true">.</span></a>
+          <p data-i18n="footer.tagline">Una casa digital para el ajedrez.</p>
+        </div>
+        <div class="footer-meta">
+          <p data-i18n="footer.demo">Datos de demostración. Sin cuentas ni inscripción en esta etapa.</p>
+          <p>© <span data-year>2026</span> Casa Morra</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
