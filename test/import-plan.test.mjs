@@ -64,6 +64,43 @@ test('una alta propuesta se vuelve sin cambios si ya está en los datos vigentes
   assert.deepEqual(first.added[0].incoming, alreadyPresent.editorial.news.at(-1));
 });
 
+test('la omisión no libera un slug vigente en jugadores, torneos ni novedades', () => {
+  const before = encodeDemoSnapshot(demo);
+  for (const collection of ['players', 'tournaments', 'editorial.news']) {
+    const current = decodeDemoSnapshot(before);
+    const currentRows = collection === 'editorial.news' ? current.editorial.news : current[collection];
+    const owner = { ...currentRows[0], id: `vigente-${collection}`, slug: `slug-vigente-${collection}` };
+    if (collection === 'tournaments') owner.standings = [];
+    currentRows.push(owner);
+    const json = snapshot((data) => {
+      const rows = collection === 'editorial.news' ? data.editorial.news : data[collection];
+      rows.push({ ...owner, id: `nuevo-${collection}` });
+    });
+    const plan = planDemoSnapshotImport(json, current);
+    assert.equal(plan.added.some(({ id }) => id.startsWith('nuevo-')), false, collection);
+    const conflict = plan.conflicting.find(({ id }) => id.startsWith('nuevo-'));
+    assert.equal(conflict?.reason, 'DUPLICATE_SLUG', collection);
+    assert.equal(conflict?.slugOwnerId, owner.id, collection);
+    assert.equal(conflict?.incoming.slug, conflict?.current.slug, collection);
+    assert.deepEqual(plan, planDemoSnapshotImport(json, current), collection);
+  }
+  assert.equal(encodeDemoSnapshot(demo), before);
+});
+
+test('editar un ID no libera el slug de otro ID vigente', () => {
+  const current = decodeDemoSnapshot(encodeDemoSnapshot(demo));
+  const owner = { ...current.players[0], id: 'vigente-adicional', slug: 'slug-vigente-adicional' };
+  current.players.push(owner);
+  const json = snapshot((data) => {
+    data.players[0].slug = owner.slug;
+  });
+  const plan = planDemoSnapshotImport(json, current);
+  const conflict = plan.conflicting.find(({ id }) => id === demo.players[0].id);
+  assert.equal(conflict?.reason, 'DUPLICATE_SLUG');
+  assert.equal(conflict?.slugOwnerId, owner.id);
+  assert.equal(conflict?.current.id, demo.players[0].id);
+});
+
 test('un registro omitido no implica eliminación y el club se informa como conflicto independiente', () => {
   const json = snapshot((data) => {
     data.editorial.news.pop();

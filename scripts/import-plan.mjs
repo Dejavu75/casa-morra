@@ -25,9 +25,17 @@ export function planDemoSnapshotImport(json, currentData = demo) {
 
   for (const collection of COLLECTIONS) {
     const existing = new Map(rowsAt(current, collection).map((row) => [row.id, row]));
+    // Una omisión en el snapshot entrante no elimina al dueño actual del slug.
+    const slugOwners = ['players', 'tournaments', 'editorial.news'].includes(collection)
+      ? new Map(rowsAt(current, collection).map((row) => [row.slug, row])) : null;
     for (const record of rowsAt(incoming, collection)) {
       const { id } = record;
-      if (!existing.has(id)) plan.added.push({ collection, id, incoming: record });
+      const owner = slugOwners?.get(record.slug);
+      if (owner && owner.id !== id) plan.conflicting.push({
+        collection, id, reason: 'DUPLICATE_SLUG', slugOwnerId: owner.id,
+        current: existing.get(id) ?? owner, incoming: record,
+      });
+      else if (!existing.has(id)) plan.added.push({ collection, id, incoming: record });
       else if (isDeepStrictEqual(existing.get(id), record)) plan.unchanged.push({ collection, id });
       else plan.conflicting.push({ collection, id, current: existing.get(id), incoming: record });
     }
