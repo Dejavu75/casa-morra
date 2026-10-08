@@ -28,6 +28,7 @@ export const puzzleEs = Object.freeze({
   reset: 'Reiniciar',
   initialFeedback: 'Elija una jugada blanca para intentar el mate.',
   invalidFeedback: 'Escriba cuatro caracteres: casilla de origen y de destino, por ejemplo c3c4.',
+  illegalFeedback: 'Esa jugada no es legal en la posición inicial. Revise el origen y el destino.',
   wrongFeedback: 'Esa respuesta no es el mate en una. Intente otra jugada.',
   correctFeedback: (notation) => `Correcto: ${notation} es mate en una.`,
   revealedFeedback: (notation) => `Solución: ${notation}. La dama va de e2 a a6 y el rey negro no tiene respuesta legal.`,
@@ -50,6 +51,40 @@ export function initialPuzzleState(messages = puzzleEs) {
   return { status: 'ready', feedback: msg(messages, 'initialFeedback') };
 }
 
+// Legalidad limitada a la composición fija: dama y rey blancos contra el rey negro.
+function legalPuzzleMove(move) {
+  const from = move.slice(0, 2);
+  const to = move.slice(2);
+  if (!['e2', 'c3'].includes(from) || from === to || FIXED_PIECES[to] || (from === 'c3' && to === 'e2')) return false;
+
+  const fromFile = FILES.indexOf(from[0]);
+  const toFile = FILES.indexOf(to[0]);
+  const fromRank = Number(from[1]);
+  const toRank = Number(to[1]);
+  const fileDelta = toFile - fromFile;
+  const rankDelta = toRank - fromRank;
+
+  if (from === 'c3') {
+    if (Math.max(Math.abs(fileDelta), Math.abs(rankDelta)) !== 1) return false;
+    // Los reyes no pueden quedar en casillas adyacentes.
+    return Math.max(Math.abs(toFile - FILES.indexOf('a')), Math.abs(toRank - 3)) > 1;
+  }
+
+  const straight = fileDelta === 0 || rankDelta === 0;
+  const diagonal = Math.abs(fileDelta) === Math.abs(rankDelta);
+  if (!straight && !diagonal) return false;
+  const fileStep = Math.sign(fileDelta);
+  const rankStep = Math.sign(rankDelta);
+  let file = fromFile + fileStep;
+  let rank = fromRank + rankStep;
+  while (file !== toFile || rank !== toRank) {
+    if (FIXED_PIECES[`${FILES[file]}${rank}`]) return false;
+    file += fileStep;
+    rank += rankStep;
+  }
+  return true;
+}
+
 export function transitionPuzzle(state, action, messages = puzzleEs) {
   if (action?.type === 'reset') return initialPuzzleState(messages);
   if (action?.type === 'reveal') {
@@ -60,6 +95,9 @@ export function transitionPuzzle(state, action, messages = puzzleEs) {
   const move = String(action.move ?? '').trim().toLowerCase();
   if (!/^[a-h][1-8][a-h][1-8]$/.test(move)) {
     return { status: 'ready', feedback: msg(messages, 'invalidFeedback') };
+  }
+  if (!legalPuzzleMove(move)) {
+    return { status: 'ready', feedback: msg(messages, 'illegalFeedback') };
   }
   if (move !== SOLUTION) {
     return { status: 'ready', feedback: msg(messages, 'wrongFeedback') };

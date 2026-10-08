@@ -27,7 +27,7 @@ test('el problema original presenta tablero, objetivo y entrada accesible', () =
   assert.doesNotMatch(html, /problema diario/i);
 });
 
-test('solo e2a6 resuelve el mate en una; otras respuestas no se declaran ilegales', () => {
+test('solo e2a6 resuelve el mate en una; una jugada legal no ganadora sigue siendo válida', () => {
   const correct = transitionPuzzle(initialPuzzleState(), { type: 'submit', move: ' E2A6 ' });
   assert.equal(correct.status, 'solved');
   assert.match(correct.feedback, /mate/i);
@@ -38,6 +38,47 @@ test('solo e2a6 resuelve el mate en una; otras respuestas no se declaran ilegale
   assert.match(wrong.feedback, /no es el mate/i);
   assert.doesNotMatch(wrong.feedback, /ilegal/i);
   assert.match(renderPuzzle(puzzleEs, wrong), /data-square="e2"[^>]*aria-label="e2, dama blanca"/);
+});
+
+test('el problema fijo diferencia jugadas ilegales de jugadas legales que no son mate', () => {
+  for (const move of ['e2e2', 'a3a4', 'd2e3', 'c3a3', 'e2c3', 'c3e2', 'c3b3', 'e2d4']) {
+    const state = transitionPuzzle(initialPuzzleState(), { type: 'submit', move });
+    assert.equal(state.status, 'ready', move);
+    assert.match(state.feedback, /no es legal/i, move);
+    assert.doesNotMatch(state.feedback, /no es el mate/i, move);
+    assert.match(renderPuzzle(puzzleEs, state), /role="status" aria-live="polite"/, move);
+  }
+  for (const move of ['e2e3', 'c3d3']) {
+    const state = transitionPuzzle(initialPuzzleState(), { type: 'submit', move });
+    assert.match(state.feedback, /no es el mate/i, move);
+    assert.doesNotMatch(state.feedback, /no es legal/i, move);
+  }
+});
+
+test('el feedback ilegal admite traducción y se conserva durante la entrada por teclado', () => {
+  const messages = { illegalFeedback: 'Jugada de prueba inválida' };
+  const handlers = new Map();
+  const focused = [];
+  const host = {
+    innerHTML: '', move: 'e2e2',
+    addEventListener(name, fn) { handlers.set(name, fn); },
+    removeEventListener(name) { handlers.delete(name); },
+    querySelector(selector) {
+      if (selector === '[data-puzzle-input]') return { value: this.move, focus() { focused.push('input'); } };
+      if (selector === '[data-puzzle-feedback]') return { focus() { focused.push('feedback'); } };
+      return null;
+    },
+  };
+  const dispose = attachPuzzle(host, { messages });
+  handlers.get('submit')({ target: { matches: () => true }, preventDefault() {} });
+  assert.match(host.innerHTML, /Jugada de prueba inválida/);
+  assert.match(host.innerHTML, /aria-live="polite"/);
+  assert.equal(focused.at(-1), 'input');
+  handlers.get('click')({ target: { closest: () => ({ dataset: { puzzleAction: 'reset' } }) } });
+  assert.match(host.innerHTML, /Elija una jugada blanca/);
+  assert.equal(focused.at(-1), 'input');
+  dispose();
+  assert.equal(handlers.size, 0);
 });
 
 test('entrada mal formada se rechaza sin evaluar legalidad', () => {

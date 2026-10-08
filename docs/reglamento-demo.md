@@ -69,7 +69,7 @@ Las funciones son módulos ES puros: aceptan `{ players, seasons, tournaments, g
 
 El visor muestra tablero, texto alternativo y controles de primera/anterior/siguiente/última posición **solo para la secuencia UCI demo revisada**. Reconstruye esa secuencia concreta, incluido un enroque; no importa PGN, no acepta movimientos de visitantes y no valida legalidad ajedrecística general. Resultados sin jugadas siguen contando para estadísticas pero no ofrecen reproducción.
 
-La portada ofrece **una composición original fija de mate en una**, no un problema diario. Su FEN es `8/8/8/8/8/k1K5/4Q3/8 w - - 0 1`; la respuesta prevista es `e2a6` (`Qa6#`). El formulario comprueba esta solución concreta y permite revelarla o reiniciar. No ejecuta un motor de ajedrez ni determina la legalidad de movimientos arbitrarios.
+La portada ofrece **una composición original fija de mate en una**, no un problema diario. Su FEN es `8/8/8/8/8/k1K5/4Q3/8 w - - 0 1`; la respuesta prevista es `e2a6` (`Qa6#`). El formulario comprueba esta solución concreta y permite revelarla o reiniciar. Para esta posición inicial, distingue entradas mal formadas, jugadas ilegales y jugadas legales que no dan mate: controla turno/origen, geometría y recorrido de dama o rey, ocupación, captura de rey y adyacencia de reyes. No ejecuta un motor de ajedrez ni valida otras posiciones, una continuación después de la primera jugada o PGN arbitrario.
 
 Ejecutar `node --test` para la suite y `npm run verify:data` para obtener la conciliación JSON de jugadores, torneos, partidas y byes. Estas pruebas no sustituyen una revisión visual/manual en navegador.
 
