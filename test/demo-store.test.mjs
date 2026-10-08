@@ -69,6 +69,18 @@ test('rechaza conflictos y preserva exactamente los bytes previos', async (t) =>
   assert.equal(await readFile(store, 'utf8'), before);
 });
 
+test('no persiste una partida adicional incompatible con la tabla oficial', async (t) => {
+  const { store } = await sandbox(t);
+  await initDemoStore(store);
+  const before = await readFile(store, 'utf8');
+  const inconsistent = decodeDemoSnapshot(fixture);
+  inconsistent.games.push({ ...inconsistent.games[0], id: 'partida-demo-extra' });
+  await assert.rejects(applyDemoStore(store, encodeDemoSnapshot(inconsistent)),
+    /STANDING_POINTS|STANDING_WDL/);
+  assert.equal(await readFile(store, 'utf8'), before);
+  assert.equal((await statusDemoStore(store)).audit.length, 1);
+});
+
 test('falla cerrado ante sobre alterado, lock o deriva del snapshot', async (t) => {
   const { dir, store } = await sandbox(t);
   await initDemoStore(store);

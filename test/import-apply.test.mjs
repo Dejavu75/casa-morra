@@ -91,3 +91,28 @@ test('rechaza entradas inválidas antes de preparar o restaurar', () => {
     ...prepared, journal: { ...prepared.journal, after: { sha256: '0'.repeat(64) } },
   }, decodeDemoSnapshot(prepared.afterSnapshot)), /diario/i);
 });
+
+test('rechaza un resultado nuevo que contradice la tabla oficial vigente', () => {
+  const inconsistent = decodeDemoSnapshot(original());
+  inconsistent.games.push({ ...inconsistent.games[0], id: 'partida-demo-extra' });
+  assert.throws(() => prepareDemoSnapshotImport(encodeDemoSnapshot(inconsistent)),
+    /STANDING_POINTS|STANDING_WDL/);
+});
+
+test('admite un torneo nuevo con resultado y tabla oficial consistentes', () => {
+  const incoming = decodeDemoSnapshot(original());
+  const [white, black] = incoming.players;
+  const sourceEvent = incoming.tournaments[0];
+  incoming.tournaments.push({ ...sourceEvent, id: 'evento-consistente', slug: 'evento-consistente',
+    name: 'Evento ficticio consistente', rounds: 1, annualEligible: false, eloEligible: false,
+    standings: [
+      { playerId: white.id, order: 1, rank: 1, points: 1, wins: 1, draws: 0, losses: 0 },
+      { playerId: black.id, order: 2, rank: 2, points: 0, wins: 0, draws: 0, losses: 1 },
+    ] });
+  incoming.games.push({ ...incoming.games[0], id: 'partida-consistente',
+    tournamentId: 'evento-consistente', round: 1, whiteId: white.id, blackId: black.id,
+    result: '1-0', moves: null, finish: null });
+  const prepared = prepareDemoSnapshotImport(encodeDemoSnapshot(incoming));
+  assert.equal(prepared.journal.added.length, 2);
+  assert.equal(decodeDemoSnapshot(prepared.afterSnapshot).games.at(-1).id, 'partida-consistente');
+});

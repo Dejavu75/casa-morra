@@ -1,6 +1,11 @@
 import * as demo from '../dist/data/demo.js';
 import { decodeDemoSnapshot, encodeDemoSnapshot, snapshotMetadata } from './demo-snapshot.mjs';
 import { planDemoSnapshotImport } from './import-plan.mjs';
+import { verifyData } from './verify-data.mjs';
+
+const OFFICIAL_STANDING_ERRORS = new Set([
+  'MISSING_STANDING', 'UNEXPLAINED_STANDING', 'STANDING_POINTS', 'STANDING_WDL',
+]);
 
 // Nombres de renderRoute; la lista es conservadora y no dispara invalidación real.
 const AFFECTED_VIEWS = Object.freeze({
@@ -34,6 +39,12 @@ export function prepareDemoSnapshotImport(json, currentData = demo) {
   for (const { collection, incoming } of plan.added) rowsAt(next, collection).push(incoming);
   // La codificación valida también la unión, sin recalcular el orden de tablas oficiales.
   const afterSnapshot = encodeDemoSnapshot(next);
+  const inconsistent = verifyData(next).errors.filter(({ code }) => OFFICIAL_STANDING_ERRORS.has(code));
+  if (inconsistent.length) {
+    const error = new Error(`Importación rechazada: tabla oficial inconsistente (${[...new Set(inconsistent.map(({ code }) => code))].join(', ')})`);
+    error.inconsistent = inconsistent;
+    throw error;
+  }
   const added = plan.added.map(({ collection, id }) => ({ collection, id }));
   const affectedViews = [...new Set(added.flatMap(({ collection }) => AFFECTED_VIEWS[collection]))].sort();
 
