@@ -40,6 +40,14 @@ test('los módulos y archivos estáticos ausentes no reciben el fallback de la S
   assert.match(nginx, /location\s+~\*\s+.*js.*css.*\$\s*\{\s*try_files\s+\$uri\s+=404;/);
 });
 
+test('Nginx comprime solo tipos textuales y anuncia variantes de respuesta', () => {
+  const nginx = read('nginx.conf');
+  assert.match(nginx, /^\s*gzip\s+on;/m);
+  assert.match(nginx, /^\s*gzip_vary\s+on;/m);
+  assert.match(nginx, /^\s*gzip_types\s+[^;]*text\/css[^;]*application\/javascript[^;]*application\/json[^;]*image\/svg\+xml[^;]*;/m);
+  assert.doesNotMatch(nginx, /gzip_types\s+[^;]*(?:image\/png|image\/jpeg|image\/webp)/);
+});
+
 test('el contexto Docker excluye archivos internos y credenciales locales', () => {
   const ignore = read('.dockerignore');
   for (const path of ['.git', '.codegraph', 'test', 'scripts', 'docs', '.env*', 'node_modules'])

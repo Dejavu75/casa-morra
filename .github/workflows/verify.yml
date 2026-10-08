@@ -31,3 +31,13 @@ jobs:
 
       - name: Construir imagen local sin publicar
         run: docker build --tag casa-morra:ci .
+
+      - name: Comprobar compresión y rutas en el contenedor
+        run: |
+          docker run --detach --name casa-morra-gzip-ci --read-only --tmpfs /tmp:rw,nosuid,noexec,size=16m --cap-drop ALL --security-opt no-new-privileges --publish 127.0.0.1:18089:8080 casa-morra:ci >/dev/null
+          trap 'docker rm -f casa-morra-gzip-ci >/dev/null 2>&1 || true' EXIT
+          for intento in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:18089/health >/dev/null; then break; fi
+            sleep 1
+          done
+          CASA_MORRA_TEST_URL=http://127.0.0.1:18089 node --test test/gzip-runtime.test.mjs

@@ -26,3 +26,9 @@ test('la CI prueba datos y construye Docker sin publicación ni secretos', () =>
   assert.match(workflow, /run:\s*docker build\s+--tag casa-morra:ci\s+\./);
   assert.doesNotMatch(workflow, /docker\s+(?:push|login)|secrets\.|GITHUB_TOKEN|ghcr\.io|docker\.io\/dhzacur/);
 });
+
+test('la CI verifica las respuestas gzip en un contenedor efímero local', () => {
+  assert.match(workflow, /docker run[\s\S]*--publish 127\.0\.0\.1:18089:8080[\s\S]*casa-morra:ci/);
+  assert.match(workflow, /CASA_MORRA_TEST_URL=http:\/\/127\.0\.0\.1:18089 node --test test\/gzip-runtime\.test\.mjs/);
+  assert.match(workflow, /trap 'docker rm -f casa-morra-gzip-ci[^']*' EXIT/);
+});
