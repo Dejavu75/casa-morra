@@ -1,5 +1,5 @@
 import { routeHref } from '../router.js';
-import { getHeadToHead, getPlayerProfile } from '../domain/statistics.js';
+import { getHeadToHead, getPlayerProfile } from '../domain/statistics.js?v=0.9.3-demo';
 import { escapeHtml as h, formatDate, formatNumber, playerName, safeRouteHref } from './common.js';
 
 // Las etiquetas se inyectan en vez de mezclarse con datos o lógica de cálculo.

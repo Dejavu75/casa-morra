@@ -47,7 +47,11 @@ runtimeTest('PNG conserva su codificación y no recibe gzip', async () => {
 runtimeTest('HTML y módulos usados por la entrega exigen revalidación de caché', async () => {
   for (const path of ['/', '/assets/site.css?v=0.9.3-demo',
     '/views/players.css?v=0.9.3-demo', '/views/content.css?v=0.9.3-demo',
-    '/assets/app.js?v=0.9.3-demo', '/views/records.js?v=0.9.2-demo',
+    '/assets/app.js?v=0.9.3-demo', '/i18n/index.js?v=0.9.3-demo',
+    '/views/annual.js?v=0.9.3-demo', '/views/players.js?v=0.9.3-demo',
+    '/views/records.js?v=0.9.3-demo', '/views/home.js?v=0.9.3-demo',
+    '/views/editorial.js?v=0.9.3-demo', '/domain/statistics.js?v=0.9.3-demo',
+    '/views/records.js?v=0.9.2-demo',
     '/assets/site.css?v=0.9.2-demo', '/assets/app.js?v=0.9.2-demo']) {
     const response = await request(path);
     assert.equal(response.status, 200, path);

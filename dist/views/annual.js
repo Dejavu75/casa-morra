@@ -1,4 +1,4 @@
-import { getAnnualStandings } from '../domain/statistics.js';
+import { getAnnualStandings } from '../domain/statistics.js?v=0.9.3-demo';
 import { routeHref } from '../router.js';
 import { competitiveEs, escapeHtml as h, formatDate, formatNumber, playerLink, safeRouteHref } from './common.js';
 

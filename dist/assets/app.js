@@ -1,12 +1,12 @@
 import * as demo from '../data/demo.js';
-import { applyTranslations, catalogs as defaultCatalogs, resolveLocale, resolveViewMessages, translate } from '../i18n/index.js';
+import { applyTranslations, catalogs as defaultCatalogs, resolveLocale, resolveViewMessages, translate } from '../i18n/index.js?v=0.9.3-demo';
 import { parseRoute, routeHref } from '../router.js';
 import { renderTournamentList, renderTournamentDetail } from '../views/tournaments.js';
-import { renderAnnual } from '../views/annual.js';
-import { renderPlayersDirectory, renderPlayerProfile } from '../views/players.js';
-import { renderStatistics, renderClassics, renderClassic } from '../views/records.js?v=0.9.2-demo';
-import { renderHome } from '../views/home.js';
-import { renderAbout, renderNewsList, renderNewsDetail, renderClasses, renderMembership } from '../views/editorial.js';
+import { renderAnnual } from '../views/annual.js?v=0.9.3-demo';
+import { renderPlayersDirectory, renderPlayerProfile } from '../views/players.js?v=0.9.3-demo';
+import { renderStatistics, renderClassics, renderClassic } from '../views/records.js?v=0.9.3-demo';
+import { renderHome } from '../views/home.js?v=0.9.3-demo';
+import { renderAbout, renderNewsList, renderNewsDetail, renderClasses, renderMembership } from '../views/editorial.js?v=0.9.3-demo';
 import { renderGame, attachGameReplay } from '../views/game.js';
 import { attachPuzzle } from '../views/puzzle.js';
 import { escapeHtml as h } from '../views/common.js';

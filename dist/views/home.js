@@ -1,4 +1,4 @@
-import { getAnnualStandings, getHomeTotals } from '../domain/statistics.js';
+import { getAnnualStandings, getHomeTotals } from '../domain/statistics.js?v=0.9.3-demo';
 import { routeHref } from '../router.js';
 import { escapeHtml as h, formatDate, formatNumber, playerLink, playerName, safeRouteHref } from './common.js';
 import { hasDemoReplay } from './game.js';

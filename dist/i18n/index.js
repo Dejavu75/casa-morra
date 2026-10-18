@@ -1,9 +1,9 @@
 // El español es el idioma publicado. Otros catálogos pueden añadirse sin cambiar las vistas.
 import { competitiveEs } from '../views/common.js';
-import { playersEs } from '../views/players.js';
+import { playersEs } from '../views/players.js?v=0.9.3-demo';
 import { recordsEs } from '../views/records.js';
 import { homeEs } from '../views/home.js';
-import { editorialEs } from '../views/editorial.js';
+import { editorialEs } from '../views/editorial.js?v=0.9.3-demo';
 import { gameEs } from '../views/game.js';
 import { puzzleEs } from '../views/puzzle.js';
 

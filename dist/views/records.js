@@ -1,4 +1,4 @@
-import { getClassics, getHeadToHead, getLeaderboards } from '../domain/statistics.js';
+import { getClassics, getHeadToHead, getLeaderboards } from '../domain/statistics.js?v=0.9.3-demo';
 import { routeHref } from '../router.js';
 import { escapeHtml, formatDate, formatNumber, safeRouteHref } from './common.js';
 import { hasDemoReplay } from './game.js';
