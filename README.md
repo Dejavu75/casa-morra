@@ -36,6 +36,8 @@ El [esquema del snapshot demo](docs/esquema-datos-demo.md) describe el formato J
 
 La [entrega candidata `0.9.1-demo`](docs/entrega-0.9.1-demo.md) actualiza ese procedimiento para el estado de exportación, la preparación multilenguaje y la política de reinicio. La versión `0.9.0-demo` permanece disponible como reversión mientras la nueva entrega no se compruebe y publique.
 
+La [entrega candidata `0.9.2-demo`](docs/entrega-0.9.2-demo.md) incorpora las mejoras visuales y la precisión del récord Elo. Su guía separa la comprobación aislada, la reversión local a `0.9.1-demo` y la publicación; esta referencia no afirma que la candidata ya esté desplegada.
+
 El botón «Modo oscuro» conserva el mismo nombre accesible al alternar el tema; `aria-pressed` indica si el modo oscuro está activo. Esta semántica tiene prueba automatizada, pero no sustituye una comprobación con lector de pantalla.
 
 ## Integración continua
