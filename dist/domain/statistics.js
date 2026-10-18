@@ -98,6 +98,18 @@ export function calculateElo(data) {
   return ratings;
 }
 
+function opponentEloRecords(gameOrder, playerId, eloByPlayer) {
+  const gamesById = new Map(gameOrder.map((game) => [game.id, game]));
+  const bands = { higher: emptyCounts(), equal: emptyCounts(), lower: emptyCounts() };
+  for (const step of eloByPlayer[playerId].history) {
+    const opponentStep = eloByPlayer[step.opponentId].history.find((row) => row.gameId === step.gameId);
+    const difference = opponentStep.before - step.before;
+    const band = Math.abs(difference) < 1e-9 ? 'equal' : difference > 0 ? 'higher' : 'lower';
+    bands[band][resultFor(gamesById.get(step.gameId), playerId)]++;
+  }
+  return Object.fromEntries(Object.entries(bands).map(([band, counts]) => [band, recordFromCounts(counts)]));
+}
+
 function profileFromPrepared(data, playerId, gameOrder, eloByPlayer) {
   const player = data.players.find((row) => row.id === playerId);
   if (!player) return null;
@@ -115,6 +127,7 @@ function profileFromPrepared(data, playerId, gameOrder, eloByPlayer) {
     officialPoints: tournaments.reduce((sum, row) => sum + row.points, 0),
     streaks: streaks(gameOrder, playerId),
     elo: { ...elo, provisional: elo.played < 10 },
+    opponentElo: opponentEloRecords(gameOrder, playerId, eloByPlayer),
   };
 }
 

@@ -112,6 +112,29 @@ test('Elo no redondea cálculos internos entre partidas', () => {
   assert.equal(elo.b.history[1].before, 1390);
 });
 
+test('perfil clasifica rendimiento por Elo previo del rival sin contar eventos no elegibles', () => {
+  const data = fixture({
+    tournaments: [
+      event('elo', 's1', '2025-09-01', []),
+      event('sin-elo', 's1', '2025-10-01', [], { eloEligible: false }),
+    ],
+    games: [
+      game('g1', 'elo', '2025-09-01', 1, 'a', 'b', '1-0'),
+      game('g2', 'elo', '2025-09-01', 2, 'b', 'a', '1/2-1/2'),
+      game('g2b', 'elo', '2025-09-01', 3, 'c', 'b', '1-0'),
+      game('g3', 'elo', '2025-09-01', 4, 'c', 'a', '1-0'),
+      game('g4', 'sin-elo', '2025-10-01', 1, 'a', 'b', '1-0'),
+    ],
+    byes: [{ id: 'bye', tournamentId: 'elo', playerId: 'a', round: 4, points: 1 }],
+  });
+  const profile = getPlayerProfile(data, 'a');
+  assert.deepEqual(profile.opponentElo.equal, { wins: 1, draws: 0, losses: 0, played: 1, points: 1, winRate: 100, scoreRate: 100 });
+  assert.deepEqual(profile.opponentElo.lower, { wins: 0, draws: 1, losses: 0, played: 1, points: 0.5, winRate: 0, scoreRate: 50 });
+  assert.deepEqual(profile.opponentElo.higher, { wins: 0, draws: 0, losses: 1, played: 1, points: 0, winRate: 0, scoreRate: 0 });
+  assert.equal(Object.values(profile.opponentElo).reduce((sum, row) => sum + row.played, 0), profile.elo.played);
+  assert.equal(getPlayerProfile(fixture(), 'a').opponentElo.higher.scoreRate, null);
+});
+
 test('racha cronológica: empate corta solo victorias; bye y tabla-only no cortan nada', () => {
   const data = fixture({
     tournaments: [event('t', 's1', '2025-09-01', [])],

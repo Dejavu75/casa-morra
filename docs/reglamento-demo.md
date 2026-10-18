@@ -41,6 +41,7 @@ En eventos con detalle, el fixture está construido para que los puntos oficiale
 
 - **Mejor y peor evento al tablero:** `100 × (G + 0,5 × E) / N`, con al menos una partida real en el torneo. No se usan puntos oficiales, byes ni eventos solo con tabla. Ante igual rendimiento prevalece mayor `N`, luego fecha más antigua e ID ascendente. Se muestra el tamaño de muestra.
 - **Rival favorable y adverso:** balance `G − P` desde la perspectiva del perfil, solo frente a rivales con al menos dos partidas al tablero. Los balances neutros no son favorables ni adversos; se muestran G-E-P y `N`. No representan categorías por Elo del rival.
+- **Rendimiento por Elo previo del rival:** cada partida de un torneo `eloEligible` se clasifica por el Elo interno de ambas personas **antes** de jugarla: rival superior, igual o inferior. Cada grupo muestra `N`, G-E-P y `100 × (G + 0,5 × E) / N`; sin partidas, el porcentaje aparece como «Sin detalle». Los tres grupos suman las partidas elegibles del historial Elo. No se usan Elo final, byes, eventos sin Elo ni resultados solo de tabla. Esta comparación es distinta del balance favorable/adverso entre parejas y no representa Elo FIDE.
 
 Son **reglas de esta demostración**, no una réplica de los criterios de otro club.
 

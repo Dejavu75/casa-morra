@@ -51,6 +51,19 @@ test('el perfil separa partidas, puntos, colores, Elo e historial oficial', () =
   assert.equal(profile.elo.history.length, profile.elo.played);
 });
 
+test('el perfil explica los tres grupos de Elo previo y mantiene las etiquetas traducibles', () => {
+  const html = renderPlayerProfile(data, 'celia-montiel').html;
+  assert.match(html, /Rendimiento por Elo previo del rival/);
+  assert.match(html, /Rival con Elo superior/);
+  assert.match(html, /Rival con Elo igual/);
+  assert.match(html, /Rival con Elo inferior/);
+  assert.match(html, /Solo partidas con Elo de Casa Morra/);
+  assert.match(html, /G–E–P/);
+  assert.match(renderPlayerProfile(data, 'celia-montiel', { ...playersEs,
+    opponentEloTitle: 'Previous opponent rating comparison',
+  }).html, /Previous opponent rating comparison/);
+});
+
 test('el estado de socio se declara demo y no se sugiere una cuenta autenticada', () => {
   const view = renderPlayerProfile(data, 'dante-arce').html;
   assert.match(view, /No socio · dato demo/);

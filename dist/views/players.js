@@ -21,6 +21,9 @@ export const playersEs = Object.freeze({
   games: 'Partidas al tablero', record: 'G–E–P', winsRate: 'Victorias/partidas',
   scoreRate: 'Puntos/partidas', rateExplanation: 'Victorias/partidas cuenta solo triunfos. Puntos/partidas también incorpora medio punto por empate.',
   white: 'Con blancas', black: 'Con negras',
+  opponentEloTitle: 'Rendimiento por Elo previo del rival',
+  opponentEloRule: 'Solo partidas con Elo de Casa Morra; se compara el Elo de ambos jugadores antes de cada partida. Los descansos y torneos sin Elo quedan excluidos. Rendimiento = (G + 0,5 × E) / partidas del grupo.',
+  higherElo: 'Rival con Elo superior', equalElo: 'Rival con Elo igual', lowerElo: 'Rival con Elo inferior',
   officialHistory: 'Historial oficial de torneos', officialHistoryInfo: 'La clasificación oficial conserva puntos y puesto aun cuando no haya resultados individuales.',
   scrollHint: 'Desplace la tabla con las flechas del teclado o con un gesto horizontal para ver todas las columnas.',
   tournament: 'Torneo', date: 'Fecha', rank: 'Puesto', points: 'Puntos',
@@ -151,6 +154,16 @@ function officialAchievements(profile, titleCount, messages, locale) {
     <p>${h(message(messages, 'careerExplanation'))}</p><dl class="players-achievements">${items}</dl></section>`;
 }
 
+function opponentEloSummary(profile, messages, locale) {
+  const items = [['higher', 'higherElo'], ['equal', 'equalElo'], ['lower', 'lowerElo']]
+    .map(([band, key]) => {
+      const record = profile.opponentElo[band];
+      return `<div><dt>${h(message(messages, key))}</dt><dd>${h(message(messages, 'gamesSample')(record.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(record, locale))} · ${h(message(messages, 'scoreRate'))}: ${h(percentage(record.scoreRate, messages, locale))}</dd></div>`;
+    }).join('');
+  return `<section aria-labelledby="players-opponent-elo"><h2 id="players-opponent-elo">${h(message(messages, 'opponentEloTitle'))}</h2>
+    <p>${h(message(messages, 'opponentEloRule'))}</p><dl class="players-colors">${items}</dl></section>`;
+}
+
 function eventCandidates(data, playerId) {
   const byEvent = new Map((data.tournaments ?? []).map((event) => [event.id, {
     event, wins: 0, draws: 0, losses: 0, played: 0,
@@ -237,6 +250,7 @@ export function renderPlayerProfile(data, slug, messages = playersEs, locale = '
     </section><section aria-labelledby="players-colors"><h2 id="players-colors">${h(message(messages, 'games'))} · ${h(message(messages, 'white'))}/${h(message(messages, 'black'))}</h2>
       <dl class="players-colors"><div><dt>${h(message(messages, 'white'))}</dt><dd>${h(formatNumber(colors.white.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(colors.white, locale))}</dd></div>
       <div><dt>${h(message(messages, 'black'))}</dt><dd>${h(formatNumber(colors.black.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(colors.black, locale))}</dd></div></dl></section>
+    ${opponentEloSummary(profile, messages, locale)}
     ${officialAchievements(profile, badges.length, messages, locale)}
     ${personalComparisons(data, player.id, messages, locale)}
     <section aria-labelledby="players-titles"><h2 id="players-titles">${h(message(messages, 'titles'))}</h2>${badges.length ? `<ul>${badgeItems}</ul>` : `<p>${h(message(messages, 'noTitles'))}</p>`}</section>
