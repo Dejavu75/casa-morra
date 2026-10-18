@@ -46,6 +46,13 @@ test('los módulos y archivos estáticos ausentes no reciben el fallback de la S
   assert.match(nginx, /location\s+~\*\s+.*js.*css.*\$\s*\{\s*try_files\s+\$uri\s+=404;/);
 });
 
+test('XML directo inexistente no recibe el documento HTML de la SPA', () => {
+  const nginx = read('nginx.conf');
+  const staticGuard = nginx.match(/location\s+~\*\s+([^\n]+)\s+\{\s*try_files\s+\$uri\s+=404;/);
+  assert.ok(staticGuard, 'falta una regla de recursos directos con respuesta 404');
+  assert.match(staticGuard[1], /\|xml\)\$/, 'los XML ausentes deben responder 404');
+});
+
 test('Nginx comprime solo tipos textuales y anuncia variantes de respuesta', () => {
   const nginx = read('nginx.conf');
   assert.match(nginx, /^\s*gzip\s+on;/m);
