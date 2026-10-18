@@ -2,6 +2,7 @@ services:
   web:
     build: .
     image: casa-morra:local
+    restart: unless-stopped
     ports:
       - "127.0.0.1:${CASA_MORRA_HTTP_PORT:-8088}:8080"
     volumes:

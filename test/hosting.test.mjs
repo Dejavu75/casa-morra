@@ -24,6 +24,11 @@ test('Compose restringe el servicio al bucle local y a un sistema de archivos de
   assert.match(compose, /wget.*127\.0\.0\.1:8080\/health/);
 });
 
+test('Compose reinicia el sitio salvo que se lo detenga expresamente', () => {
+  const compose = read('compose.yaml');
+  assert.match(compose, /^\s+restart:\s*unless-stopped\s*$/m);
+});
+
 test('Nginx entrega rutas SPA, no confunde activos ausentes con HTML y restringe recursos', () => {
   const nginx = read('nginx.conf');
   assert.match(nginx, /listen\s+8080;/);
