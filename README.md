@@ -36,9 +36,9 @@ El origen local se reutiliza entre entregas. Nginx envía `Cache-Control: no-cac
 
 El [esquema del snapshot demo](docs/esquema-datos-demo.md) describe el formato JSON determinista, las operaciones locales y sus límites; no hay base de datos multiusuario. La [procedencia de los datos y recursos demo](docs/procedencia-demo.md) identifica el fixture y las imágenes por SHA-256, con el alcance de la inspección de originalidad y sus límites de privacidad. Las estadísticas se comprueban con `npm run verify:data`. El [procedimiento de entrega y reversión](docs/entrega-0.9.0-demo.md) separa la prueba aislada del servicio habitual. Esto no sustituye el QA de navegador, teclado y lector de pantalla.
 
-La [entrega candidata `0.9.1-demo`](docs/entrega-0.9.1-demo.md) actualiza ese procedimiento para el estado de exportación, la preparación multilenguaje y la política de reinicio. La versión `0.9.0-demo` permanece disponible como reversión mientras la nueva entrega no se compruebe y publique.
+La [guía de la entrega `0.9.1-demo`](docs/entrega-0.9.1-demo.md) amplía ese procedimiento para el estado de exportación, la preparación multilenguaje y la política de reinicio. Describe cómo comprobar y revertir esa entrega; no es una indicación del estado actual del contenedor.
 
-La [entrega candidata `0.9.2-demo`](docs/entrega-0.9.2-demo.md) incorpora las mejoras visuales y la precisión del récord Elo. Su guía separa la comprobación aislada, la reversión local a `0.9.1-demo` y la publicación; esta referencia no afirma que la candidata ya esté desplegada.
+La [guía de la entrega `0.9.2-demo`](docs/entrega-0.9.2-demo.md) documenta las mejoras visuales, la precisión del récord Elo y la reversión local a `0.9.1-demo`. La prerelease pública de GitHub `v0.9.2-demo` apunta a `5dc4963`. El 18/10/2026, `127.0.0.1:8088` servía HTML con recursos `0.9.2-demo`, pero todavía no incluía el favicon de la rama 71. Esta observación no significa que las ramas posteriores ya estén desplegadas; antes de cada entrega se debe comprobar el contenedor y el commit exacto.
 
 El botón «Modo oscuro» conserva el mismo nombre accesible al alternar el tema; `aria-pressed` indica si el modo oscuro está activo. Esta semántica tiene prueba automatizada, pero no sustituye una comprobación con lector de pantalla.
 
