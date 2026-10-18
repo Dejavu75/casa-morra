@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { players, tournaments, games, byes, titles, seasons } from '../dist/data/demo.js';
 import { parseRoute } from '../dist/router.js';
 import { renderPlayersDirectory } from '../dist/views/players.js';
@@ -37,6 +38,32 @@ test('las letras sin jugadores comunican su estado como texto y no como etiqueta
     assert.match(html, new RegExp(`<span class="players-letter-empty"><span aria-hidden="true">${letter}</span><span class="players-visually-hidden">Sin jugadores con ${letter}</span></span>`));
   }
   assert.match(html, /<a href="#letra-a">A<\/a>/);
+});
+
+test('las letras inactivas mantienen contraste de texto en ambos temas sin opacidad', () => {
+  const playersCss = readFileSync(new URL('../dist/views/players.css', import.meta.url), 'utf8');
+  const siteCss = readFileSync(new URL('../dist/assets/site.css', import.meta.url), 'utf8');
+  const tile = playersCss.match(/\.players-alphabet > \.players-letter-empty\s*\{([^}]*)\}/)?.[1];
+  assert.ok(tile, 'estilo de las letras inactivas');
+  assert.match(tile, /color:\s*var\(--muted\)/);
+  assert.doesNotMatch(tile, /opacity\s*:/);
+
+  const root = siteCss.match(/:root\s*\{([^}]*)\}/)?.[1];
+  const dark = siteCss.match(/:root\[data-theme="oscuro"\]\s*\{([^}]*)\}/)?.[1];
+  const color = (block, token) => {
+    const value = block?.match(new RegExp(`${token}:\\s*(#[0-9a-f]{6})`, 'i'))?.[1];
+    assert.ok(value, `token ${token}`);
+    return value.match(/[0-9a-f]{2}/gi).map((hex) => parseInt(hex, 16) / 255);
+  };
+  const luminance = (rgb) => rgb.map((channel) => channel <= 0.04045
+    ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4)
+    .reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+  const ratio = (foreground, background) => {
+    const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+    return (values[0] + 0.05) / (values[1] + 0.05);
+  };
+  assert.ok(ratio(color(root, '--muted'), color(root, '--surface-light')) >= 4.5);
+  assert.ok(ratio(color(dark, '--muted'), color(dark, '--surface')) >= 4.5);
 });
 
 test('el directorio escapa el texto de búsqueda y los nombres de la muestra', () => {

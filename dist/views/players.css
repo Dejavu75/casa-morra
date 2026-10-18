@@ -115,8 +115,8 @@
   font-weight: 700;
 }
 
-.players-alphabet > span {
-  opacity: 0.5;
+.players-alphabet > .players-letter-empty {
+  color: var(--muted);
 }
 
 .players-visually-hidden {
