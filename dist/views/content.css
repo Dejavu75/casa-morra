@@ -56,6 +56,7 @@
 .content-card-grid li { border: 1px solid var(--line); padding: 1.3rem; }
 .content-card-grid article { max-width: none; }
 .content-table-wrap { overflow-x: auto; }
+.content-table-wrap:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
 .content-page table:not(.game-board) { border-collapse: collapse; min-width: 45rem; width: 100%; text-align: left; }
 .content-page table:not(.game-board) caption { text-align: left; font-weight: 700; padding-block: .8rem; }
 .content-page table:not(.game-board) th,

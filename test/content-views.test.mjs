@@ -40,6 +40,15 @@ test('institución, noticias, clases y socios usan contenido ficticio sin accion
   assert.doesNotMatch(membership, /<form|wa\.me|mailto:/);
 });
 
+test('la tabla de clases recibe foco con un nombre accesible', async () => {
+  const html = renderClasses(data).html;
+  assert.match(html, /<div class="content-table-wrap" role="region" aria-label="Clases ficticias de Casa Morra" tabindex="0"><table>/);
+  assert.match(renderClasses(data, { classesCaption: 'Chess lessons' }).html, /aria-label="Chess lessons"/);
+  assert.doesNotMatch(renderClasses({ ...data, editorial: { ...editorial, classes: [] } }).html, /content-table-wrap/);
+  const styles = await readFile(new URL('../dist/views/content.css', import.meta.url), 'utf8');
+  assert.match(styles, /\.content-table-wrap:focus-visible\s*\{[^}]*outline:\s*3px solid var\(--focus\)/);
+});
+
 test('todo contenido editorial se escapa, incluso títulos y detalles', () => {
   const unsafe = { ...data, editorial: { ...editorial,
     club: { ...editorial.club, history: '<img src=x onerror=alert(1)>' },

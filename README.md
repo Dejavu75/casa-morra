@@ -42,6 +42,8 @@ La [guía de la entrega `0.9.2-demo`](docs/entrega-0.9.2-demo.md) documenta las 
 
 El botón «Modo oscuro» conserva el mismo nombre accesible al alternar el tema; `aria-pressed` indica si el modo oscuro está activo. Esta semántica tiene prueba automatizada, pero no sustituye una comprobación con lector de pantalla.
 
+En pantallas angostas, la tabla de «Clases» recibe foco con Tab como región desplazable. Toma su nombre del título visible de la tabla y muestra un contorno de foco. El desplazamiento horizontal mediante flechas no se pudo confirmar con el mecanismo de entrada del navegador utilizado; tampoco se realizó una auditoría completa con tecnologías de asistencia.
+
 ## Integración continua
 
 `.github/workflows/verify.yml` ejecuta `npm test`, `npm run verify:data` y una construcción Docker en `push` y `pull_request`. La imagen de CI se construye solo para validar el paquete: no se publica ni se accede a secretos. El trabajo usa permisos de lectura y referencias SHA completas para [checkout](https://github.com/actions/checkout/commit/3d3c42e5aac5ba805825da76410c181273ba90b1) y [setup-node](https://github.com/actions/setup-node/commit/820762786026740c76f36085b0efc47a31fe5020), conforme a la [guía de seguridad de GitHub Actions](https://docs.github.com/en/actions/reference/security/secure-use).

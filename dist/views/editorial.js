@@ -54,7 +54,7 @@ export function renderNewsDetail(data, slug, messages = editorialEs, locale = 'e
 export function renderClasses(data, messages = editorialEs) {
   const items = data.editorial?.classes ?? [];
   const rows = items.map((item) => `<tr><td>${h(item.day)}</td><td>${h(item.time)}</td><th scope="row">${h(item.name)}</th><td>${h(item.teacher)}</td><td>${h(item.level)}</td><td>${h(item.place)}</td></tr>`).join('');
-  const table = rows ? `<div class="content-table-wrap"><table><caption>${h(msg(messages, 'classesCaption'))}</caption><thead><tr>
+  const table = rows ? `<div class="content-table-wrap" role="region" aria-label="${h(msg(messages, 'classesCaption'))}" tabindex="0"><table><caption>${h(msg(messages, 'classesCaption'))}</caption><thead><tr>
     <th scope="col">${h(msg(messages, 'day'))}</th><th scope="col">${h(msg(messages, 'hour'))}</th><th scope="col">${h(msg(messages, 'class'))}</th><th scope="col">${h(msg(messages, 'teacher'))}</th><th scope="col">${h(msg(messages, 'level'))}</th><th scope="col">${h(msg(messages, 'place'))}</th>
     </tr></thead><tbody>${rows}</tbody></table></div>` : `<p>${h(msg(messages, 'classesEmpty'))}</p>`;
   return shell(msg(messages, 'classes'), `${table}<p class="content-note">${h(msg(messages, 'clubOnly'))}</p>`, messages);
