@@ -4,6 +4,13 @@ import { readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 
 const root = new URL('../', import.meta.url);
+const canRunCompose = (probe) => !probe.error && probe.status === 0;
+
+test('Compose ausente o fallido omite la comprobación dependiente de Docker', () => {
+  assert.equal(canRunCompose({ status: 0 }), true);
+  assert.equal(canRunCompose({ status: 1 }), false);
+  assert.equal(canRunCompose({ status: null, error: new Error('ENOENT') }), false);
+});
 
 test('la red host escucha directamente en 8088 y el modo local mantiene la misma URL', async () => {
   const [base, host, nginx, dockerfile] = await Promise.all([
@@ -27,7 +34,7 @@ test('la variante host elimina la publicación de puertos sin cambiar la variant
 
 const available = spawnSync('docker', ['compose', 'version'], { encoding: 'utf8' });
 test('el modelo Compose combinado conserva protecciones y carece de mapeos',
-  { skip: available.error ? 'Docker Compose no está disponible' : undefined }, () => {
+  { skip: canRunCompose(available) ? undefined : 'Docker Compose no está disponible' }, () => {
     const result = spawnSync('docker', ['compose', '-f', 'compose.yaml', '-f', 'compose.host.yaml',
       'config', '--format', 'json'], { cwd: new URL('..', import.meta.url), encoding: 'utf8' });
     assert.equal(result.status, 0, result.stderr);
