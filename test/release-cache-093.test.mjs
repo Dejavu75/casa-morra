@@ -16,7 +16,9 @@ test('la entrega 0.9.3 versiona todo el grafo de módulos modificados', async ()
       '../i18n/index.js', '../views/annual.js', '../views/players.js',
       '../views/records.js', '../views/home.js', '../views/editorial.js',
     ],
-    'i18n/index.js': ['../views/players.js', '../views/editorial.js'],
+    'i18n/index.js': [
+      '../views/players.js', '../views/records.js', '../views/home.js', '../views/editorial.js',
+    ],
     'views/annual.js': ['../domain/statistics.js'],
     'views/home.js': ['../domain/statistics.js'],
     'views/players.js': ['../domain/statistics.js'],
