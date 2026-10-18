@@ -1,4 +1,6 @@
-# Red del host en Docker Desktop
+# Red del host en Docker Desktop (alternativa no activada)
+
+Para el acceso LAN solicitado se utiliza actualmente la [variante bridge ligada a la IP local](red-lan-docker.md). El modo host puede escuchar también en interfaces IPv6 o redes virtuales del anfitrión; no activarlo sin una política de firewall que limite efectivamente el alcance.
 
 Casa Morra puede servir HTTP en la red local mediante `http://192.168.0.52:8088/`. Esta es una dirección privada del anfitrión; no se abre el router ni se publica el servicio en Internet. La variante habitual de `compose.yaml` conserva la publicación exclusiva en `127.0.0.1:8088` y sirve como reversión.
 

@@ -36,7 +36,7 @@ El origen local se reutiliza entre entregas. Nginx envía `Cache-Control: no-cac
 
 El [esquema del snapshot demo](docs/esquema-datos-demo.md) describe el formato JSON determinista, las operaciones locales y sus límites; no hay base de datos multiusuario. La [procedencia de los datos y recursos demo](docs/procedencia-demo.md) identifica el fixture y las imágenes por SHA-256, con el alcance de la inspección de originalidad y sus límites de privacidad. Las estadísticas se comprueban con `npm run verify:data`. El [procedimiento de entrega y reversión](docs/entrega-0.9.0-demo.md) separa la prueba aislada del servicio habitual. Esto no sustituye el QA de navegador, teclado y lector de pantalla.
 
-La [variante de red del host](docs/red-host-docker.md) permite servir Casa Morra en la LAN `192.168.0.52:8088` sin mapeo de puertos, una vez habilitada la opción correspondiente de Docker Desktop. El Compose habitual conserva el acceso exclusivo por bucle local y sirve como reversión.
+La [variante bridge para la LAN](docs/red-lan-docker.md) publica Casa Morra únicamente en `192.168.0.52:8088`; el Compose habitual conserva el acceso exclusivo por bucle local y sirve como reversión. La [variante de red del host](docs/red-host-docker.md) es opcional, pero escucha en todas las interfaces disponibles y requiere controles de firewall adecuados antes de su activación.
 
 La [guía de la entrega `0.9.1-demo`](docs/entrega-0.9.1-demo.md) amplía ese procedimiento para el estado de exportación, la preparación multilenguaje y la política de reinicio. Describe cómo comprobar y revertir esa entrega; no es una indicación del estado actual del contenedor.
 
