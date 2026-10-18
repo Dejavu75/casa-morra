@@ -1,34 +1,42 @@
 # Red del host en Docker Desktop
 
-Esta variante está **preparada, no activada**. El servicio habitual continúa en una red bridge y solo publica `127.0.0.1:8088`. La variante se selecciona explícitamente con `compose.host.yaml`; un `docker compose up` normal sigue usando `compose.yaml` y no cambia la exposición.
+Casa Morra puede servir HTTP en la red local mediante `http://192.168.0.52:8088/`. Esta es una dirección privada del anfitrión; no se abre el router ni se publica el servicio en Internet. La variante habitual de `compose.yaml` conserva la publicación exclusiva en `127.0.0.1:8088` y sirve como reversión.
 
-## Antes de activarla
+## Preparación
 
-1. Definir si el acceso externo será solo desde la red local o desde Internet. No se debe abrir el firewall ni el router sin esa decisión. El modo host **no** ofrece TLS, autenticación ni protección adicional para publicar HTTP en Internet.
-2. En Docker Desktop 4.34 o posterior para contenedores Linux, habilitar «Enable host networking» en Settings → Resources → Network y aplicar el cambio. No es compatible con Enhanced Container Isolation. Esto requiere reiniciar Docker Desktop y puede interrumpir otros proyectos que estén ejecutándose. Confirmar una ventana operativa antes de hacerlo.
-3. Verificar que el puerto **8080** esté libre y que el directorio `.demo-public/` de este checkout exista con la exportación pública demo validada. No reutilizar ni mover silenciosamente el almacén privado `.demo-state/`.
-4. Hacer una copia verificable del estado actual y conservar el Compose de loopback para la reversión. La variante host sustituye el mapeo 8088→8080: `ports` se elimina deliberadamente porque Compose no admite mapeos junto a `network_mode: host`.
+1. Comprobar que `192.168.0.52` pertenece a una interfaz de este equipo, que el puerto `8088` no está ocupado por otro servicio y que `.demo-public/snapshot.json` contiene únicamente datos ficticios. No montar `.demo-state/`.
+2. En Docker Desktop 4.34 o posterior para contenedores Linux, habilitar **Settings → Resources → Network → Enable host networking** y aplicar el cambio. Docker Desktop puede reiniciarse; comprobar después que los demás proyectos recuperaron su estado. No es compatible con Enhanced Container Isolation.
+3. Conservar el estado anterior de Casa Morra y la configuración de bucle local antes de recrear el contenedor. El modo host no admite `ports`: Nginx escucha directamente en `8088` y `compose.host.yaml` elimina el mapeo de Compose.
+4. Revisar el firewall de Windows y el perímetro de la LAN. HTTP no tiene TLS ni autenticación; este procedimiento no autoriza acceso desde Internet.
 
-Se puede **validar sin activar** el modelo combinado:
+Validar el modelo combinado sin activar el servicio:
 
 ```powershell
-docker compose -f compose.yaml -f compose.host.yaml config
+docker compose -p casa-morra -f compose.yaml -f compose.host.yaml config
 ```
 
-Después de confirmar el alcance y la ventana operativa, una activación explícita desde este checkout usaría el mismo proyecto Compose:
+## Activación y comprobación
+
+Desde el checkout con la exportación pública validada:
 
 ```powershell
 docker compose -p casa-morra -f compose.yaml -f compose.host.yaml up -d --build
+docker inspect casa-morra-web-1 --format '{{.HostConfig.NetworkMode}} {{.State.Health.Status}}'
+Invoke-WebRequest http://127.0.0.1:8088/health
+Invoke-WebRequest http://192.168.0.52:8088/health
 ```
 
-Esto recrea el contenedor `casa-morra-web-1`; no ejecutar como prueba inocua. En modo host, Nginx escucha en **8080** y Docker no muestra un mapeo `ports`. Comprobar `docker inspect` (`NetworkMode=host`, `Health.Status=healthy`), `http://127.0.0.1:8080/health`, el snapshot público y las vistas; una petición desde otra máquina de la red elegida es indispensable para afirmar acceso externo. El firewall de Windows, las reglas de red y cualquier proxy/TLS se gestionan por separado.
+La recreación afecta al contenedor de Casa Morra; no usarla como prueba inocua. `docker inspect` debe indicar `host` y `healthy`, sin publicación `ports`. Comprobar también la portada, una ruta profunda, un activo y `/demo/snapshot.json`. Una solicitud desde otra máquina de `192.168.0.0/24` es necesaria para afirmar que el acceso LAN realmente funciona; una solicitud del propio anfitrión a su IP no alcanza para demostrarlo. El modo host de Docker Desktop trabaja en capa 4 y no permite vincular el proceso del contenedor exclusivamente a la IP física del anfitrión.
 
-Para revertir, aplicar desde el checkout que conserva el Compose y la exportación pública anteriores:
+## Reversión
+
+Desde un checkout con `.demo-public/` validado:
 
 ```powershell
 docker compose -p casa-morra -f compose.yaml up -d --build
+Invoke-WebRequest http://127.0.0.1:8088/health
 ```
 
-Verificar de nuevo `127.0.0.1:8088/health`, el estado saludable y las rutas públicas. No deshabilitar la opción global de Docker Desktop ni reiniciarlo automáticamente: otros proyectos pueden estar utilizando red host.
+Confirmar luego que `NetworkMode` indica la red bridge del proyecto Compose (por ejemplo, `casa-morra_default`), la publicación exclusiva `127.0.0.1:8088`, estado `healthy` y las rutas públicas. No deshabilitar automáticamente la opción global de Docker Desktop: otros proyectos pueden haber empezado a usarla.
 
-La [documentación de Docker sobre red host](https://docs.docker.com/engine/network/drivers/host/) indica que Docker Desktop la ofrece como opción activable y que los mapeos de puertos se ignoran; la [especificación de merge de Compose](https://docs.docker.com/reference/compose-file/merge/) define `!reset []`.
+Referencias: [red host de Docker](https://docs.docker.com/engine/network/drivers/host/) y [merge de Compose](https://docs.docker.com/reference/compose-file/merge/).

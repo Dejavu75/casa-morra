@@ -4,7 +4,7 @@ services:
     image: casa-morra:local
     restart: unless-stopped
     ports:
-      - "127.0.0.1:${CASA_MORRA_HTTP_PORT:-8088}:8080"
+      - "127.0.0.1:${CASA_MORRA_HTTP_PORT:-8088}:8088"
     volumes:
       - type: bind
         source: ./.demo-public
@@ -20,7 +20,7 @@ services:
     security_opt:
       - no-new-privileges:true
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/health || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8088/health || exit 1"]
       interval: 10s
       timeout: 3s
       retries: 3

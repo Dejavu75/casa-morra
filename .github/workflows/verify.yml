@@ -35,7 +35,7 @@ jobs:
       - name: Comprobar compresión y rutas en el contenedor
         run: |
           mkdir -p .demo-public
-          docker run --detach --name casa-morra-gzip-ci --read-only --tmpfs /tmp:rw,nosuid,noexec,size=16m --cap-drop ALL --security-opt no-new-privileges --mount type=bind,src="$PWD/.demo-public",dst=/srv/casa-morra-public,readonly --publish 127.0.0.1:18089:8080 casa-morra:ci >/dev/null
+          docker run --detach --name casa-morra-gzip-ci --read-only --tmpfs /tmp:rw,nosuid,noexec,size=16m --cap-drop ALL --security-opt no-new-privileges --mount type=bind,src="$PWD/.demo-public",dst=/srv/casa-morra-public,readonly --publish 127.0.0.1:18089:8088 casa-morra:ci >/dev/null
           trap 'docker rm -f casa-morra-gzip-ci >/dev/null 2>&1 || true' EXIT
           for intento in $(seq 1 20); do
             if curl --fail --silent http://127.0.0.1:18089/health >/dev/null; then break; fi

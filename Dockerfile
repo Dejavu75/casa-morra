@@ -6,4 +6,4 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY dist/ /usr/share/nginx/html/
 
 USER nginx
-EXPOSE 8080
+EXPOSE 8088

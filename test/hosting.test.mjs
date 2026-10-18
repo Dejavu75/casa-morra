@@ -9,19 +9,19 @@ test('la imagen sirve el sitio como usuario sin privilegios desde una base inmut
   const main = read('nginx-main.conf');
   assert.match(dockerfile, /^FROM nginx:stable-alpine@sha256:[a-f0-9]{64}$/m);
   assert.match(dockerfile, /^USER nginx$/m);
-  assert.match(dockerfile, /^EXPOSE 8080$/m);
+  assert.match(dockerfile, /^EXPOSE 8088$/m);
   assert.match(main, /^pid\s+\/tmp\/nginx\.pid;/m);
   assert.match(main, /client_body_temp_path\s+\/tmp\/client_temp;/);
 });
 
 test('Compose restringe el servicio al bucle local y a un sistema de archivos de solo lectura', () => {
   const compose = read('compose.yaml');
-  assert.match(compose, /127\.0\.0\.1:\$\{CASA_MORRA_HTTP_PORT:-8088\}:8080/);
+  assert.match(compose, /127\.0\.0\.1:\$\{CASA_MORRA_HTTP_PORT:-8088\}:8088/);
   assert.match(compose, /read_only:\s*true/);
   assert.match(compose, /cap_drop:\s*\n\s*-\s*ALL/);
   assert.match(compose, /no-new-privileges:true/);
   assert.match(compose, /tmpfs:/);
-  assert.match(compose, /wget.*127\.0\.0\.1:8080\/health/);
+  assert.match(compose, /wget.*127\.0\.0\.1:8088\/health/);
 });
 
 test('Compose reinicia el sitio salvo que se lo detenga expresamente', () => {
@@ -31,7 +31,7 @@ test('Compose reinicia el sitio salvo que se lo detenga expresamente', () => {
 
 test('Nginx entrega rutas SPA, no confunde activos ausentes con HTML y restringe recursos', () => {
   const nginx = read('nginx.conf');
-  assert.match(nginx, /listen\s+8080;/);
+  assert.match(nginx, /listen\s+8088;/);
   assert.match(nginx, /location\s+\^~\s+\/assets\/\s*\{\s*try_files\s+\$uri\s+=404;/);
   assert.match(nginx, /location\s+\/\s*\{\s*try_files\s+\$uri\s+\$uri\/\s+\/index\.html;/);
   const headers = read('security-headers.inc');
@@ -84,7 +84,7 @@ test('Compose monta únicamente la exportación pública existente, fuera del do
   assert.match(compose, /read_only:\s*true/);
   assert.match(compose, /create_host_path:\s*false/);
   assert.doesNotMatch(compose, /\.demo-state/);
-  assert.match(compose, /127\.0\.0\.1:\$\{CASA_MORRA_HTTP_PORT:-8088\}:8080/);
+  assert.match(compose, /127\.0\.0\.1:\$\{CASA_MORRA_HTTP_PORT:-8088\}:8088/);
 });
 
 test('Nginx solo expone la ruta exacta del snapshot sin caché y conserva seguridad', () => {
