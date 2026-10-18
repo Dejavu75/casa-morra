@@ -10,9 +10,10 @@ const read = (file) => readFile(path.join(root, file), 'utf8');
 test('el catálogo español cubre etiquetas visibles y conserva un fallback', async () => {
   const { es, translate, resolveLocale } = await import('../dist/i18n/index.js');
   const html = await read('dist/index.html');
-  const keys = [...html.matchAll(/data-i18n(?:-aria|-placeholder)?="([^"]+)"/g)].map((match) => match[1]);
+  const keys = [...html.matchAll(/data-i18n(?:-aria|-placeholder|-content)?="([^"]+)"/g)].map((match) => match[1]);
 
   assert.ok(keys.length >= 12, 'la portada debe declarar sus etiquetas traducibles');
+  assert.ok(keys.includes('meta.description'), 'la descripción también debe incluirse en la cobertura del catálogo');
   for (const key of keys) assert.ok(es[key], `falta traducción: ${key}`);
   assert.equal(resolveLocale('en'), 'es');
   assert.equal(translate('nav.home', 'en'), es['nav.home']);
