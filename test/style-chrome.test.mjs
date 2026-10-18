@@ -18,3 +18,13 @@ test('menú y pie responden a pantalla estrecha sin estilos de vistas', () => {
   assert.match(css, /@media \(max-width: 1180px\)\s*\{[\s\S]*\.site-nav\.is-open\s*\{\s*display: flex/);
   assert.match(css, /@media \(max-width: 560px\)\s*\{[\s\S]*\.brand-name\s*\{[\s\S]*font-size: 1\.25rem/);
 });
+
+test('el botón de actualización usa la identidad visual y conserva foco visible', () => {
+  const css = readFileSync(cssPath, 'utf8');
+  const control = css.match(/\.demo-source-controls \[data-demo-refresh\]\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(control, /background:\s*var\(--indigo\)/);
+  assert.match(control, /color:\s*var\(--paper\)/);
+  assert.match(control, /border:\s*1px solid var\(--accent-text\)/);
+  assert.match(control, /min-block-size:\s*2\.75rem/);
+  assert.match(css, /a:focus-visible,\s*button:focus-visible,\s*input:focus-visible\s*\{\s*outline:\s*3px solid var\(--focus\)/);
+});

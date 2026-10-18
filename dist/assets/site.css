@@ -551,7 +551,19 @@ h2 em {
   align-items: center;
   padding-block: .5rem;
 }
-.demo-source-controls button { cursor: pointer; }
+.demo-source-controls [data-demo-refresh] {
+  appearance: none;
+  min-block-size: 2.75rem;
+  padding: .55rem .85rem;
+  border: 1px solid var(--accent-text);
+  border-radius: .25rem;
+  background: var(--indigo);
+  color: var(--paper);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.demo-source-controls [data-demo-refresh]:hover { text-decoration: underline; text-underline-offset: .15em; }
 .demo-source-controls [role="status"] { min-block-size: 2.75rem; display: flex; align-items: center; margin: 0; font-weight: 600; color: #92400e; }
 :root[data-theme="oscuro"] .demo-source-controls [role="status"] { color: #ffd29b; }
 .demo-source-controls [data-demo-warning] { grid-column: 1 / -1; }
