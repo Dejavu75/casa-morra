@@ -1,6 +1,6 @@
 # Entrega `0.9.3-demo`: comprobación y reversión
 
-Esta entrega candidata reúne las correcciones y mejoras de las ramas 61 a 73: recursos ausentes con 404, accesibilidad móvil, grupos de rendimiento Elo previo por rival y favicon propio. Sigue siendo una demostración pública con datos ficticios, sin cuentas ni inscripción. **Esta guía no acredita por sí sola que la candidata esté desplegada.**
+Esta entrega candidata reúne las correcciones y mejoras de las ramas 63 a 73: recursos XML ausentes con 404, accesibilidad móvil, grupos de rendimiento Elo previo por rival y favicon propio. **No incorpora las ramas 61 y 62**, cuyos consentimientos RDD específicos siguen pendientes. Sigue siendo una demostración pública con datos ficticios, sin cuentas ni inscripción. **Esta guía no acredita por sí sola que la candidata esté desplegada.**
 
 ## Antes de cambiar el servicio habitual
 
@@ -23,7 +23,7 @@ Invoke-WebRequest http://127.0.0.1:18106/health
 Invoke-WebRequest http://127.0.0.1:18106/demo/snapshot.json
 ```
 
-Registrar el ID de imagen candidata y comprobar: enlace solo a `127.0.0.1:18106`, contenedor `healthy`, montaje público de solo lectura fuera del docroot, `Cache-Control: no-store` en el snapshot y 404 para recursos privados o inexistentes. Recorrer en navegador las vistas públicas, las diez tablas estadísticas, búsqueda/filtros, visor de partidas, problema, menú móvil, grupos Elo de seis perfiles, favicon SVG y foco de la tabla de «Clases». Ejecutar el test de cabeceras y compresión con `CASA_MORRA_TEST_URL=http://127.0.0.1:18106 node --test test/gzip-runtime.test.mjs`.
+Registrar el ID de imagen candidata y comprobar: enlace solo a `127.0.0.1:18106`, contenedor `healthy`, montaje público de solo lectura fuera del docroot, `Cache-Control: no-store` en el snapshot y 404 para recursos XML inexistentes. La candidata todavía devuelve la página HTML con HTTP 200 para rutas como `/.git/config` y `/x/.private/file`; no atribuirle la protección pendiente de la rama 61. También conserva `/50x.html` de la imagen base; no atribuirle la retirada pendiente de la rama 62. Recorrer en navegador las vistas públicas, las diez tablas estadísticas, búsqueda/filtros, visor de partidas, problema, menú móvil, grupos Elo de seis perfiles, favicon SVG y foco de la tabla de «Clases». Ejecutar el test de cabeceras y compresión con `CASA_MORRA_TEST_URL=http://127.0.0.1:18106 node --test test/gzip-runtime.test.mjs`.
 
 La URL nueva `?entrega=0.9.3-demo` solicita HTML fresco cuando un navegador había conservado una página anterior. Esta entrega versiona las entradas CSS/JS y las hojas de jugadores y contenido modificadas; los demás módulos dependen de la revalidación `Cache-Control: no-cache`. No afirmar que una pestaña antigua cambió automáticamente. Registrar cualquier prueba omitida, en particular lector de pantalla, contraste inconcluso o desplazamiento con flechas no verificado.
 
