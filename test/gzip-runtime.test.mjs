@@ -44,6 +44,16 @@ runtimeTest('PNG conserva su codificación y no recibe gzip', async () => {
   assert.ok(image.body.length > 0);
 });
 
+runtimeTest('HTML y módulos usados por la entrega exigen revalidación de caché', async () => {
+  for (const path of ['/', '/assets/site.css?v=0.9.2-demo',
+    '/assets/app.js?v=0.9.2-demo', '/views/records.js?v=0.9.2-demo']) {
+    const response = await request(path);
+    assert.equal(response.status, 200, path);
+    assert.match(response.headers['cache-control'] ?? '', /(?:^|,)\s*no-cache\s*(?:,|$)/i, path);
+    assert.equal(response.headers['x-content-type-options'], 'nosniff', path);
+  }
+});
+
 runtimeTest('rutas profundas, 404 y cabeceras de seguridad permanecen intactos', async () => {
   const [root, deep, missingAsset, missingModule] = await Promise.all([
     request('/', 'gzip'),

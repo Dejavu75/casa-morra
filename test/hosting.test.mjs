@@ -54,6 +54,16 @@ test('Nginx comprime solo tipos textuales y anuncia variantes de respuesta', () 
   assert.doesNotMatch(nginx, /gzip_types\s+[^;]*(?:image\/png|image\/jpeg|image\/webp)/);
 });
 
+test('los recursos de la entrega se revalidan y sus cambios tienen URL nueva', () => {
+  const nginx = read('nginx.conf');
+  const html = read('dist/index.html');
+  const app = read('dist/assets/app.js');
+  assert.match(nginx, /add_header\s+Cache-Control\s+no-cache\s+always;/);
+  assert.match(html, /href="\/assets\/site\.css\?v=0\.9\.2-demo"/);
+  assert.match(html, /src="\/assets\/app\.js\?v=0\.9\.2-demo"/);
+  assert.match(app, /from '\.\.\/views\/records\.js\?v=0\.9\.2-demo'/);
+});
+
 test('el contexto Docker excluye archivos internos y credenciales locales', () => {
   const ignore = read('.dockerignore');
   for (const path of ['.git', '.codegraph', 'test', 'scripts', 'docs', '.env*', 'node_modules', '.demo-state', '.demo-public'])

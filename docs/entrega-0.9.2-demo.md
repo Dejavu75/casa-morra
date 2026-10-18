@@ -1,6 +1,6 @@
 # Entrega `0.9.2-demo` y reversión local
 
-Esta candidata reúne las unidades posteriores a `0.9.1-demo`: estilo del botón «Actualizar datos», foco visible de controles nativos y precisión suficiente para distinguir valores Elo que ocupan puestos diferentes. La aplicación sigue usando datos ficticios, sin cuentas ni inscripción. La rama WebP pendiente de consentimiento no está incluida.
+Esta candidata reúne las unidades posteriores a `0.9.1-demo`: estilo del botón «Actualizar datos», foco visible de controles nativos y precisión suficiente para distinguir valores Elo que ocupan puestos diferentes. Revalida recursos estáticos y cambia las URL de CSS y módulos modificados para que un navegador que ya visitó `8088` no reutilice la versión anterior. La aplicación sigue usando datos ficticios, sin cuentas ni inscripción. La rama WebP pendiente de consentimiento no está incluida.
 
 ## Comprobación previa
 
@@ -22,7 +22,7 @@ Invoke-WebRequest http://127.0.0.1:18101/health
 Invoke-WebRequest http://127.0.0.1:18101/demo/snapshot.json
 ```
 
-El estado de la exportación debe indicar `exists:true` y `fresh:true`. Recorrer en navegador las quince clases de rutas, diez tablas estadísticas, búsqueda de jugadores, filtro de torneos, visor, problema y menú móvil. En el récord de Elo, los puestos distintos no deben mostrar el mismo valor redondeado. Registrar los casos omitidos: `healthy` y HTTP 200 no prueban funcionalidad completa ni accesibilidad con lector real.
+El estado de la exportación debe indicar `exists:true` y `fresh:true`. Recorrer en navegador las quince clases de rutas, diez tablas estadísticas, búsqueda de jugadores, filtro de torneos, visor, problema y menú móvil. En el récord de Elo, los puestos distintos no deben mostrar el mismo valor redondeado. Antes del cambio de `8088`, cargar la versión anterior en un navegador con caché normal; después del cambio, volver a entrar al mismo origen **sin deshabilitar caché ni recargar forzosamente** y comprobar el Elo corregido. Registrar los casos omitidos: `healthy` y HTTP 200 no prueban funcionalidad completa ni accesibilidad con lector real.
 
 ## Preservar reversión antes de cambiar `8088`
 

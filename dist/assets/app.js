@@ -4,7 +4,7 @@ import { parseRoute, routeHref } from '../router.js';
 import { renderTournamentList, renderTournamentDetail } from '../views/tournaments.js';
 import { renderAnnual } from '../views/annual.js';
 import { renderPlayersDirectory, renderPlayerProfile } from '../views/players.js';
-import { renderStatistics, renderClassics, renderClassic } from '../views/records.js';
+import { renderStatistics, renderClassics, renderClassic } from '../views/records.js?v=0.9.2-demo';
 import { renderHome } from '../views/home.js';
 import { renderAbout, renderNewsList, renderNewsDetail, renderClasses, renderMembership } from '../views/editorial.js';
 import { renderGame, attachGameReplay } from '../views/game.js';
