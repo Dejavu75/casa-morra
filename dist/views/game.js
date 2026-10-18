@@ -115,7 +115,7 @@ function renderReplay(game, ply, messages) {
     </div><section aria-labelledby="game-transcript"><h2 id="game-transcript">${h(msg(messages, 'transcript'))}</h2><ol class="game-transcript">${transcript}</ol></section>`;
 }
 
-export function renderGame(data, id, { ply = 0 } = {}, messages = gameEs) {
+export function renderGame(data, id, { ply = 0 } = {}, messages = gameEs, locale = 'es-AR') {
   const game = data.games?.find((item) => item.id === id);
   if (!game) return { title: `${msg(messages, 'missing')} — Casa Morra`, html: `<div class="content-page container"><h1>${h(msg(messages, 'missing'))}</h1><p>${h(msg(messages, 'missingText'))}</p><a href="${h(routeHref('tournaments'))}">${h(msg(messages, 'back'))}</a></div>` };
   const event = data.tournaments?.find((item) => item.id === game.tournamentId);
@@ -135,7 +135,7 @@ export function renderGame(data, id, { ply = 0 } = {}, messages = gameEs) {
   }
   return { title: `${msg(messages, 'game')} — Casa Morra`, html: `<div class="content-page content-game container"><p class="content-eyebrow">${h(msg(messages, 'demo'))}</p>
     <h1>${h(msg(messages, 'game'))}: ${h(playerName(data, game.whiteId))} — ${h(playerName(data, game.blackId))}</h1>
-    <p>${event ? `${h(event.name)} · ` : ''}${h(formatDate(game.date))} · ${h(msg(messages, 'round'))} ${h(game.round)} · ${h(result)}</p>${replay}</div>` };
+    <p>${event ? `${h(event.name)} · ` : ''}${h(formatDate(game.date, locale))} · ${h(msg(messages, 'round'))} ${h(game.round)} · ${h(result)}</p>${replay}</div>` };
 }
 
 const actions = Object.freeze({ first: () => 0, prev: (ply) => ply - 1, next: (ply) => ply + 1, last: (_ply, total) => total });

@@ -7,8 +7,9 @@ export const playersEs = Object.freeze({
   players: 'Jugadores', demo: 'Datos ficticios de demostración',
   directoryIntro: 'Explorá el padrón ficticio y sus perfiles estadísticos.',
   searchLabel: 'Buscar jugador por nombre o apellido', searchButton: 'Buscar', clear: 'Ver todos',
-  alphabet: 'Índice alfabético', rosterTotal: (total) => `${formatNumber(total)} jugadores en el padrón`,
-  resultsTotal: (shown, total) => `${formatNumber(shown)} coincidencia${shown === 1 ? '' : 's'} de ${formatNumber(total)} jugadores`,
+  alphabet: 'Índice alfabético', emptyLetter: (letter) => `Sin jugadores con ${letter}`,
+  rosterTotal: (total, locale = 'es-AR') => `${formatNumber(total, locale)} jugadores en el padrón`,
+  resultsTotal: (shown, total, locale = 'es-AR') => `${formatNumber(shown, locale)} coincidencia${shown === 1 ? '' : 's'} de ${formatNumber(total, locale)} jugadores`,
   noResults: 'No encontramos jugadores para esa búsqueda.',
   profile: 'Perfil de jugador', notFound: 'Jugador no encontrado',
   unknownPlayer: 'El identificador no coincide con ningún jugador de la muestra.',
@@ -24,6 +25,7 @@ export const playersEs = Object.freeze({
   scrollHint: 'Desplace la tabla con las flechas del teclado o con un gesto horizontal para ver todas las columnas.',
   tournament: 'Torneo', date: 'Fecha', rank: 'Puesto', points: 'Puntos',
   wins: 'Ganadas', draws: 'Empatadas', losses: 'Perdidas', noDetail: 'Sin detalle',
+  winsShort: 'G', drawsShort: 'E', lossesShort: 'P',
   noEvents: 'Todavía no hay torneos oficiales para este jugador.',
   eloHistory: 'Historial Elo', eloHistoryInfo: 'Cada fila corresponde a una partida elegible; los torneos que solo tienen tabla no modifican el Elo.',
   game: 'Partida', opponent: 'Rival', before: 'Antes', after: 'Después',
@@ -42,45 +44,45 @@ export const playersEs = Object.freeze({
   rivalRule: 'Balance = victorias menos derrotas frente a cada rival. Solo se comparan parejas con al menos dos partidas al tablero; los empates son neutros. No son categorías por Elo.',
   noEligibleRivals: 'Sin rivales con al menos dos partidas al tablero.',
   noFavorable: 'Sin rival con balance favorable.', noAdverse: 'Sin rival con balance adverso.',
-  gamesSample: (played) => `${formatNumber(played)} partida${played === 1 ? '' : 's'}`,
+  gamesSample: (played, locale = 'es-AR') => `${formatNumber(played, locale)} partida${played === 1 ? '' : 's'}`,
 });
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const titleFor = (title) => `${title} — Casa Morra`;
 const message = (messages, key) => messages?.[key] ?? playersEs[key];
-const normalize = (value) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es-AR');
-const initial = (name) => normalize(name).trim().charAt(0).toUpperCase();
+const normalize = (value, locale) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase(locale);
+const initial = (name, locale) => normalize(name, locale).trim().charAt(0).toUpperCase();
 
 function playerUrl(player) {
   return player && safeRouteHref(routeHref, 'player', { slug: player.slug });
 }
 
-function recordText(record) {
-  return `${formatNumber(record.wins)}–${formatNumber(record.draws)}–${formatNumber(record.losses)}`;
+function recordText(record, locale) {
+  return `${formatNumber(record.wins, locale)}–${formatNumber(record.draws, locale)}–${formatNumber(record.losses, locale)}`;
 }
 
-function percentage(value) {
-  return value == null ? 'Sin detalle' : `${formatNumber(value)} %`;
+function percentage(value, messages, locale) {
+  return value == null ? message(messages, 'noDetail') : `${formatNumber(value, locale)} %`;
 }
 
 function membershipText(player, messages) {
   return message(messages, ({ socio: 'member', socia: 'memberFemale', no_socio: 'nonMember' })[player.membership] ?? 'membershipUnknown');
 }
 
-export function renderPlayersDirectory(data, { q = '' } = {}, messages = playersEs) {
+export function renderPlayersDirectory(data, { q = '' } = {}, messages = playersEs, locale = 'es-AR') {
   const query = String(q ?? '').trim();
   const roster = [...(data.players ?? [])].sort((a, b) =>
-    a.name.localeCompare(b.name, 'es-AR') || a.id.localeCompare(b.id));
-  const selected = query ? roster.filter((player) => normalize(player.name).includes(normalize(query))) : roster;
+    a.name.localeCompare(b.name, locale) || a.id.localeCompare(b.id));
+  const selected = query ? roster.filter((player) => normalize(player.name, locale).includes(normalize(query, locale))) : roster;
   const sections = new Map();
   for (const person of selected) {
-    const letter = initial(person.name);
+    const letter = initial(person.name, locale);
     if (!sections.has(letter)) sections.set(letter, []);
     sections.get(letter).push(person);
   }
   const index = [...alphabet].map((letter) => sections.has(letter)
     ? `<a href="#letra-${letter.toLowerCase()}">${letter}</a>`
-    : `<span aria-label="Sin jugadores con ${letter}">${letter}</span>`).join('');
+    : `<span aria-label="${h(message(messages, 'emptyLetter')(letter))}">${letter}</span>`).join('');
   const groups = [...sections].map(([letter, people]) => {
     const items = people.map((person) => {
       const url = playerUrl(person);
@@ -90,8 +92,8 @@ export function renderPlayersDirectory(data, { q = '' } = {}, messages = players
     return `<section class="players-letter" id="letra-${h(letter.toLowerCase())}" aria-labelledby="titulo-${h(letter.toLowerCase())}"><h2 id="titulo-${h(letter.toLowerCase())}">${h(letter)}</h2><ul>${items}</ul></section>`;
   }).join('');
   const resultLabel = query
-    ? message(messages, 'resultsTotal')(selected.length, roster.length)
-    : message(messages, 'rosterTotal')(roster.length);
+    ? message(messages, 'resultsTotal')(selected.length, roster.length, locale)
+    : message(messages, 'rosterTotal')(roster.length, locale);
   const html = `<div class="players-page container"><p class="players-eyebrow">${h(message(messages, 'demo'))}</p><h1>${h(message(messages, 'players'))}</h1>
     <p>${h(message(messages, 'directoryIntro'))}</p><form class="players-search" method="get" action="${h(routeHref('players'))}" role="search">
       <label for="players-q">${h(message(messages, 'searchLabel'))}</label><input id="players-q" name="q" type="search" value="${h(query)}" maxlength="120" autocomplete="off">
@@ -102,7 +104,7 @@ export function renderPlayersDirectory(data, { q = '' } = {}, messages = players
   return { title: titleFor(message(messages, 'players')), html };
 }
 
-function officialHistory(data, profile, messages) {
+function officialHistory(data, profile, messages, locale) {
   if (!profile.tournaments.length) return `<p>${h(message(messages, 'noEvents'))}</p>`;
   const events = new Map((data.tournaments ?? []).map((event) => [event.id, event]));
   const rows = [...profile.tournaments].reverse().map((standing) => {
@@ -111,29 +113,29 @@ function officialHistory(data, profile, messages) {
     const eventName = h(event?.name ?? standing.tournamentId);
     const linked = url ? `<a href="${h(url)}">${eventName}</a>` : eventName;
     const results = [standing.wins, standing.draws, standing.losses].map((value) =>
-      `<td>${value == null ? h(message(messages, 'noDetail')) : h(formatNumber(value))}</td>`).join('');
-    return `<tr><th scope="row">${linked}</th><td>${h(formatDate(standing.date))}</td><td>${h(formatNumber(standing.rank))}</td><td>${h(formatNumber(standing.points))}</td>${results}</tr>`;
+      `<td>${value == null ? h(message(messages, 'noDetail')) : h(formatNumber(value, locale))}</td>`).join('');
+    return `<tr><th scope="row">${linked}</th><td>${h(formatDate(standing.date, locale))}</td><td>${h(formatNumber(standing.rank, locale))}</td><td>${h(formatNumber(standing.points, locale))}</td>${results}</tr>`;
   }).join('');
   return `<p id="players-official-scroll-hint" class="players-scroll-hint">${h(message(messages, 'scrollHint'))}</p><div class="players-table-wrap" role="region" aria-labelledby="players-official" aria-describedby="players-official-scroll-hint" tabindex="0"><table><caption>${h(message(messages, 'officialHistory'))}</caption><thead><tr>
     <th scope="col">${h(message(messages, 'tournament'))}</th><th scope="col">${h(message(messages, 'date'))}</th><th scope="col">${h(message(messages, 'rank'))}</th><th scope="col">${h(message(messages, 'points'))}</th>
-    <th scope="col"><abbr title="${h(message(messages, 'wins'))}">G</abbr></th><th scope="col"><abbr title="${h(message(messages, 'draws'))}">E</abbr></th><th scope="col"><abbr title="${h(message(messages, 'losses'))}">P</abbr></th>
+    <th scope="col"><abbr title="${h(message(messages, 'wins'))}">${h(message(messages, 'winsShort'))}</abbr></th><th scope="col"><abbr title="${h(message(messages, 'draws'))}">${h(message(messages, 'drawsShort'))}</abbr></th><th scope="col"><abbr title="${h(message(messages, 'losses'))}">${h(message(messages, 'lossesShort'))}</abbr></th>
     </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
-function ratingHistory(data, profile, messages) {
+function ratingHistory(data, profile, messages, locale) {
   if (!profile.elo.history.length) return `<p>${h(message(messages, 'noEloHistory'))}</p>`;
   const max = Math.max(2000, Math.ceil(profile.elo.peak / 100) * 100);
   const rows = profile.elo.history.map((step) => {
     const after = Math.round(step.after);
-    return `<tr><th scope="row">${h(step.gameId)}</th><td>${h(formatDate(step.date))}</td><td>${h(playerName(data, step.opponentId))}</td>
-      <td>${h(formatNumber(Math.round(step.before)))}</td><td><meter min="0" max="${h(max)}" value="${h(after)}">${h(formatNumber(after))}</meter> <span>${h(formatNumber(after))}</span></td></tr>`;
+    return `<tr><th scope="row">${h(step.gameId)}</th><td>${h(formatDate(step.date, locale))}</td><td>${h(playerName(data, step.opponentId))}</td>
+      <td>${h(formatNumber(Math.round(step.before), locale))}</td><td><meter min="0" max="${h(max)}" value="${h(after)}">${h(formatNumber(after, locale))}</meter> <span>${h(formatNumber(after, locale))}</span></td></tr>`;
   }).join('');
   return `<p id="players-elo-scroll-hint" class="players-scroll-hint">${h(message(messages, 'scrollHint'))}</p><div class="players-table-wrap" role="region" aria-labelledby="players-elo" aria-describedby="players-elo-scroll-hint" tabindex="0"><table><caption>${h(message(messages, 'eloHistory'))}</caption><thead><tr>
     <th scope="col">${h(message(messages, 'game'))}</th><th scope="col">${h(message(messages, 'date'))}</th><th scope="col">${h(message(messages, 'opponent'))}</th><th scope="col">${h(message(messages, 'before'))}</th><th scope="col">${h(message(messages, 'after'))}</th>
     </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
-function officialAchievements(profile, titleCount, messages) {
+function officialAchievements(profile, titleCount, messages, locale) {
   const ranks = profile.tournaments.reduce((counts, row) => {
     if (row.rank === 1) counts.firstPlaces += 1;
     if (row.rank >= 1 && row.rank <= 3) counts.podiums += 1;
@@ -144,7 +146,7 @@ function officialAchievements(profile, titleCount, messages) {
     ['podiums', ranks.podiums], ['winningStreak', profile.streaks.winning],
     ['unbeatenStreak', profile.streaks.unbeaten], ['titleCount', titleCount],
   ];
-  const items = entries.map(([key, value]) => `<div><dt>${h(message(messages, key))}</dt><dd>${h(formatNumber(value))}</dd></div>`).join('');
+  const items = entries.map(([key, value]) => `<div><dt>${h(message(messages, key))}</dt><dd>${h(formatNumber(value, locale))}</dd></div>`).join('');
   return `<section aria-labelledby="players-career"><h2 id="players-career">${h(message(messages, 'career'))}</h2>
     <p>${h(message(messages, 'careerExplanation'))}</p><dl class="players-achievements">${items}</dl></section>`;
 }
@@ -175,13 +177,13 @@ function compareEventTie(a, b) {
   return b.played - a.played || a.event.date.localeCompare(b.event.date) || a.event.id.localeCompare(b.event.id);
 }
 
-function eventComparison(row, messages) {
+function eventComparison(row, messages, locale) {
   if (!row) return `<p>${h(message(messages, 'noBoardEvents'))}</p>`;
   const href = safeRouteHref(routeHref, 'tournament', { slug: row.event.slug });
   const name = h(row.event.name);
   const linked = href ? `<a href="${h(href)}">${name}</a>` : name;
   const rate = 100 * (row.wins + row.draws * 0.5) / row.played;
-  return `<p>${linked} · ${h(formatNumber(rate))} % · ${h(message(messages, 'gamesSample')(row.played))} · G–E–P ${h(recordText(row))}</p>`;
+  return `<p>${linked} · ${h(formatNumber(rate, locale))} % · ${h(message(messages, 'gamesSample')(row.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(row, locale))}</p>`;
 }
 
 function rivalCandidates(data, playerId) {
@@ -191,12 +193,12 @@ function rivalCandidates(data, playerId) {
   }).filter((row) => row && row.played >= 2);
 }
 
-function rivalComparison(row, emptyKey, messages) {
+function rivalComparison(row, emptyKey, messages, locale) {
   if (!row) return `<p>${h(message(messages, emptyKey))}</p>`;
-  return `<p>${h(row.person.name)} · G–E–P ${h(recordText(row))} · ${h(message(messages, 'gamesSample')(row.played))}</p>`;
+  return `<p>${h(row.person.name)} · ${h(message(messages, 'record'))} ${h(recordText(row, locale))} · ${h(message(messages, 'gamesSample')(row.played, locale))}</p>`;
 }
 
-function personalComparisons(data, playerId, messages) {
+function personalComparisons(data, playerId, messages, locale) {
   const events = eventCandidates(data, playerId);
   const best = [...events].sort((a, b) => -compareEventRate(a, b) || compareEventTie(a, b))[0];
   const worst = [...events].sort((a, b) => compareEventRate(a, b) || compareEventTie(a, b))[0];
@@ -207,16 +209,16 @@ function personalComparisons(data, playerId, messages) {
     .sort((a, b) => a.balance - b.balance || b.played - a.played || a.person.id.localeCompare(b.person.id))[0];
   return `<section aria-labelledby="players-comparisons"><h2 id="players-comparisons">${h(message(messages, 'comparisons'))}</h2>
     <p>${h(message(messages, 'comparisonsRule'))}</p>
-    <div class="players-summary"><div><h3>${h(message(messages, 'bestEvent'))}</h3>${eventComparison(best, messages)}</div>
-      <div><h3>${h(message(messages, 'worstEvent'))}</h3>${eventComparison(worst, messages)}</div></div>
+    <div class="players-summary"><div><h3>${h(message(messages, 'bestEvent'))}</h3>${eventComparison(best, messages, locale)}</div>
+      <div><h3>${h(message(messages, 'worstEvent'))}</h3>${eventComparison(worst, messages, locale)}</div></div>
     <p>${h(message(messages, 'rivalRule'))}</p>
     ${rivals.length ? '' : `<p>${h(message(messages, 'noEligibleRivals'))}</p>`}
-    <div class="players-summary"><div><h3>${h(message(messages, 'favorable'))}</h3>${rivalComparison(favorable, 'noFavorable', messages)}</div>
-      <div><h3>${h(message(messages, 'adverse'))}</h3>${rivalComparison(adverse, 'noAdverse', messages)}</div></div>
+    <div class="players-summary"><div><h3>${h(message(messages, 'favorable'))}</h3>${rivalComparison(favorable, 'noFavorable', messages, locale)}</div>
+      <div><h3>${h(message(messages, 'adverse'))}</h3>${rivalComparison(adverse, 'noAdverse', messages, locale)}</div></div>
   </section>`;
 }
 
-export function renderPlayerProfile(data, slug, messages = playersEs) {
+export function renderPlayerProfile(data, slug, messages = playersEs, locale = 'es-AR') {
   const player = data.players?.find((person) => person.slug === slug);
   if (!player) return { title: titleFor(message(messages, 'notFound')),
     html: `<div class="players-page container"><h1>${h(message(messages, 'notFound'))}</h1><p>${h(message(messages, 'unknownPlayer'))}</p><a href="${h(routeHref('players'))}">${h(message(messages, 'back'))}</a></div>` };
@@ -228,17 +230,17 @@ export function renderPlayerProfile(data, slug, messages = playersEs) {
   const html = `<div class="players-page container"><nav class="players-back" aria-label="${h(message(messages, 'back'))}"><a href="${h(routeHref('players'))}">${h(message(messages, 'back'))}</a></nav>
     <p class="players-eyebrow">${h(message(messages, 'demo'))}</p><h1>${h(player.name)}</h1><p class="players-membership">${h(membershipText(player, messages))}</p><p>${h(message(messages, 'accountNotice'))}</p>
     <section class="players-summary" aria-label="${h(message(messages, 'profile'))}">
-      <div><h2>${h(message(messages, 'elo'))}</h2><p><strong>${h(formatNumber(Math.round(profile.elo.rating)))}</strong> · ${h(profile.elo.provisional ? message(messages, 'provisional') : message(messages, 'consolidated'))}</p>
-        <p>${h(message(messages, 'peakElo'))}: ${h(formatNumber(Math.round(profile.elo.peak)))}</p><small>${h(message(messages, 'eloMethod'))}</small></div>
-      <div><h2>${h(message(messages, 'games'))}</h2><p>${h(formatNumber(count.played))} · ${h(message(messages, 'record'))} ${h(recordText(count))}</p>
-        <p>${h(message(messages, 'winsRate'))}: ${h(percentage(count.winRate))}</p><p>${h(message(messages, 'scoreRate'))}: ${h(percentage(count.scoreRate))}</p><small>${h(message(messages, 'rateExplanation'))}</small></div>
+      <div><h2>${h(message(messages, 'elo'))}</h2><p><strong>${h(formatNumber(Math.round(profile.elo.rating), locale))}</strong> · ${h(profile.elo.provisional ? message(messages, 'provisional') : message(messages, 'consolidated'))}</p>
+        <p>${h(message(messages, 'peakElo'))}: ${h(formatNumber(Math.round(profile.elo.peak), locale))}</p><small>${h(message(messages, 'eloMethod'))}</small></div>
+      <div><h2>${h(message(messages, 'games'))}</h2><p>${h(formatNumber(count.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(count, locale))}</p>
+        <p>${h(message(messages, 'winsRate'))}: ${h(percentage(count.winRate, messages, locale))}</p><p>${h(message(messages, 'scoreRate'))}: ${h(percentage(count.scoreRate, messages, locale))}</p><small>${h(message(messages, 'rateExplanation'))}</small></div>
     </section><section aria-labelledby="players-colors"><h2 id="players-colors">${h(message(messages, 'games'))} · ${h(message(messages, 'white'))}/${h(message(messages, 'black'))}</h2>
-      <dl class="players-colors"><div><dt>${h(message(messages, 'white'))}</dt><dd>${h(formatNumber(colors.white.played))} · ${h(message(messages, 'record'))} ${h(recordText(colors.white))}</dd></div>
-      <div><dt>${h(message(messages, 'black'))}</dt><dd>${h(formatNumber(colors.black.played))} · ${h(message(messages, 'record'))} ${h(recordText(colors.black))}</dd></div></dl></section>
-    ${officialAchievements(profile, badges.length, messages)}
-    ${personalComparisons(data, player.id, messages)}
+      <dl class="players-colors"><div><dt>${h(message(messages, 'white'))}</dt><dd>${h(formatNumber(colors.white.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(colors.white, locale))}</dd></div>
+      <div><dt>${h(message(messages, 'black'))}</dt><dd>${h(formatNumber(colors.black.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(colors.black, locale))}</dd></div></dl></section>
+    ${officialAchievements(profile, badges.length, messages, locale)}
+    ${personalComparisons(data, player.id, messages, locale)}
     <section aria-labelledby="players-titles"><h2 id="players-titles">${h(message(messages, 'titles'))}</h2>${badges.length ? `<ul>${badgeItems}</ul>` : `<p>${h(message(messages, 'noTitles'))}</p>`}</section>
-    <section aria-labelledby="players-official"><h2 id="players-official">${h(message(messages, 'officialHistory'))}</h2><p>${h(message(messages, 'officialHistoryInfo'))}</p>${officialHistory(data, profile, messages)}</section>
-    <section aria-labelledby="players-elo"><h2 id="players-elo">${h(message(messages, 'eloHistory'))}</h2><p>${h(message(messages, 'eloHistoryInfo'))}</p>${ratingHistory(data, profile, messages)}</section></div>`;
+    <section aria-labelledby="players-official"><h2 id="players-official">${h(message(messages, 'officialHistory'))}</h2><p>${h(message(messages, 'officialHistoryInfo'))}</p>${officialHistory(data, profile, messages, locale)}</section>
+    <section aria-labelledby="players-elo"><h2 id="players-elo">${h(message(messages, 'eloHistory'))}</h2><p>${h(message(messages, 'eloHistoryInfo'))}</p>${ratingHistory(data, profile, messages, locale)}</section></div>`;
   return { title: titleFor(player.name), html };
 }

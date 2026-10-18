@@ -14,6 +14,7 @@ export const recordsEs = Object.freeze({
   classicsIntro: 'Se muestran parejas con al menos cuatro partidas al tablero. Los descansos no cuentan.',
   noClassics: 'Todavía no hay enfrentamientos con cuatro partidas al tablero.',
   perspective: 'Resultados desde la perspectiva del primer jugador.',
+  scoreAbbrev: 'G-E-P',
   pointsRate: 'Rendimiento por puntos', winsRate: 'Porcentaje de victorias',
   colorWhite: 'Blancas', colorBlack: 'Negras', games: 'Partidas al tablero',
   points: 'puntos', wins: 'ganadas', draws: 'empatadas', losses: 'perdidas',
@@ -51,41 +52,41 @@ function playerLink(data, playerId, fallbackName) {
   return href ? `<a href="${e(href)}">${name}</a>` : name;
 }
 
-function boardValue(board, value) {
-  return `${e(formatNumber(value))}${board.id === 'winRate' ? ' %' : ''}`;
+function boardValue(board, value, locale) {
+  return `${e(formatNumber(value, locale))}${board.id === 'winRate' ? ' %' : ''}`;
 }
 
-function boardTable(data, board, entries, caption, labels) {
-  return `<table class="record-table"><caption>${e(caption)}</caption><thead><tr><th scope="col">${e(labels.position)}</th><th scope="col">${e(labels.player)}</th><th scope="col">${e(labels.value)}</th></tr></thead><tbody>${entries.map((entry) => `<tr><th scope="row">${entry.rank}</th><td>${playerLink(data, entry.playerId, entry.name)}</td><td>${boardValue(board, entry.value)}</td></tr>`).join('')}</tbody></table>`;
+function boardTable(data, board, entries, caption, labels, locale) {
+  return `<table class="record-table"><caption>${e(caption)}</caption><thead><tr><th scope="col">${e(labels.position)}</th><th scope="col">${e(labels.player)}</th><th scope="col">${e(labels.value)}</th></tr></thead><tbody>${entries.map((entry) => `<tr><th scope="row">${e(formatNumber(entry.rank, locale))}</th><td>${playerLink(data, entry.playerId, entry.name)}</td><td>${boardValue(board, entry.value, locale)}</td></tr>`).join('')}</tbody></table>`;
 }
 
-export function renderStatistics(data, labels = recordsEs) {
+export function renderStatistics(data, labels = recordsEs, locale = 'es-AR') {
   const boards = getLeaderboards(data);
   const sections = boards.map((board) => {
     const title = labels.boardTitles?.[board.id] ?? board.label;
     const description = labels.boardRules?.[board.id] ?? '';
     const visible = board.entries.slice(0, 10);
     const extra = board.entries.slice(10);
-    const table = visible.length ? boardTable(data, board, visible, title, labels) : `<p>${e(labels.noEligible)}</p>`;
-    const more = extra.length ? `<details><summary>${e(labels.more)}</summary>${boardTable(data, board, extra, title, labels)}</details>` : '';
+    const table = visible.length ? boardTable(data, board, visible, title, labels, locale) : `<p>${e(labels.noEligible)}</p>`;
+    const more = extra.length ? `<details><summary>${e(labels.more)}</summary>${boardTable(data, board, extra, title, labels, locale)}</details>` : '';
     return `<section class="record-board" data-record-id="${e(board.id)}" aria-labelledby="record-${e(board.id)}"><h2 id="record-${e(board.id)}">${e(title)}</h2><p>${e(description)}</p>${table}${more}</section>`;
   }).join('');
   return { title: labels.statisticsTitle, html: `<section class="records-page"><h1>${e(labels.statisticsTitle)}</h1><p>${e(labels.demo)}</p>${sections}</section>` };
 }
 
-function scoreSummary(record) {
-  return `${record.wins}-${record.draws}-${record.losses}`;
+function scoreSummary(record, locale) {
+  return `${formatNumber(record.wins, locale)}-${formatNumber(record.draws, locale)}-${formatNumber(record.losses, locale)}`;
 }
 
-function scorePoints(record) {
-  return `${formatNumber(record.points)} / ${record.played}`;
+function scorePoints(record, locale) {
+  return `${formatNumber(record.points, locale)} / ${formatNumber(record.played, locale)}`;
 }
 
-function scorePercent(record) {
-  return record.scoreRate === null ? '—' : `${Math.round(record.scoreRate)} %`;
+function scorePercent(record, locale) {
+  return record.scoreRate === null ? '—' : `${formatNumber(Math.round(record.scoreRate), locale)} %`;
 }
 
-export function renderClassics(data, labels = recordsEs) {
+export function renderClassics(data, labels = recordsEs, locale = 'es-AR') {
   const pairs = getClassics(data);
   const cards = pairs.map((pair) => {
     const first = data.players.find((player) => player.id === pair.firstId);
@@ -93,26 +94,26 @@ export function renderClassics(data, labels = recordsEs) {
     const href = first && second && safeRouteHref(routeHref, 'classic', { first: first.slug, second: second.slug });
     const names = `${e(first?.name ?? pair.firstId)} — ${e(second?.name ?? pair.secondId)}`;
     const heading = href ? `<a href="${e(href)}">${names}</a>` : names;
-    return `<article class="classic-pair"><h2>${heading}</h2><p>${e(labels.perspective)}</p><p>G-E-P: ${scoreSummary(pair.record)} · ${e(labels.pointsRate)}: ${e(scorePoints(pair.record))} (${e(scorePercent(pair.record))})</p></article>`;
+    return `<article class="classic-pair"><h2>${heading}</h2><p>${e(labels.perspective)}</p><p>${e(labels.scoreAbbrev)}: ${scoreSummary(pair.record, locale)} · ${e(labels.pointsRate)}: ${e(scorePoints(pair.record, locale))} (${e(scorePercent(pair.record, locale))})</p></article>`;
   }).join('');
   return { title: labels.classicsTitle, html: `<section class="classics-page"><h1>${e(labels.classicsTitle)}</h1><p>${e(labels.classicsIntro)}</p>${cards || `<p>${e(labels.noClassics)}</p>`}</section>` };
 }
 
-function colorLine(label, record) {
-  return `<li><strong>${e(label)}:</strong> ${scoreSummary(record)} · ${e(scorePoints(record))}</li>`;
+function colorLine(label, record, locale) {
+  return `<li><strong>${e(label)}:</strong> ${scoreSummary(record, locale)} · ${e(scorePoints(record, locale))}</li>`;
 }
 
-function gameRows(data, games, labels) {
+function gameRows(data, games, labels, locale) {
   return games.map((game) => {
     const hasMoves = Array.isArray(game.moves) && game.moves.length > 0;
     const href = hasDemoReplay(game) ? safeRouteHref(routeHref, 'game', { id: game.id }) : null;
     const moves = href ? `<a href="${e(href)}">${e(labels.viewGame)}</a>`
       : hasMoves ? e(labels.movesUnavailable) : e(labels.noMoves);
-    return `<tr><td>${e(formatDate(game.date))}</td><td>${playerLink(data, game.whiteId)}</td><td>${playerLink(data, game.blackId)}</td><td>${e(game.result)}</td><td>${moves}</td></tr>`;
+    return `<tr><td>${e(formatDate(game.date, locale))}</td><td>${playerLink(data, game.whiteId)}</td><td>${playerLink(data, game.blackId)}</td><td>${e(game.result)}</td><td>${moves}</td></tr>`;
   }).join('');
 }
 
-export function renderClassic(data, firstSlug, secondSlug, labels = recordsEs) {
+export function renderClassic(data, firstSlug, secondSlug, labels = recordsEs, locale = 'es-AR') {
   const first = data.players.find((player) => player.slug === firstSlug);
   const second = data.players.find((player) => player.slug === secondSlug);
   const pair = first && second ? getHeadToHead(data, first.id, second.id) : null;
@@ -122,9 +123,9 @@ export function renderClassic(data, firstSlug, secondSlug, labels = recordsEs) {
   };
   const title = `${first.name} — ${second.name}`;
   const record = pair.record;
-  const rows = gameRows(data, pair.games, labels);
+  const rows = gameRows(data, pair.games, labels, locale);
   return {
     title,
-    html: `<article class="classic-detail"><h1>${e(title)}</h1><p>${e(labels.perspective)}</p><p><strong>G-E-P: ${scoreSummary(record)}</strong> · ${e(labels.pointsRate)}: ${e(scorePoints(record))} (${e(scorePercent(record))}) · ${e(labels.winsRate)}: ${e(`${Math.round(record.winRate)} %`)}</p><ul>${colorLine(labels.colorWhite, pair.colors.white)}${colorLine(labels.colorBlack, pair.colors.black)}</ul><h2>${e(labels.games)}</h2><div class="classic-table-scroll" role="region" aria-label="${e(`${labels.games}: ${title}`)}" tabindex="0"><table><caption>${e(title)}: ${e(labels.games)}</caption><thead><tr><th scope="col">${e(labels.date)}</th><th scope="col">${e(labels.white)}</th><th scope="col">${e(labels.black)}</th><th scope="col">${e(labels.result)}</th><th scope="col">${e(labels.sheet)}</th></tr></thead><tbody>${rows}</tbody></table></div><a href="${routeHref('classics')}">${e(labels.backClassics)}</a></article>`,
+    html: `<article class="classic-detail"><h1>${e(title)}</h1><p>${e(labels.perspective)}</p><p><strong>${e(labels.scoreAbbrev)}: ${scoreSummary(record, locale)}</strong> · ${e(labels.pointsRate)}: ${e(scorePoints(record, locale))} (${e(scorePercent(record, locale))}) · ${e(labels.winsRate)}: ${e(`${formatNumber(Math.round(record.winRate), locale)} %`)}</p><ul>${colorLine(labels.colorWhite, pair.colors.white, locale)}${colorLine(labels.colorBlack, pair.colors.black, locale)}</ul><h2>${e(labels.games)}</h2><div class="classic-table-scroll" role="region" aria-label="${e(`${labels.games}: ${title}`)}" tabindex="0"><table><caption>${e(title)}: ${e(labels.games)}</caption><thead><tr><th scope="col">${e(labels.date)}</th><th scope="col">${e(labels.white)}</th><th scope="col">${e(labels.black)}</th><th scope="col">${e(labels.result)}</th><th scope="col">${e(labels.sheet)}</th></tr></thead><tbody>${rows}</tbody></table></div><a href="${routeHref('classics')}">${e(labels.backClassics)}</a></article>`,
   };
 }

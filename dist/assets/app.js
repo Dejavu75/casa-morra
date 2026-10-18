@@ -1,5 +1,5 @@
 import * as demo from '../data/demo.js';
-import { applyTranslations, catalogs as defaultCatalogs, resolveViewMessages, translate } from '../i18n/index.js';
+import { applyTranslations, catalogs as defaultCatalogs, resolveLocale, resolveViewMessages, translate } from '../i18n/index.js';
 import { parseRoute, routeHref } from '../router.js';
 import { renderTournamentList, renderTournamentDetail } from '../views/tournaments.js';
 import { renderAnnual } from '../views/annual.js';
@@ -19,24 +19,34 @@ const navGroup = Object.freeze({
   classic: 'classics', 'news-detail': 'news',
 });
 
+export function createViewContext(locale = 'es', catalogs = defaultCatalogs) {
+  const resolved = resolveLocale(locale, catalogs);
+  return {
+    locale: resolved === 'es' ? 'es-AR' : locale,
+    messages: (namespace) => resolveViewMessages(namespace, resolved, catalogs),
+  };
+}
+
 export function renderRoute(route, source = demoData, { locale = 'es', catalogs = defaultCatalogs } = {}) {
-  const messages = (namespace) => resolveViewMessages(namespace, locale, catalogs);
+  const context = createViewContext(locale, catalogs);
+  const { messages } = context;
+  const formatLocale = context.locale;
   switch (route.name) {
-    case 'home': return renderHome(source, { puzzleMessages: messages('puzzle') }, messages('home'));
-    case 'tournaments': return renderTournamentList(source, route.query, messages('competitive'));
-    case 'tournament': return renderTournamentDetail(source, route.params.slug, messages('competitive'));
-    case 'annual': return renderAnnual(source, route.params.seasonId, messages('competitive'));
-    case 'players': return renderPlayersDirectory(source, route.query, messages('players'));
-    case 'player': return renderPlayerProfile(source, route.params.slug, messages('players'));
-    case 'statistics': return renderStatistics(source, messages('records'));
-    case 'classics': return renderClassics(source, messages('records'));
-    case 'classic': return renderClassic(source, route.params.first, route.params.second, messages('records'));
-    case 'about': return renderAbout(source, messages('editorial'));
-    case 'news': return renderNewsList(source, messages('editorial'));
-    case 'news-detail': return renderNewsDetail(source, route.params.slug, messages('editorial'));
-    case 'classes': return renderClasses(source, messages('editorial'));
-    case 'membership': return renderMembership(source, messages('editorial'));
-    case 'game': return renderGame(source, route.params.id, undefined, messages('game'));
+    case 'home': return renderHome(source, { puzzleMessages: messages('puzzle') }, messages('home'), formatLocale);
+    case 'tournaments': return renderTournamentList(source, route.query, messages('competitive'), formatLocale);
+    case 'tournament': return renderTournamentDetail(source, route.params.slug, messages('competitive'), formatLocale);
+    case 'annual': return renderAnnual(source, route.params.seasonId, messages('competitive'), formatLocale);
+    case 'players': return renderPlayersDirectory(source, route.query, messages('players'), formatLocale);
+    case 'player': return renderPlayerProfile(source, route.params.slug, messages('players'), formatLocale);
+    case 'statistics': return renderStatistics(source, messages('records'), formatLocale);
+    case 'classics': return renderClassics(source, messages('records'), formatLocale);
+    case 'classic': return renderClassic(source, route.params.first, route.params.second, messages('records'), formatLocale);
+    case 'about': return renderAbout(source, messages('editorial'), formatLocale);
+    case 'news': return renderNewsList(source, messages('editorial'), formatLocale);
+    case 'news-detail': return renderNewsDetail(source, route.params.slug, messages('editorial'), formatLocale);
+    case 'classes': return renderClasses(source, messages('editorial'), formatLocale);
+    case 'membership': return renderMembership(source, messages('editorial'), formatLocale);
+    case 'game': return renderGame(source, route.params.id, undefined, messages('game'), formatLocale);
     default: {
       const title = translate('notFound.title', locale, catalogs);
       const body = translate('notFound.body', locale, catalogs);
@@ -84,6 +94,7 @@ export function renderThemeToggle(button, theme, locale = 'es', catalogs = defau
 
 function startApp() {
   const locale = applyTranslations(document, document.documentElement.lang);
+  const { messages } = createViewContext(locale);
   const main = document.querySelector('#contenido');
   const menuButton = document.querySelector('[data-menu-toggle]');
   const navigation = document.querySelector('#navegacion-principal');
@@ -139,11 +150,11 @@ function startApp() {
       else link.removeAttribute('aria-current');
     }
     if (route.name === 'game') {
-      detachReplay = attachGameReplay(main.querySelector('[data-game-replay]'), activeData, route.params.id);
+      detachReplay = attachGameReplay(main.querySelector('[data-game-replay]'), activeData, route.params.id, messages('game'));
     }
     if (route.name === 'home') {
       detachPuzzle = attachPuzzle(main.querySelector('[data-puzzle-host]'), {
-        messages: resolveViewMessages('puzzle', locale),
+        messages: messages('puzzle'),
       });
     }
     setMenuOpen(false);

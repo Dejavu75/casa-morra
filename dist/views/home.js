@@ -51,7 +51,7 @@ function renderGallery(messages) {
   </section>`;
 }
 
-export function renderHome(data, { today = localToday(), puzzleMessages = puzzleEs } = {}, messages = homeEs) {
+export function renderHome(data, { today = localToday(), puzzleMessages = puzzleEs } = {}, messages = homeEs, locale = 'es-AR') {
   const totals = getHomeTotals(data);
   const season = [...(data.seasons ?? [])].sort((a, b) => b.start.localeCompare(a.start))[0];
   const annual = season ? getAnnualStandings(data, season.id).standings.slice(0, 5) : [];
@@ -62,12 +62,12 @@ export function renderHome(data, { today = localToday(), puzzleMessages = puzzle
   const featuredUrl = featured && safeRouteHref(routeHref, 'game', { id: featured.id });
   const featuredEvent = featured && data.tournaments?.find((event) => event.id === featured.tournamentId);
   const news = [...(data.editorial?.news ?? [])].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 2);
-  const annualRows = annual.map((row) => `<li class="home-annual-row"><span>${h(formatNumber(row.rank))}.</span> ${playerLink(data, row.playerId, routeHref)} <strong>${h(formatNumber(row.points))} ${h(msg(messages, 'points'))}</strong></li>`).join('');
+  const annualRows = annual.map((row) => `<li class="home-annual-row"><span>${h(formatNumber(row.rank, locale))}.</span> ${playerLink(data, row.playerId, routeHref)} <strong>${h(formatNumber(row.points, locale))} ${h(msg(messages, 'points'))}</strong></li>`).join('');
   const newsRows = news.map((item) => {
     const href = safeRouteHref(routeHref, 'news-detail', { slug: item.slug });
-    return `<li><article><p>${h(formatDate(item.date))}</p><h3>${href ? `<a href="${h(href)}">${h(item.title)}</a>` : h(item.title)}</h3><p>${h(item.excerpt)}</p></article></li>`;
+    return `<li><article><p>${h(formatDate(item.date, locale))}</p><h3>${href ? `<a href="${h(href)}">${h(item.title)}</a>` : h(item.title)}</h3><p>${h(item.excerpt)}</p></article></li>`;
   }).join('');
-  const futureHtml = future ? `<p>${futureUrl ? `<a href="${h(futureUrl)}">${h(future.name)}</a>` : h(future.name)} · ${h(formatDate(future.date))}</p>`
+  const futureHtml = future ? `<p>${futureUrl ? `<a href="${h(futureUrl)}">${h(future.name)}</a>` : h(future.name)} · ${h(formatDate(future.date, locale))}</p>`
     : `<p>${h(msg(messages, 'noUpcoming'))}</p>`;
   const featuredHtml = featured && featuredUrl
     ? `<p>${h(playerName(data, featured.whiteId))} — ${h(playerName(data, featured.blackId))}${featuredEvent ? ` · ${h(featuredEvent.name)}` : ''}</p><a href="${h(featuredUrl)}">${h(msg(messages, 'replay'))}</a><p class="content-note">${h(msg(messages, 'replayNote'))}</p>`
@@ -75,7 +75,7 @@ export function renderHome(data, { today = localToday(), puzzleMessages = puzzle
   return { title: msg(messages, 'title'), html: `<div class="content-page content-home container">
     <section class="content-hero" aria-labelledby="home-title"><p class="content-eyebrow">${h(msg(messages, 'eyebrow'))}</p><h1 id="home-title">${h(msg(messages, 'headline'))}</h1><p>${h(msg(messages, 'intro'))}</p>
       <nav aria-label="${h(msg(messages, 'explore'))}"><a href="${h(routeHref('tournaments'))}">${h(msg(messages, 'tournaments'))}</a><a href="${h(routeHref('players'))}">${h(msg(messages, 'players'))}</a><a href="${h(routeHref('about'))}">${h(msg(messages, 'about'))}</a></nav></section>
-    <section class="home-totals" aria-label="${h(msg(messages, 'totals'))}"><p><strong>${h(formatNumber(totals.players))}</strong> ${h(msg(messages, 'players'))}</p><p><strong>${h(formatNumber(totals.tournaments))}</strong> ${h(msg(messages, 'tournaments'))}</p><p><strong>${h(formatNumber(totals.games))}</strong> ${h(msg(messages, 'games'))}</p></section>
+    <section class="home-totals" aria-label="${h(msg(messages, 'totals'))}"><p><strong>${h(formatNumber(totals.players, locale))}</strong> ${h(msg(messages, 'players'))}</p><p><strong>${h(formatNumber(totals.tournaments, locale))}</strong> ${h(msg(messages, 'tournaments'))}</p><p><strong>${h(formatNumber(totals.games, locale))}</strong> ${h(msg(messages, 'games'))}</p></section>
     ${renderGallery(messages)}
     <div data-puzzle-host>${renderPuzzle(puzzleMessages)}</div>
     <div class="home-grid"><section aria-labelledby="home-next"><h2 id="home-next">${h(msg(messages, 'upcoming'))}</h2>${futureHtml}</section>

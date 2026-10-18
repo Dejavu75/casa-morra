@@ -35,19 +35,19 @@ export function renderAbout(data, messages = editorialEs) {
     <p class="content-note">${h(msg(messages, 'aboutNote'))}</p><nav class="content-end-links" aria-label="${h(msg(messages, 'explore'))}"><a href="${h(routeHref('tournaments'))}">${h(msg(messages, 'viewTournaments'))}</a><a href="${h(routeHref('news'))}">${h(msg(messages, 'goNews'))}</a></nav>`, messages);
 }
 
-export function renderNewsList(data, messages = editorialEs) {
+export function renderNewsList(data, messages = editorialEs, locale = 'es-AR') {
   const items = [...(data.editorial?.news ?? [])].sort((a, b) => b.date.localeCompare(a.date));
   const cards = items.map((item) => {
     const url = safeRouteHref(routeHref, 'news-detail', { slug: item.slug });
-    return `<li><article><p>${h(formatDate(item.date))}</p><h2>${url ? `<a href="${h(url)}">${h(item.title)}</a>` : h(item.title)}</h2><p>${h(item.excerpt)}</p></article></li>`;
+    return `<li><article><p>${h(formatDate(item.date, locale))}</p><h2>${url ? `<a href="${h(url)}">${h(item.title)}</a>` : h(item.title)}</h2><p>${h(item.excerpt)}</p></article></li>`;
   }).join('');
   return shell(msg(messages, 'news'), cards ? `<ul class="content-card-grid">${cards}</ul>` : `<p>${h(msg(messages, 'newsEmpty'))}</p>`, messages);
 }
 
-export function renderNewsDetail(data, slug, messages = editorialEs) {
+export function renderNewsDetail(data, slug, messages = editorialEs, locale = 'es-AR') {
   const item = data.editorial?.news?.find((entry) => entry.slug === slug);
   if (!item) return shell(msg(messages, 'newsMissing'), `<p>${h(msg(messages, 'newsUnknown'))}</p><a href="${h(routeHref('news'))}">${h(msg(messages, 'goNews'))}</a>`, messages);
-  return shell(item.title, `<p>${h(formatDate(item.date))}</p><p class="content-lead">${h(item.excerpt)}</p><article><p>${h(item.body)}</p></article>
+  return shell(item.title, `<p>${h(formatDate(item.date, locale))}</p><p class="content-lead">${h(item.excerpt)}</p><article><p>${h(item.body)}</p></article>
     <p class="content-note">${h(msg(messages, 'aboutNote'))}</p><a href="${h(routeHref('news'))}">${h(msg(messages, 'newsBack'))}</a>`, messages);
 }
 
