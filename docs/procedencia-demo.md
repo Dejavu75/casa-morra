@@ -4,7 +4,7 @@ Casa Morra usa identidades, torneos, resultados y textos ficticios creados para 
 
 ## Artefactos verificables
 
-Estos SHA-256 identifican el contenido **de esta revisión**. Para los PNG, el hash se calcula sobre los bytes exactos. Para `dist/data/demo.js`, se calcula sobre UTF-8 con saltos de línea LF: un checkout Windows puede convertirlos a CRLF sin cambiar el contenido versionado. Por eso el hash del archivo de trabajo Windows puede diferir del indicado aquí; la prueba normaliza solo `CRLF → LF` y verifica ambos escenarios. `node --test test/provenance.test.mjs` comprueba que el documento y los archivos coincidan; si un recurso cambia, hay que revisar su procedencia y actualizar la tabla y la prueba en el mismo cambio.
+Estos SHA-256 identifican el contenido **de esta revisión**. Para los PNG, el hash se calcula sobre los bytes exactos. Para `dist/data/demo.js` y `dist/favicon.svg`, se calcula sobre UTF-8 con saltos de línea LF: un checkout Windows puede convertirlos a CRLF sin cambiar el contenido versionado. Por eso el hash del archivo de trabajo Windows puede diferir del indicado aquí; la prueba normaliza solo `CRLF → LF` en esos dos archivos de texto y verifica ambos escenarios. `node --test test/provenance.test.mjs` comprueba que el documento y los archivos coincidan; si un recurso cambia, hay que revisar su procedencia y actualizar la tabla y la prueba en el mismo cambio.
 
 | Archivo | SHA-256 | Procedencia |
 |---|---|---|
@@ -12,8 +12,9 @@ Estos SHA-256 identifican el contenido **de esta revisión**. Para los PNG, el h
 | `dist/assets/hero-ajedrez.png` | `17FD0E195F23D3E83E463880899EBE99ACC931B7E948F1CFCD4E33774614E11F` | Imagen generada para el proyecto con una herramienta de OpenAI. |
 | `dist/assets/galeria-estudio.png` | `6F4879D1DC92FBD354C14DB0F7D971EFB4538C99889CBD661C3F619801103429` | Imagen generada para el proyecto con una herramienta de OpenAI. |
 | `dist/assets/galeria-sala.png` | `7AA62F2D1CA5233418E1C95B66F9DBB75375740A6B844AC677F996FE0D9FB36D` | Imagen generada para el proyecto con una herramienta de OpenAI. |
+| `dist/favicon.svg` | `92459378F3582F9A4A094E5DC05010CA4174C75D18BBAA6115A0DBC3376F0F75` | Monograma vectorial CM diseñado para Casa Morra con la paleta propia; sin enlaces ni recursos externos. |
 
-Se cotejaron los tres PNG con los archivos originales de la generación local: cada par fue idéntico byte por byte. No se incluyen en el repositorio los archivos de trabajo ni rutas locales. Esa coincidencia establece la procedencia de los **bytes**, no demuestra por sí sola titularidad de derechos, originalidad absoluta ni ausencia de infracción.
+Se cotejaron los tres PNG con los archivos originales de la generación local: cada par fue idéntico byte por byte. El SVG del favicon es un diseño nuevo del proyecto que utiliza el monograma y colores de la marca. No se incluyen en el repositorio los archivos de trabajo ni rutas locales. Esa coincidencia establece la procedencia de los **bytes**, no demuestra por sí sola titularidad de derechos, originalidad absoluta ni ausencia de infracción.
 
 ## Alcance de la inspección
 

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img">
+  <title>Casa Morra</title>
+  <rect width="48" height="48" rx="8" fill="#111a2c"/>
+  <rect x="3" y="3" width="42" height="42" rx="6" fill="none" stroke="#f5f0e6" stroke-width="1.5"/>
+  <text x="5" y="32" fill="#f5f0e6" font-family="Georgia, 'Times New Roman', serif" font-size="25" font-weight="700" letter-spacing="-3">CM</text>
+  <circle cx="39" cy="35" r="2.3" fill="#dbad82"/>
+</svg>
