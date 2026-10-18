@@ -27,7 +27,7 @@ export const playersEs = Object.freeze({
   officialHistory: 'Historial oficial de torneos', officialHistoryInfo: 'La clasificación oficial conserva puntos y puesto aun cuando no haya resultados individuales.',
   scrollHint: 'Desplace la tabla con las flechas del teclado o con un gesto horizontal para ver todas las columnas.',
   tournament: 'Torneo', date: 'Fecha', rank: 'Puesto', points: 'Puntos',
-  wins: 'Ganadas', draws: 'Empatadas', losses: 'Perdidas', noDetail: 'Sin detalle',
+  wins: 'Ganadas', draws: 'Empatadas', losses: 'Perdidas', noDetail: 'Sin detalle', noGames: 'Sin partidas',
   winsShort: 'G', drawsShort: 'E', lossesShort: 'P',
   noEvents: 'Todavía no hay torneos oficiales para este jugador.',
   eloHistory: 'Historial Elo', eloHistoryInfo: 'Cada fila corresponde a una partida elegible; los torneos que solo tienen tabla no modifican el Elo.',
@@ -64,8 +64,8 @@ function recordText(record, locale) {
   return `${formatNumber(record.wins, locale)}–${formatNumber(record.draws, locale)}–${formatNumber(record.losses, locale)}`;
 }
 
-function percentage(value, messages, locale) {
-  return value == null ? message(messages, 'noDetail') : `${formatNumber(value, locale)} %`;
+function percentage(value, messages, locale, emptyKey = 'noDetail') {
+  return value == null ? message(messages, emptyKey) : `${formatNumber(value, locale)} %`;
 }
 
 function membershipText(player, messages) {
@@ -239,6 +239,7 @@ export function renderPlayerProfile(data, slug, messages = playersEs, locale = '
   const badges = (data.titles ?? []).filter((title) => title.playerId === player.id);
   const badgeItems = badges.map((title) => `<li>${h(title.label)}</li>`).join('');
   const count = profile.record;
+  const rateEmptyKey = count.played === 0 ? 'noGames' : 'noDetail';
   const colors = profile.colors;
   const html = `<div class="players-page container"><nav class="players-back" aria-label="${h(message(messages, 'back'))}"><a href="${h(routeHref('players'))}">${h(message(messages, 'back'))}</a></nav>
     <p class="players-eyebrow">${h(message(messages, 'demo'))}</p><h1>${h(player.name)}</h1><p class="players-membership">${h(membershipText(player, messages))}</p><p>${h(message(messages, 'accountNotice'))}</p>
@@ -246,7 +247,7 @@ export function renderPlayerProfile(data, slug, messages = playersEs, locale = '
       <div><h2>${h(message(messages, 'elo'))}</h2><p><strong>${h(formatNumber(Math.round(profile.elo.rating), locale))}</strong> · ${h(profile.elo.provisional ? message(messages, 'provisional') : message(messages, 'consolidated'))}</p>
         <p>${h(message(messages, 'peakElo'))}: ${h(formatNumber(Math.round(profile.elo.peak), locale))}</p><small>${h(message(messages, 'eloMethod'))}</small></div>
       <div><h2>${h(message(messages, 'games'))}</h2><p>${h(formatNumber(count.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(count, locale))}</p>
-        <p>${h(message(messages, 'winsRate'))}: ${h(percentage(count.winRate, messages, locale))}</p><p>${h(message(messages, 'scoreRate'))}: ${h(percentage(count.scoreRate, messages, locale))}</p><small>${h(message(messages, 'rateExplanation'))}</small></div>
+        <p>${h(message(messages, 'winsRate'))}: ${h(percentage(count.winRate, messages, locale, rateEmptyKey))}</p><p>${h(message(messages, 'scoreRate'))}: ${h(percentage(count.scoreRate, messages, locale, rateEmptyKey))}</p><small>${h(message(messages, 'rateExplanation'))}</small></div>
     </section><section aria-labelledby="players-colors"><h2 id="players-colors">${h(message(messages, 'games'))} · ${h(message(messages, 'white'))}/${h(message(messages, 'black'))}</h2>
       <dl class="players-colors"><div><dt>${h(message(messages, 'white'))}</dt><dd>${h(formatNumber(colors.white.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(colors.white, locale))}</dd></div>
       <div><dt>${h(message(messages, 'black'))}</dt><dd>${h(formatNumber(colors.black.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(colors.black, locale))}</dd></div></dl></section>

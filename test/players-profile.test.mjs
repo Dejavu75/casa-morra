@@ -131,4 +131,9 @@ test('trayectoria sin torneos ni partidas presenta ceros y vacíos explícitos',
   }
   assert.match(html, /Todavía no hay torneos oficiales/);
   assert.match(html, /Todavía no hay partidas elegibles/);
+  assert.match(html, /Victorias\/partidas: Sin partidas/);
+  assert.match(html, /Puntos\/partidas: Sin partidas/);
+  assert.equal((html.match(/Puntos\/partidas: Sin detalle/g) ?? []).length, 3);
+  assert.match(renderPlayerProfile(fixture, 'ana', { ...playersEs, noGames: 'No games' }).html,
+    /Victorias\/partidas: No games<\/p><p>Puntos\/partidas: No games/);
 });
