@@ -113,7 +113,11 @@ function startApp() {
   let detachPuzzle = () => {};
   let activeData = demoData;
   const source = createDemoSource({ fixture: demoData, fetch: (...args) => window.fetch(...args),
-    crypto: window.crypto, onChange(state) {
+    crypto: window.crypto, onPending() {
+      if (sourceStatus) sourceStatus.textContent = translate('demo.status.loading', locale);
+      if (refreshButton) refreshButton.disabled = true;
+    }, onChange(state) {
+      if (refreshButton) refreshButton.disabled = false;
       activeData = state.data;
       if (sourceStatus) sourceStatus.textContent = translate(state.warning ?
         'demo.status.unavailable' : state.kind === 'export' ? 'demo.status.export' : 'demo.status.fixture', locale);

@@ -31,6 +31,7 @@ export const es = Object.freeze({
   'hero.demo': 'Datos de demostración · Sitio en desarrollo',
   'demo.refresh': 'Actualizar datos',
   'demo.status.fixture': 'Datos de ejemplo del sitio',
+  'demo.status.loading': 'Actualizando datos…',
   'demo.status.export': 'Exportación pública verificada',
   'demo.status.unavailable': 'Actualización fallida; datos de ejemplo',
   'demo.sourceDetails': 'Detalles de la fuente',

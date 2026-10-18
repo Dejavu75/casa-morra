@@ -131,6 +131,24 @@ test('respuestas asíncronas viejas nunca sobrescriben la última recarga', asyn
   assert.deepEqual(events.map((event) => event.kind), ['export']);
 });
 
+test('la recarga anuncia el estado pendiente antes de resolver y conserva la última respuesta', async () => {
+  let release;
+  let calls = 0;
+  const events = [];
+  const source = createDemoSource({ fixture: demo, crypto: webcrypto,
+    fetch: async () => ++calls === 1 ? new Promise((resolve) => { release = resolve; }) :
+      { ok: true, json: async () => exported() },
+    onPending: () => events.push('pending'),
+    onChange: (state) => events.push(state.kind) });
+  const old = source.refresh();
+  assert.deepEqual(events, ['pending']);
+  await source.refresh();
+  assert.deepEqual(events, ['pending', 'pending', 'export']);
+  release({ ok: false, status: 404 });
+  await old;
+  assert.deepEqual(events, ['pending', 'pending', 'export']);
+});
+
 test('una consulta que nunca termina usa el fixture y una respuesta tardía no lo reemplaza', async () => {
   let release;
   const events = [];

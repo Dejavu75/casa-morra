@@ -119,7 +119,7 @@ export async function validatePublicDemo(value, crypto) {
   return data;
 }
 
-export function createDemoSource({ fixture, fetch, crypto, onChange, timeoutMs = 5000 }) {
+export function createDemoSource({ fixture, fetch, crypto, onChange, onPending, timeoutMs = 5000 }) {
   let generation = 0;
   let inFlight = null;
   return {
@@ -128,6 +128,7 @@ export function createDemoSource({ fixture, fetch, crypto, onChange, timeoutMs =
       inFlight?.abort();
       const controller = new AbortController();
       inFlight = controller;
+      onPending?.();
       let timer;
       let state;
       try {

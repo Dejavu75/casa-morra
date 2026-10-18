@@ -25,6 +25,17 @@ test('el estado de la fuente usa el catálogo y conserva el aviso completo', asy
   assert.match(app, /renderLocation\(\);\s*void source\.refresh\(\)/);
 });
 
+test('la interfaz anuncia una actualización pendiente y evita recargas manuales duplicadas', async () => {
+  const [app, source, catalog] = await Promise.all([
+    text('../dist/assets/app.js'), text('../dist/assets/demo-source.js'), text('../dist/i18n/index.js'),
+  ]);
+  assert.match(catalog, /'demo\.status\.loading': 'Actualizando datos…'/);
+  assert.match(source, /onPending\?\.\(\)/);
+  assert.match(app, /onPending\(\)\s*\{[^}]*sourceStatus\.textContent = translate\('demo\.status\.loading'/);
+  assert.match(app, /onPending\(\)\s*\{[^}]*refreshButton\.disabled = true/);
+  assert.match(app, /onChange\(state\)\s*\{[^}]*refreshButton\.disabled = false/);
+});
+
 test('los controles reservan espacio para el aviso sin desplazar la página al fallar', async () => {
   const css = await text('../dist/assets/site.css');
   assert.match(css, /\.demo-source-controls\s*\{[^}]*display:\s*grid;/);
