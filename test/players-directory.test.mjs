@@ -30,6 +30,15 @@ test('el índice ofrece navegación A–Z y estado vacío honesto', () => {
   assert.match(empty, /No encontramos jugadores para esa búsqueda/);
 });
 
+test('las letras sin jugadores comunican su estado como texto y no como etiqueta de un span genérico', () => {
+  const html = renderPlayersDirectory(data).html;
+  assert.doesNotMatch(html, /<span aria-label="Sin jugadores con [A-Z]"/);
+  for (const letter of 'GHIJKLMNOPQRSTUVWXYZ') {
+    assert.match(html, new RegExp(`<span class="players-letter-empty"><span aria-hidden="true">${letter}</span><span class="players-visually-hidden">Sin jugadores con ${letter}</span></span>`));
+  }
+  assert.match(html, /<a href="#letra-a">A<\/a>/);
+});
+
 test('el directorio escapa el texto de búsqueda y los nombres de la muestra', () => {
   const unsafe = { ...data, players: data.players.map((person) => person.id === 'celia-montiel'
     ? { ...person, name: '<img src=x onerror=alert(1)>' } : person) };

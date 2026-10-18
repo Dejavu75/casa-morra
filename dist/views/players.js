@@ -82,7 +82,7 @@ export function renderPlayersDirectory(data, { q = '' } = {}, messages = players
   }
   const index = [...alphabet].map((letter) => sections.has(letter)
     ? `<a href="#letra-${letter.toLowerCase()}">${letter}</a>`
-    : `<span aria-label="${h(message(messages, 'emptyLetter')(letter))}">${letter}</span>`).join('');
+    : `<span class="players-letter-empty"><span aria-hidden="true">${letter}</span><span class="players-visually-hidden">${h(message(messages, 'emptyLetter')(letter))}</span></span>`).join('');
   const groups = [...sections].map(([letter, people]) => {
     const items = people.map((person) => {
       const url = playerUrl(person);
