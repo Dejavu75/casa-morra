@@ -111,7 +111,7 @@ h2 {
 }
 
 @media (max-width: 600px) {
-  .players-page h2 {
+  .players-page > .players-back ~ section h2 {
     font-size: clamp(2rem, 8vw, 3rem);
   }
 }
