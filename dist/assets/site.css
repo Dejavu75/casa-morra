@@ -353,6 +353,17 @@ h2 em {
   }
 }
 
+@media (max-width: 350px) {
+  .menu-toggle [data-i18n="nav.menu"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
 /* Integración pública: las vistas comparten la misma identidad editorial. */
 .site-nav {
   gap: clamp(0.7rem, 1.5vw, 1.4rem);
