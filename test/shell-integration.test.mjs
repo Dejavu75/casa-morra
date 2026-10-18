@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { shouldClientNavigate } from '../dist/assets/app.js';
+import { es } from '../dist/i18n/index.js';
 
 const read = (path) => readFile(new URL(`../dist/${path}`, import.meta.url), 'utf8');
 
@@ -16,6 +17,15 @@ test('el shell ofrece navegación pública y estilos de todas las vistas', async
   assert.match(html, /<main id="contenido"/);
   assert.match(html, /<html lang="es">/);
   assert.doesNotMatch(html, /En preparación|Próximamente/);
+});
+
+test('el nombre accesible de la marca conserva todo el texto visible en orden', async () => {
+  const html = await read('index.html');
+  const brand = html.match(/<a class="brand"[^>]*aria-label="([^"]+)"[^>]*>([\s\S]*?)<\/a>/);
+  assert.ok(brand, 'la marca debe ser un enlace con nombre accesible');
+  const visible = brand[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().replace(/CM\s+\./, 'CM.');
+  assert.ok(brand[1].includes(visible), `el nombre accesible debe incluir «${visible}»`);
+  assert.equal(es['brand.home'], brand[1], 'el catálogo activo no debe restaurar un nombre diferente');
 });
 
 test('solo intercepta clic principal sin modificadores en enlace interno', () => {

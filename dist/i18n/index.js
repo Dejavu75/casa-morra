@@ -10,7 +10,7 @@ import { puzzleEs } from '../views/puzzle.js';
 export const es = Object.freeze({
   'meta.description': 'Casa Morra: torneos, jugadores, estadísticas y partidas ficticias de ajedrez.',
   'skip.content': 'Saltar al contenido',
-  'brand.home': 'Casa Morra, ir al inicio',
+  'brand.home': 'CM. Casa Morra, ir al inicio',
   'nav.menu': 'Menú',
   'nav.main': 'Navegación principal',
   'nav.home': 'Inicio',
