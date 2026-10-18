@@ -52,12 +52,28 @@ function playerLink(data, playerId, fallbackName) {
   return href ? `<a href="${e(href)}">${name}</a>` : name;
 }
 
-function boardValue(board, value, locale) {
-  return `${e(formatNumber(value, locale))}${board.id === 'winRate' ? ' %' : ''}`;
+function boardValueFormatter(board, locale) {
+  if (board.id !== 'peakElo') return (value) => formatNumber(value, locale);
+  for (let digits = 1; digits <= 20; digits += 1) {
+    const formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: digits });
+    const valuesByLabel = new Map();
+    const ambiguous = board.entries.some(({ value }) => {
+      const label = formatter.format(value);
+      const previous = valuesByLabel.get(label);
+      valuesByLabel.set(label, value);
+      return previous !== undefined && previous !== value;
+    });
+    if (!ambiguous) return (value) => formatter.format(value);
+  }
+  return (value) => new Intl.NumberFormat(locale, { maximumFractionDigits: 20 }).format(value);
 }
 
-function boardTable(data, board, entries, caption, labels, locale) {
-  return `<table class="record-table"><caption>${e(caption)}</caption><thead><tr><th scope="col">${e(labels.position)}</th><th scope="col">${e(labels.player)}</th><th scope="col">${e(labels.value)}</th></tr></thead><tbody>${entries.map((entry) => `<tr><th scope="row">${e(formatNumber(entry.rank, locale))}</th><td>${playerLink(data, entry.playerId, entry.name)}</td><td>${boardValue(board, entry.value, locale)}</td></tr>`).join('')}</tbody></table>`;
+function boardValue(board, value, formatValue) {
+  return `${e(formatValue(value))}${board.id === 'winRate' ? ' %' : ''}`;
+}
+
+function boardTable(data, board, entries, caption, labels, locale, formatValue) {
+  return `<table class="record-table"><caption>${e(caption)}</caption><thead><tr><th scope="col">${e(labels.position)}</th><th scope="col">${e(labels.player)}</th><th scope="col">${e(labels.value)}</th></tr></thead><tbody>${entries.map((entry) => `<tr><th scope="row">${e(formatNumber(entry.rank, locale))}</th><td>${playerLink(data, entry.playerId, entry.name)}</td><td>${boardValue(board, entry.value, formatValue)}</td></tr>`).join('')}</tbody></table>`;
 }
 
 export function renderStatistics(data, labels = recordsEs, locale = 'es-AR') {
@@ -67,8 +83,9 @@ export function renderStatistics(data, labels = recordsEs, locale = 'es-AR') {
     const description = labels.boardRules?.[board.id] ?? '';
     const visible = board.entries.slice(0, 10);
     const extra = board.entries.slice(10);
-    const table = visible.length ? boardTable(data, board, visible, title, labels, locale) : `<p>${e(labels.noEligible)}</p>`;
-    const more = extra.length ? `<details><summary>${e(labels.more)}</summary>${boardTable(data, board, extra, title, labels, locale)}</details>` : '';
+    const formatValue = boardValueFormatter(board, locale);
+    const table = visible.length ? boardTable(data, board, visible, title, labels, locale, formatValue) : `<p>${e(labels.noEligible)}</p>`;
+    const more = extra.length ? `<details><summary>${e(labels.more)}</summary>${boardTable(data, board, extra, title, labels, locale, formatValue)}</details>` : '';
     return `<section class="record-board" data-record-id="${e(board.id)}" aria-labelledby="record-${e(board.id)}"><h2 id="record-${e(board.id)}">${e(title)}</h2><p>${e(description)}</p>${table}${more}</section>`;
   }).join('');
   return { title: labels.statisticsTitle, html: `<section class="records-page"><h1>${e(labels.statisticsTitle)}</h1><p>${e(labels.demo)}</p>${sections}</section>` };

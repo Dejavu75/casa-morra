@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import * as demo from '../dist/data/demo.js';
 import { getClassics, getLeaderboards } from '../dist/domain/statistics.js';
 import { hasDemoReplay } from '../dist/views/game.js';
-import { renderStatistics, renderClassics, renderClassic } from '../dist/views/records.js';
+import { renderStatistics, renderClassics, renderClassic, recordsEs } from '../dist/views/records.js';
 
 const sample = { ...demo };
 
@@ -19,6 +19,21 @@ test('las diez clasificaciones presentan población, regla y tabla accesible', (
   assert.match(page.html, /<caption/);
   assert.match(page.html, /<th scope="col"/);
   assert.doesNotMatch(page.html, /mi posición|posición personal|bye.*partida jugada/i);
+});
+
+test('el Elo visible distingue valores con puestos diferentes sin alterar otros récords', () => {
+  const html = renderStatistics(sample).html;
+  const elo = html.match(/<section[^>]*data-record-id="peakElo"[\s\S]*?<\/section>/)?.[0] ?? '';
+  const rows = [...elo.matchAll(/<tr><th scope="row">([^<]+)<\/th><td>[^<]*(?:<a[^>]*>[^<]+<\/a>)?<\/td><td>([^<]+)<\/td><\/tr>/g)]
+    .map(([, rank, value]) => ({ rank, value }));
+  assert.equal(rows.length, getLeaderboards(sample).find((board) => board.id === 'peakElo').entries.length);
+  const ranksByValue = new Map();
+  for (const { rank, value } of rows) {
+    if (ranksByValue.has(value)) assert.equal(rank, ranksByValue.get(value), `Elo ${value}`);
+    ranksByValue.set(value, rank);
+  }
+  assert.match(html, /data-record-id="winRate"[\s\S]*?41,7 %/);
+  assert.match(renderStatistics(sample, recordsEs, 'en-US').html, /data-record-id="peakElo"[\s\S]*?1,409\.98/);
 });
 
 test('una clasificación larga usa expansión nativa sin esconder el encabezado de tabla', () => {

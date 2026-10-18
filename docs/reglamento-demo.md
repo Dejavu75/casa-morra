@@ -59,7 +59,7 @@ Son **reglas de esta demostración**, no una réplica de los criterios de otro c
 | 9 | Torneos jugados | Participaciones en tabla oficial. |
 | 10 | Podios | Puestos oficiales 1, 2 o 3. |
 
-En los listados de récords, el valor determina el puesto; los valores iguales comparten puesto y el nombre solo ordena su presentación. Se indican la población, el denominador y los eventos incluidos junto a cada cifra. Ningún récord crea una cuenta de usuario ni una posición «propia» mientras no haya autenticación.
+En los listados de récords, el valor determina el puesto; los valores iguales comparten puesto y el nombre solo ordena su presentación. En el récord de mayor Elo demo, la vista muestra los decimales necesarios para distinguir valores con puestos diferentes sin cambiar el cálculo interno. Se indican la población, el denominador y los eventos incluidos junto a cada cifra. Ningún récord crea una cuenta de usuario ni una posición «propia» mientras no haya autenticación.
 
 ### API del núcleo
 
