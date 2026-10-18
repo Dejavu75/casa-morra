@@ -26,6 +26,9 @@
 .home-totals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-block: 1rem 3rem; border-block: 1px solid var(--line); }
 .home-totals p { margin: 0; padding: 1.5rem .7rem; }
 .home-totals strong { display: block; color: var(--heading); font-family: var(--font-serif); font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1; }
+.home-story { max-width: 68ch; border-left: 4px solid var(--accent-text); padding: .1rem 1.25rem 1.5rem; margin-block: 1rem 3rem; }
+.home-join { margin-block: 3rem 1rem; border: 1px solid var(--line); padding: clamp(1rem, 3vw, 2rem); }
+.home-join h2 { margin-top: 0; }
 .home-gallery { margin-block: 1rem 3rem; }
 .editorial-carousel { min-width: 0; border: 1px solid var(--line); padding: 1rem; }
 .editorial-carousel legend { padding-inline: .4rem; font-weight: 700; }

@@ -25,6 +25,24 @@ test('la portada calcula poblaciones demo y presenta actividad y enlaces reales'
   assert.match(earlier.html, /Copa Casa Morra/);
 });
 
+test('la portada muestra la historia ficticia y una invitación honesta para socios', () => {
+  const html = renderHome(data, { today: '2026-10-07' }).html;
+  assert.match(html, /<section class="home-story" aria-labelledby="home-story-title">/);
+  assert.match(html, /<h2 id="home-story-title">Historia de Casa Morra<\/h2>/);
+  assert.match(html, new RegExp(editorial.club.history));
+  assert.match(html, /¿Te gustaría formar parte\?/);
+  assert.match(html, /href="\/socios"[^>]*>Conocer la propuesta para socios<\/a>/);
+  assert.ok(html.indexOf('class="home-totals"') < html.indexOf('class="home-story"'));
+  assert.ok(html.indexOf('class="home-story"') < html.indexOf('class="home-gallery"'));
+
+  const translated = renderHome(data, {}, { story: 'Our story', join: 'Join us' }).html;
+  assert.match(translated, /<h2 id="home-story-title">Our story<\/h2>/);
+  assert.match(translated, /<h2 id="home-join-title">Join us<\/h2>/);
+  const unsafe = renderHome({ ...data, editorial: { ...editorial, club: { ...editorial.club, history: '<img src=x onerror=alert(1)>' } } }).html;
+  assert.doesNotMatch(unsafe, /<img src=x/);
+  assert.match(unsafe, /&lt;img src=x onerror=alert\(1\)&gt;/);
+});
+
 test('institución, noticias, clases y socios usan contenido ficticio sin acciones falsas', () => {
   assert.match(renderAbout(data).html, /Esta casa de demostración/);
   assert.match(renderNewsList(data).html, /Cuaderno para explorar aperturas/i);

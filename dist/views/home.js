@@ -24,6 +24,10 @@ export const homeEs = Object.freeze({
   galleryStudyCaption: 'Una mesa para revisar ideas y anotar variantes.',
   galleryRoomCaption: 'Un espacio imaginario para compartir el análisis.',
   galleryDisclaimer: 'Imagen generada para esta demostración; no retrata una sede real.',
+  story: 'Historia de Casa Morra',
+  join: '¿Te gustaría formar parte?',
+  joinNote: 'Explora la propuesta ficticia para socios. Esta demostración no recibe solicitudes ni pagos.',
+  joinLink: 'Conocer la propuesta para socios',
 });
 
 const msg = (messages, key) => messages?.[key] ?? homeEs[key];
@@ -76,12 +80,14 @@ export function renderHome(data, { today = localToday(), puzzleMessages = puzzle
     <section class="content-hero" aria-labelledby="home-title"><p class="content-eyebrow">${h(msg(messages, 'eyebrow'))}</p><h1 id="home-title">${h(msg(messages, 'headline'))}</h1><p>${h(msg(messages, 'intro'))}</p>
       <nav aria-label="${h(msg(messages, 'explore'))}"><a href="${h(routeHref('tournaments'))}">${h(msg(messages, 'tournaments'))}</a><a href="${h(routeHref('players'))}">${h(msg(messages, 'players'))}</a><a href="${h(routeHref('about'))}">${h(msg(messages, 'about'))}</a></nav></section>
     <section class="home-totals" aria-label="${h(msg(messages, 'totals'))}"><p><strong>${h(formatNumber(totals.players, locale))}</strong> ${h(msg(messages, 'players'))}</p><p><strong>${h(formatNumber(totals.tournaments, locale))}</strong> ${h(msg(messages, 'tournaments'))}</p><p><strong>${h(formatNumber(totals.games, locale))}</strong> ${h(msg(messages, 'games'))}</p></section>
+    ${data.editorial?.club?.history ? `<section class="home-story" aria-labelledby="home-story-title"><h2 id="home-story-title">${h(msg(messages, 'story'))}</h2><p>${h(data.editorial.club.history)}</p><a href="${h(routeHref('about'))}">${h(msg(messages, 'about'))}</a></section>` : ''}
     ${renderGallery(messages)}
     <div data-puzzle-host>${renderPuzzle(puzzleMessages)}</div>
     <div class="home-grid"><section aria-labelledby="home-next"><h2 id="home-next">${h(msg(messages, 'upcoming'))}</h2>${futureHtml}</section>
       <section aria-labelledby="home-annual"><h2 id="home-annual">${h(msg(messages, 'annual'))}${season ? ` · ${h(season.label)}` : ''}</h2>${annualRows ? `<ul class="home-annual">${annualRows}</ul>` : `<p>${h(msg(messages, 'annualEmpty'))}</p>`}${annualUrl ? `<a href="${h(annualUrl)}">${h(msg(messages, 'allAnnual'))}</a>` : ''}</section></div>
     <section aria-labelledby="home-news"><h2 id="home-news">${h(msg(messages, 'news'))}</h2>${newsRows ? `<ul class="content-card-grid">${newsRows}</ul>` : `<p>${h(msg(messages, 'noNews'))}</p>`}<a href="${h(routeHref('news'))}">${h(msg(messages, 'allNews'))}</a></section>
     <section aria-labelledby="home-featured"><h2 id="home-featured">${h(msg(messages, 'featured'))}</h2>${featuredHtml}</section>
-    <nav class="content-end-links" aria-label="${h(msg(messages, 'projectInfo'))}"><a href="${h(routeHref('classes'))}">${h(msg(messages, 'classes'))}</a><a href="${h(routeHref('membership'))}">${h(msg(messages, 'membership'))}</a></nav>
+    <section class="home-join" aria-labelledby="home-join-title"><h2 id="home-join-title">${h(msg(messages, 'join'))}</h2><p>${h(msg(messages, 'joinNote'))}</p><a href="${h(routeHref('membership'))}">${h(msg(messages, 'joinLink'))}</a></section>
+    <nav class="content-end-links" aria-label="${h(msg(messages, 'projectInfo'))}"><a href="${h(routeHref('classes'))}">${h(msg(messages, 'classes'))}</a></nav>
   </div>` };
 }
