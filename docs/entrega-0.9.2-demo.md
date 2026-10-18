@@ -22,7 +22,7 @@ Invoke-WebRequest http://127.0.0.1:18101/health
 Invoke-WebRequest http://127.0.0.1:18101/demo/snapshot.json
 ```
 
-El estado de la exportación debe indicar `exists:true` y `fresh:true`. Recorrer en navegador las quince clases de rutas, diez tablas estadísticas, búsqueda de jugadores, filtro de torneos, visor, problema y menú móvil. En el récord de Elo, los puestos distintos no deben mostrar el mismo valor redondeado. Antes del cambio de `8088`, cargar la versión anterior en un navegador con caché normal; después del cambio, volver a entrar al mismo origen **sin deshabilitar caché ni recargar forzosamente** y comprobar el Elo corregido. Registrar los casos omitidos: `healthy` y HTTP 200 no prueban funcionalidad completa ni accesibilidad con lector real.
+El estado de la exportación debe indicar `exists:true` y `fresh:true`. Recorrer en navegador las quince clases de rutas, diez tablas estadísticas, búsqueda de jugadores, filtro de torneos, visor, problema y menú móvil. En el récord de Elo, los puestos distintos no deben mostrar el mismo valor redondeado. Antes del cambio de `8088`, cargar la versión anterior en un navegador con caché normal; después del cambio, entrar a <http://127.0.0.1:8088/estadisticas?entrega=0.9.2-demo> **sin deshabilitar caché ni recargar forzosamente** y comprobar el Elo corregido. El parámetro hace nueva la URL del documento: una ruta antigua previamente cacheada todavía puede mostrar HTML y módulos viejos. Informar ese límite, no presentarlo como actualización automática de todas las pestañas. Registrar los casos omitidos: `healthy` y HTTP 200 no prueban funcionalidad completa ni accesibilidad con lector real.
 
 ## Preservar reversión antes de cambiar `8088`
 
@@ -62,7 +62,7 @@ Invoke-WebRequest http://127.0.0.1:8088/health
 Invoke-WebRequest http://127.0.0.1:8088/demo/snapshot.json
 ```
 
-Comparar el ID de imagen con `$imagenCandidata`; verificar enlace exclusivo `127.0.0.1:8088`, montaje público de solo lectura, `restart: unless-stopped`, `healthy`, snapshot con `Cache-Control: no-store` y rutas privadas con 404. Recorrer las vistas en navegador y comprobar que se indica «Exportación pública verificada», que los valores Elo y sus puestos concuerdan y que no hay errores de consola.
+Comparar el ID de imagen con `$imagenCandidata`; verificar enlace exclusivo `127.0.0.1:8088`, montaje público de solo lectura, `restart: unless-stopped`, `healthy`, snapshot con `Cache-Control: no-store` y rutas privadas con 404. Ingresar con `?entrega=0.9.2-demo` desde el navegador previamente cacheado; recorrer las vistas y comprobar «Exportación pública verificada», concordancia entre Elo y puestos y ausencia de errores de consola. No inferir que una pestaña vieja se reemplazó sola.
 
 Si falla la aceptación, restaurar el alias local y recrear con **el Compose del checkout anterior**, sin construir ni borrar datos:
 

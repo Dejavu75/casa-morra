@@ -52,6 +52,10 @@ runtimeTest('HTML y módulos usados por la entrega exigen revalidación de cach�
     assert.match(response.headers['cache-control'] ?? '', /(?:^|,)\s*no-cache\s*(?:,|$)/i, path);
     assert.equal(response.headers['x-content-type-options'], 'nosniff', path);
   }
+  const entry = await request('/estadisticas?entrega=0.9.2-demo');
+  assert.equal(entry.status, 200);
+  assert.match(entry.headers['cache-control'] ?? '', /no-cache/i);
+  assert.match(entry.body.toString('utf8'), /src="\/assets\/app\.js\?v=0\.9\.2-demo"/);
 });
 
 runtimeTest('rutas profundas, 404 y cabeceras de seguridad permanecen intactos', async () => {
