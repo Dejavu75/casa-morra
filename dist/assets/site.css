@@ -110,6 +110,12 @@ h2 {
   letter-spacing: -0.05em;
 }
 
+@media (max-width: 600px) {
+  .players-page h2 {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+}
+
 h2 em {
   color: var(--accent-text);
 }

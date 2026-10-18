@@ -28,6 +28,13 @@ test('el menú conserva su nombre accesible en pantallas de 320 píxeles', () =>
   assert.match(compact, /clip-path:\s*inset\(50%\)/);
 });
 
+test('los títulos de perfil caben en pantallas de 320 píxeles sin alterar los demás títulos', () => {
+  const css = readFileSync(cssPath, 'utf8');
+  assert.match(css, /^h2\s*\{[^}]*font-size:\s*clamp\(3rem, 5\.2vw, 5\.5rem\)/m);
+  const mobile = css.match(/@media \(max-width: 600px\)\s*\{\s*\.players-page h2\s*\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(mobile, /font-size:\s*clamp\(2rem, 8vw, 3rem\)/);
+});
+
 test('el botón de actualización conserva su estilo y los controles nativos comparten foco visible', () => {
   const css = readFileSync(cssPath, 'utf8');
   const control = css.match(/\.demo-source-controls \[data-demo-refresh\]\s*\{([^}]*)\}/)?.[1] ?? '';
