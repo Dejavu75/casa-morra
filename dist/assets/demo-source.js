@@ -1,4 +1,5 @@
 import { validateOfficialFields, validateOfficialStandings } from '../domain/official-integrity.js';
+import { sha256Hex } from './sha256.js';
 
 // Contrato público del exportador. El hash prueba integridad, no vigencia del almacén privado.
 const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -104,7 +105,6 @@ function validateSnapshot(snapshot) {
 }
 
 export async function validatePublicDemo(value, crypto) {
-  if (!crypto?.subtle?.digest) throw new Error('WebCrypto no disponible');
   if (!exact(value, ['format', 'version', 'source', 'snapshot']) ||
       value.format !== 'casa-morra.demo-public' || value.version !== 1 ||
       !exact(value.source, ['bytes', 'sha256']) ||
@@ -113,8 +113,10 @@ export async function validatePublicDemo(value, crypto) {
   const data = validateSnapshot(value.snapshot);
   const bytes = new TextEncoder().encode(JSON.stringify(value.snapshot));
   if (bytes.length !== value.source.bytes) throw invalid();
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
-  const sha256 = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
+  const sha256 = crypto?.subtle?.digest
+    ? Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)),
+      (byte) => byte.toString(16).padStart(2, '0')).join('')
+    : sha256Hex(bytes);
   if (sha256 !== value.source.sha256) throw invalid();
   return data;
 }

@@ -11,7 +11,7 @@ La variante `compose.lan.yaml` usa la red bridge de Docker y publica el puerto �
 docker compose -p casa-morra -f compose.yaml -f compose.lan.yaml config
 ```
 
-3. Recordar que el sitio usa HTTP sin TLS ni autenticación. No abrir el router ni anunciar acceso desde Internet. El firewall del anfitrión y las reglas de la red pueden impedir el acceso desde otros equipos aunque la publicación local funcione.
+3. Recordar que el sitio usa HTTP sin TLS ni autenticación. El SHA-256 del snapshot demo también se valida en navegadores sin WebCrypto, pero no protege el transporte ni autentica al emisor. No abrir el router ni anunciar acceso desde Internet. El firewall del anfitrión y las reglas de la red pueden impedir el acceso desde otros equipos aunque la publicación local funcione.
 
 ## Activación y comprobación
 

@@ -95,8 +95,29 @@ test('la validación rechaza metadatos, hash, bytes, forma y referencias alterad
     const value = structuredClone(exported());
     mutate(value);
     await assert.rejects(validatePublicDemo(value, webcrypto), /inválid|alterad/i);
+    await assert.rejects(validatePublicDemo(value, null), /inválid|alterad/i);
   }
-  await assert.rejects(validatePublicDemo(exported(), null), /WebCrypto/i);
+  const withoutWebCrypto = await validatePublicDemo(exported(), null);
+  assert.equal(withoutWebCrypto.games.length, demo.games.length);
+  const alteredWithoutWebCrypto = structuredClone(exported());
+  alteredWithoutWebCrypto.snapshot.data.players[0].name = 'Cambio no declarado';
+  await assert.rejects(validatePublicDemo(alteredWithoutWebCrypto, null), /inválid|alterad/i);
+});
+
+test('el origen HTTP sin WebCrypto carga la exportación íntegra y conserva el aviso ante corrupción', async () => {
+  let value = exported();
+  const events = [];
+  const source = createDemoSource({ fixture: demo, crypto: undefined,
+    fetch: async () => ({ ok: true, json: async () => value }),
+    onChange: (state) => events.push(state) });
+  await source.refresh();
+  assert.equal(events.at(-1).kind, 'export');
+  assert.equal(events.at(-1).warning, null);
+  value = structuredClone(exported());
+  value.source.sha256 = '0'.repeat(64);
+  await source.refresh();
+  assert.equal(events.at(-1).kind, 'fixture');
+  assert.equal(events.at(-1).warning, 'demo.fallback');
 });
 
 test('respuesta ausente o corrupta usa fixture con aviso, y actualización posterior reemplaza', async () => {
