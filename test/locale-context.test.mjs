@@ -30,7 +30,7 @@ test('el locale inyectado atraviesa vistas, fechas, números y fallback español
   const spanish = renderRoute(route('/torneos'), demo, { locale: 'fr-FR', catalogs });
   assert.match(spanish.html, /3 de octubre de 2026/);
   assert.match(spanish.html, /<h1>Torneos<\/h1>/);
-  assert.match(renderRoute(route('/'), demo, { locale: 'en-US', catalogs }).html, /October 4, 2026/);
+  assert.match(renderRoute(route('/'), demo, { locale: 'en-US', catalogs }).html, /<strong>70<\/strong><span>Partidas al tablero/);
   assert.match(renderRoute(route('/novedades'), demo, { locale: 'en-US', catalogs }).html, /October 4, 2026/);
   assert.match(renderRoute(route('/jugadores/ayla-neri'), demo, { locale: 'en-US', catalogs }).html, /October 3, 2026/);
   assert.match(renderRoute(route('/estadisticas'), demo, { locale: 'en-US', catalogs }).html, /Estadísticas y récords/);
@@ -75,5 +75,5 @@ test('el contexto mantiene los mensajes inyectados en puzzle y replay interactiv
   detachReplay();
   const app = readFileSync(fileURLToPath(new URL('../dist/assets/app.js', import.meta.url)), 'utf8');
   assert.match(app, /attachGameReplay\([^;]+messages\('game'\)/);
-  assert.match(app, /attachPuzzle\([^;]+messages\('puzzle'\)/);
+  assert.doesNotMatch(app, /attachPuzzle\(/);
 });

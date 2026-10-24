@@ -1,6 +1,12 @@
 # Casa Morra
 
-Sitio independiente de ajedrez en español, con datos ficticios de demostración. Nginx sirve el sitio estático desde `dist/`; no hay backend, cuentas ni datos del club de referencia.
+Sitio independiente de estadísticas de ajedrez en español, con datos ficticios de demostración. Nginx sirve el sitio estático desde `dist/`; no hay backend, cuentas ni datos del club de referencia.
+
+## Experiencia estadística
+
+La portada `/` y `/estadisticas` muestran el mismo tablero: totales de jugadores, torneos y partidas al tablero, acceso a diez clasificaciones y reglas de cálculo visibles. La navegación pública solo ofrece estadísticas. Los nombres de las tablas son texto, no enlaces a perfiles. Las URL históricas conocidas se redirigen en el navegador a `/estadisticas`; las direcciones desconocidas conservan la vista 404. Se mantienen los módulos de torneos, jugadores y demás contenidos como soporte de datos y reversión, pero no se presentan en la experiencia pública actual. El idioma publicado es español y los textos de las vistas se mantienen en catálogos para incorporar otros idiomas más adelante.
+
+Los totales y clasificaciones se calculan sobre el fixture original o sobre la exportación pública verificada que el sitio cargue. «Datos de demostración» permanece visible; no son estadísticas del club de referencia.
 
 ## Verificación local
 

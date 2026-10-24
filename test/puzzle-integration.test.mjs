@@ -14,12 +14,11 @@ test('la portada incorpora el problema original después de la galería', () => 
   assert.ok(html.indexOf('data-puzzle-host') < html.indexOf('class="home-grid"'));
 });
 
-test('el shell carga estilo del problema y adjunta y libera sus eventos en navegación', async () => {
+test('el shell conserva el estilo del problema histórico sin montarlo en portada', async () => {
   const index = await read('index.html');
   const app = await read('assets/app.js');
   assert.match(index, /<link rel="stylesheet" href="\/views\/puzzle.css">/);
   assert.ok(index.indexOf('/views/content.css') < index.indexOf('/views/puzzle.css'));
-  assert.match(app, /import \{ attachPuzzle \} from '\.\.\/views\/puzzle\.js';/);
-  assert.match(app, /detachPuzzle\(\);[\s\S]*main\.innerHTML = page\.html/);
-  assert.match(app, /route\.name === 'home'[\s\S]*attachPuzzle\(main\.querySelector\('\[data-puzzle-host\]'\),\s*\{/);
+  assert.doesNotMatch(app, /attachPuzzle\(/);
+  assert.match(app, /case 'home': return renderStatistics\(/);
 });

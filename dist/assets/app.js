@@ -5,10 +5,8 @@ import { renderTournamentList, renderTournamentDetail } from '../views/tournamen
 import { renderAnnual } from '../views/annual.js?v=0.9.3-demo';
 import { renderPlayersDirectory, renderPlayerProfile } from '../views/players.js?v=0.9.3-demo';
 import { renderStatistics, renderClassics, renderClassic } from '../views/records.js?v=0.9.3-demo';
-import { renderHome } from '../views/home.js?v=0.9.3-demo';
 import { renderAbout, renderNewsList, renderNewsDetail, renderClasses, renderMembership } from '../views/editorial.js?v=0.9.3-demo';
 import { renderGame, attachGameReplay } from '../views/game.js';
-import { attachPuzzle } from '../views/puzzle.js';
 import { escapeHtml as h } from '../views/common.js';
 import { applyTheme, nextTheme, readTheme, saveTheme } from './theme.js';
 import { createDemoSource } from './demo-source.js';
@@ -32,7 +30,7 @@ export function renderRoute(route, source = demoData, { locale = 'es', catalogs 
   const { messages } = context;
   const formatLocale = context.locale;
   switch (route.name) {
-    case 'home': return renderHome(source, { puzzleMessages: messages('puzzle') }, messages('home'), formatLocale);
+    case 'home': return renderStatistics(source, messages('records'), formatLocale);
     case 'tournaments': return renderTournamentList(source, route.query, messages('competitive'), formatLocale);
     case 'tournament': return renderTournamentDetail(source, route.params.slug, messages('competitive'), formatLocale);
     case 'annual': return renderAnnual(source, route.params.seasonId, messages('competitive'), formatLocale);
@@ -57,6 +55,13 @@ export function renderRoute(route, source = demoData, { locale = 'es', catalogs 
       };
     }
   }
+}
+
+export function resolvePublicRoute(route) {
+  if (route.name === 'home' || route.name === 'statistics' || route.name === 'not-found') {
+    return { route, redirect: false };
+  }
+  return { route: parseRoute(routeHref('statistics')), redirect: true };
 }
 
 export function shouldClientNavigate(event, anchor, currentOrigin) {
@@ -110,7 +115,6 @@ function startApp() {
   try { storage = window.localStorage; } catch { /* El sitio sigue funcionando sin almacenamiento. */ }
   let theme = readTheme(storage) ?? (window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? 'oscuro' : 'claro');
   let detachReplay = () => {};
-  let detachPuzzle = () => {};
   let activeData = demoData;
   const source = createDemoSource({ fixture: demoData, fetch: (...args) => window.fetch(...args),
     crypto: window.crypto, onChange(state) {
@@ -136,26 +140,21 @@ function startApp() {
   }
 
   function renderLocation({ focus = false, scroll = false } = {}) {
-    const route = parseRoute(window.location.pathname, window.location.search);
+    const requested = parseRoute(window.location.pathname, window.location.search);
+    const { route, redirect } = resolvePublicRoute(requested);
+    if (redirect) window.history.replaceState({}, '', routeHref('statistics'));
     const page = renderRoute(route, activeData, { locale });
     detachReplay();
-    detachPuzzle();
     detachReplay = () => {};
-    detachPuzzle = () => {};
     main.innerHTML = page.html;
     document.title = page.title.includes('Casa Morra') ? page.title : `${page.title} — Casa Morra`;
-    const active = navGroup[route.name] ?? route.name;
+    const active = route.name === 'home' ? 'statistics' : navGroup[route.name] ?? route.name;
     for (const link of navigation?.querySelectorAll('[data-route-name]') ?? []) {
       if (link.dataset.routeName === active) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     }
     if (route.name === 'game') {
       detachReplay = attachGameReplay(main.querySelector('[data-game-replay]'), activeData, route.params.id, messages('game'));
-    }
-    if (route.name === 'home') {
-      detachPuzzle = attachPuzzle(main.querySelector('[data-puzzle-host]'), {
-        messages: messages('puzzle'),
-      });
     }
     setMenuOpen(false);
     if (focus) main.focus({ preventScroll: true });

@@ -4,12 +4,11 @@ import * as demo from '../dist/data/demo.js';
 import { parseRoute } from '../dist/router.js';
 import { getClassics } from '../dist/domain/statistics.js';
 import { es, resolveViewMessages } from '../dist/i18n/index.js';
-import { initialPuzzleState, transitionPuzzle } from '../dist/views/puzzle.js';
 import { renderRoute } from '../dist/assets/app.js';
 
 const data = { ...demo };
 
-test('el dispatcher entrega título y encabezado para las quince rutas públicas', () => {
+test('el dispatcher conserva título y encabezado para las quince rutas históricas', () => {
   const classic = getClassics(data)[0];
   const first = data.players.find((player) => player.id === classic.firstId).slug;
   const second = data.players.find((player) => player.id === classic.secondId).slug;
@@ -44,9 +43,8 @@ test('los catálogos por vista cambian textos sin cambiar cifras, IDs ni enlaces
   } } };
   const options = { locale: 'en-US', catalogs };
   const home = renderRoute(parseRoute('/'), data, options).html;
-  assert.match(home, /Every game starts with an idea/);
-  assert.match(home, /<strong>70<\/strong> partidas/);
-  assert.match(home, /href="\/torneos"/);
+  assert.match(home, /<h1>Records<\/h1>/);
+  assert.doesNotMatch(home, /href="\/torneos"/);
   const tournament = renderRoute(parseRoute('/torneos'), data, options).html;
   assert.match(tournament, /<h1>Events<\/h1>/);
   assert.match(tournament, /Internal/);
@@ -81,17 +79,13 @@ test('el 404 traduce etiquetas y escapa contenido de un catálogo externo', () =
   assert.match(page.html, /href="\/">Back home<\/a>/);
 });
 
-test('el catálogo del problema llega a portada sin alterar posición ni solución', () => {
+test('la portada estadística no carga el problema de ajedrez', () => {
   const catalogs = { es, en: { views: { puzzle: {
     title: 'Mate in one', instructions: 'Enter a UCI move.',
     initialFeedback: 'Choose a move.',
     correctFeedback: (notation) => `Solved: ${notation}`,
   } } } };
   const html = renderRoute(parseRoute('/'), data, { locale: 'en', catalogs }).html;
-  assert.match(html, /<h2 id="puzzle-title">Mate in one<\/h2>/);
-  assert.match(html, /<p id="puzzle-instructions">Enter a UCI move\.<\/p>/);
-  assert.match(html, /data-fen="8\/8\/8\/8\/8\/k1K5\/4Q3\/8 w - - 0 1"/);
-  const messages = resolveViewMessages('puzzle', 'en', catalogs);
-  assert.equal(transitionPuzzle(initialPuzzleState(messages), { type: 'submit', move: 'e2a6' }, messages).feedback,
-    'Solved: Qa6#');
+  assert.doesNotMatch(html, /data-puzzle-host|Mate in one|Enter a UCI move/);
+  assert.match(html, /<h1>Estadísticas y récords<\/h1>/);
 });

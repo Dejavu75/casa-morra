@@ -6,11 +6,11 @@ import { es } from '../dist/i18n/index.js';
 
 const read = (path) => readFile(new URL(`../dist/${path}`, import.meta.url), 'utf8');
 
-test('el shell ofrece navegación pública y estilos de todas las vistas', async () => {
+test('el shell ofrece solo navegación estadística y conserva estilos para rutas históricas', async () => {
   const html = await read('index.html');
-  for (const href of ['/torneos', '/jugadores', '/estadisticas', '/clasicos', '/novedades', '/clases', '/nosotros', '/socios']) {
-    assert.ok(html.includes(`href="${href}"`), href);
-  }
+  assert.ok(html.includes('href="/estadisticas"'));
+  const navigation = html.match(/<nav\b[^>]*>([\s\S]*?)<\/nav>/)?.[1] ?? '';
+  assert.equal((navigation.match(/<a\b/g) ?? []).length, 1);
   for (const css of ['competitive.css', 'players.css', 'content.css', 'puzzle.css']) {
     assert.ok(html.includes(`/views/${css}`), css);
   }

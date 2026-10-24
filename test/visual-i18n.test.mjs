@@ -12,14 +12,14 @@ test('el catálogo español cubre etiquetas visibles y conserva un fallback', as
   const html = await read('dist/index.html');
   const keys = [...html.matchAll(/data-i18n(?:-aria|-placeholder|-content)?="([^"]+)"/g)].map((match) => match[1]);
 
-  assert.ok(keys.length >= 12, 'la portada debe declarar sus etiquetas traducibles');
+  assert.ok(keys.length >= 8, 'la portada debe declarar sus etiquetas traducibles');
   assert.ok(keys.includes('meta.description'), 'la descripción también debe incluirse en la cobertura del catálogo');
   for (const key of keys) assert.ok(es[key], `falta traducción: ${key}`);
   assert.equal(resolveLocale('en'), 'es');
   assert.equal(translate('nav.home', 'en'), es['nav.home']);
   assert.equal(translate('not.available', 'en'), 'not.available');
   assert.match(html, /<html lang="es">/);
-  assert.match(html, /<title>Casa Morra/);
+  assert.match(html, /<title>Estadísticas y récords — Casa Morra/);
   assert.match(html, /Datos de demostración/);
 });
 

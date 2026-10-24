@@ -8,7 +8,7 @@ import { gameEs } from '../views/game.js';
 import { puzzleEs } from '../views/puzzle.js';
 
 export const es = Object.freeze({
-  'meta.description': 'Casa Morra: torneos, jugadores, estadísticas y partidas ficticias de ajedrez.',
+  'meta.description': 'Casa Morra: estadísticas y récords de ajedrez con datos de demostración.',
   'skip.content': 'Saltar al contenido',
   'brand.home': 'CM. Casa Morra, ir al inicio',
   'nav.menu': 'Menú',
@@ -44,7 +44,7 @@ export const es = Object.freeze({
   'card.games': '03 / PARTIDAS',
   'card.pending': 'En preparación',
   'footer.demo': 'Datos de demostración. Sin cuentas ni inscripción en esta etapa.',
-  'footer.tagline': 'Una casa digital para el ajedrez.',
+  'footer.tagline': 'El ajedrez contado en cifras.',
   'notFound.title': 'Página no encontrada',
   'notFound.body': 'La dirección solicitada no forma parte de esta demostración.',
   'notFound.home': 'Volver al inicio',

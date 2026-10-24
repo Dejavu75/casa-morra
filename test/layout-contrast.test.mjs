@@ -18,7 +18,7 @@ test('el shell conserva contenido útil sin JavaScript y reserva la altura visib
   const html = await read('index.html');
   const css = await read('assets/site.css');
   assert.match(html, /<main id="contenido">[\s\S]*<h1 id="fallback-title">Casa Morra<\/h1>/);
-  assert.match(html, /Datos de demostración\. Para consultar torneos, jugadores y partidas se necesita JavaScript\./);
+  assert.match(html, /Datos de demostración\. Para consultar las estadísticas se necesita JavaScript\./);
   assert.match(css, /#contenido\s*\{[^}]*min-height:\s*100vh;[^}]*min-height:\s*100svh;/);
 });
 

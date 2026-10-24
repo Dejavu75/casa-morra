@@ -22,13 +22,12 @@ test('menú y pie responden a pantalla estrecha sin estilos de vistas', () => {
   assert.match(css, /@media \(max-width: 560px\)\s*\{[\s\S]*\.brand-name\s*\{[\s\S]*font-size: 1\.25rem/);
 });
 
-test('el menú conserva su nombre accesible en pantallas de 320 píxeles', () => {
-  const css = readFileSync(cssPath, 'utf8');
+test('la navegación estadística permanece visible sin menú en pantallas de 320 píxeles', () => {
+  const css = readFileSync(fileURLToPath(new URL('../dist/assets/stats.css', import.meta.url)), 'utf8');
   const html = readFileSync(fileURLToPath(new URL('../dist/index.html', import.meta.url)), 'utf8');
-  assert.match(html, /<span data-i18n="nav\.menu">Menú<\/span>/);
-  const compact = css.match(/@media \(max-width: 350px\)\s*\{\s*\.menu-toggle \[data-i18n="nav\.menu"\]\s*\{([^}]*)\}/)?.[1] ?? '';
-  assert.match(compact, /position:\s*absolute/);
-  assert.match(compact, /clip-path:\s*inset\(50%\)/);
+  assert.doesNotMatch(html, /data-menu-toggle/);
+  assert.match(html, /href="\/estadisticas"/);
+  assert.match(css, /@media \(max-width: 1180px\)[\s\S]*\.stats-only \.site-nav\s*\{[\s\S]*display: flex/);
 });
 
 test('los títulos de perfil caben en 320 píxeles sin cambiar el directorio', () => {
