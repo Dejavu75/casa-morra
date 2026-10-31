@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Administración de partidas — Casa Morra</title>
+  <meta name="description" content="Carga local de resultados y jugadas de Casa Morra.">
+  <link rel="stylesheet" href="/admin.css">
+  <script type="module" src="/admin.js"></script>
+</head>
+<body>
+  <header class="masthead"><div class="shell"><span class="brand">CASA <b>MORRA</b></span><span class="badge">Administración local</span></div></header>
+  <main class="shell">
+    <div class="intro"><p class="eyebrow">Estadísticas · Ajedrez</p><h1>Partidas</h1><p>Registrá primero el resultado y completá las jugadas cuando recibas la planilla.</p></div>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+    <section id="login-panel" class="panel" aria-labelledby="login-title">
+      <h2 id="login-title">Acceso administrativo</h2>
+      <form id="login-form"><label for="password">Contraseña</label><input id="password" name="password" type="password" autocomplete="current-password" required><button type="submit">Ingresar</button></form>
+      <p class="muted">Este panel funciona únicamente desde el equipo servidor; la web pública permanece de solo lectura.</p>
+    </section>
+    <div id="workspace" hidden>
+      <div class="toolbar"><p id="summary"></p><div><button id="publish" type="button" class="secondary">Reintentar publicación</button><button id="logout" type="button" class="ghost">Salir</button></div></div>
+      <div class="grid">
+        <section class="panel" aria-labelledby="create-title">
+          <p class="step">01 · Resultado</p><h2 id="create-title">Cargar partida nueva</h2>
+          <form id="create-form">
+            <label for="tournament">Torneo</label><select id="tournament" required></select>
+            <div class="pair"><div><label for="white">Blancas</label><select id="white" required></select></div><div><label for="black">Negras</label><select id="black" required></select></div></div>
+            <div class="pair"><div><label for="round">Ronda</label><input id="round" type="number" min="1" step="1" required></div><div><label for="date">Fecha</label><input id="date" type="date" required></div></div>
+            <label for="result">Resultado</label><select id="result" required><option value="1-0">1–0 · ganan blancas</option><option value="0-1">0–1 · ganan negras</option><option value="1/2-1/2">½–½ · empate</option></select>
+            <label for="create-format">Jugadas (opcional)</label><select id="create-format"><option value="">Solo resultado, cargar jugadas después</option><option value="manual">Manual · notación algebraica</option><option value="pgn">Importar PGN</option></select>
+            <label for="create-text">Secuencia manual o PGN</label><textarea id="create-text" rows="5" spellcheck="false" placeholder="e4 e5 Nf3 Nc6"></textarea>
+            <button type="submit">Guardar resultado</button>
+          </form>
+        </section>
+        <section class="panel" aria-labelledby="complete-title">
+          <p class="step">02 · Planilla</p><h2 id="complete-title">Completar partida existente</h2>
+          <form id="complete-form">
+            <label for="game">Partida</label><select id="game" required></select>
+            <label for="complete-format">Modo de carga</label><select id="complete-format"><option value="manual">Manual · notación algebraica</option><option value="pgn">Importar PGN</option></select>
+            <label for="complete-text">Jugadas</label><textarea id="complete-text" rows="10" spellcheck="false" required placeholder="e4 e5 Nf3 Nc6"></textarea>
+            <p class="muted">Se actualiza la misma partida. El resultado y la tabla del torneo no se vuelven a sumar.</p>
+            <button type="submit">Guardar jugadas</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+  <footer class="shell">Casa Morra · datos ficticios de demostración</footer>
+</body>
+</html>

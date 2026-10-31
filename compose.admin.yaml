@@ -1,0 +1,36 @@
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+    image: casa-morra-admin:local
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${CASA_MORRA_ADMIN_PORT:-8090}:8090"
+    environment:
+      CASA_MORRA_ADMIN_PASSWORD: ${CASA_MORRA_ADMIN_PASSWORD:?Definir contraseña administrativa local}
+      CASA_MORRA_ADMIN_STORE: /app/.demo-state/admin.json
+      CASA_MORRA_ADMIN_PUBLIC: /app/.demo-public/snapshot.json
+    volumes:
+      - type: bind
+        source: ./.demo-state
+        target: /app/.demo-state
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./.demo-public
+        target: /app/.demo-public
+        bind:
+          create_host_path: false
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,noexec,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8090/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3

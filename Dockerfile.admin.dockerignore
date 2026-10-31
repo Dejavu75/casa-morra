@@ -1,0 +1,15 @@
+.git
+.gitignore
+.codegraph
+.demo-state
+.demo-public
+node_modules
+test
+docs
+odd
+.github
+.env*
+*.log
+README.md
+compose*.yaml
+Dockerfile

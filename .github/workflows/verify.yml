@@ -23,7 +23,10 @@ jobs:
           node-version: '22'
           package-manager-cache: false
 
-      - name: Ejecutar pruebas
+      - name: Instalar dependencias fijadas
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Ejecutar pruebas automatizadas
         run: npm test
 
       - name: Conciliar datos demo
@@ -31,6 +34,9 @@ jobs:
 
       - name: Construir imagen local sin publicar
         run: docker build --tag casa-morra:ci .
+
+      - name: Construir imagen administrativa local sin publicar
+        run: docker build --file Dockerfile.admin --tag casa-morra-admin:ci .
 
       - name: Comprobar compresión y rutas en el contenedor
         run: |

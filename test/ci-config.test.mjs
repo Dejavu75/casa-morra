@@ -21,9 +21,11 @@ test('la CI verifica push y PR con permisos mínimos y acciones fijadas', () => 
 });
 
 test('la CI prueba datos y construye Docker sin publicación ni secretos', () => {
+  assert.match(workflow, /run:\s*npm ci --ignore-scripts --no-audit --no-fund[\s\S]*run:\s*npm test/);
   assert.match(workflow, /run:\s*npm test/);
   assert.match(workflow, /run:\s*npm run verify:data/);
   assert.match(workflow, /run:\s*docker build\s+--tag casa-morra:ci\s+\./);
+  assert.match(workflow, /run:\s*docker build --file Dockerfile\.admin --tag casa-morra-admin:ci \./);
   assert.doesNotMatch(workflow, /docker\s+(?:push|login)|secrets\.|GITHUB_TOKEN|ghcr\.io|docker\.io\/dhzacur/);
 });
 

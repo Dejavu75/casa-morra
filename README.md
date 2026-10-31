@@ -1,6 +1,6 @@
 # Casa Morra
 
-Sitio independiente de estadísticas de ajedrez en español, con datos ficticios de demostración. Nginx sirve el sitio estático desde `dist/`; no hay backend, cuentas ni datos del club de referencia.
+Sitio independiente de estadísticas de ajedrez en español, con datos ficticios de demostración. Nginx sirve las estadísticas públicas desde `dist/`. El servicio administrativo opcional de Node queda separado y limitado al bucle local; no se incluyen datos del club de referencia.
 
 ## Experiencia estadística
 
@@ -10,9 +10,10 @@ Los totales y clasificaciones se calculan sobre el fixture original o sobre la e
 
 ## Verificación local
 
-Requiere Node.js 22 para las pruebas nativas y Docker con Compose para ejecutar el sitio. No se instalan paquetes de Node.
+Requiere Node.js 22 para las pruebas nativas y Docker con Compose para ejecutar el sitio. `npm ci` instala la dependencia de ajedrez fijada en `package-lock.json` antes de las pruebas.
 
 ```powershell
+npm ci
 node --test
 npm run verify:data
 node scripts/demo-snapshot.mjs
@@ -32,7 +33,7 @@ Compose configura `restart: unless-stopped`: Docker reinicia el servicio tras un
 
 La imagen usa una base Nginx fijada por digest y ejecuta el proceso como usuario sin privilegios en el puerto interno 8088. El sistema de archivos del contenedor es de solo lectura, salvo el montaje temporal `/tmp` requerido por Nginx. Se eliminan las capacidades Linux y se prohíbe adquirir privilegios adicionales. El contexto Docker excluye Git, pruebas, documentación, scripts, archivos `.env*`, el almacén `.demo-state/` y la exportación `.demo-public/`.
 
-Compose exige un directorio `.demo-public/` **existente** y lo monta en modo de solo lectura fuera del docroot; no crea el directorio por omisión. La publicación explícita anterior lo prepara. Solo `/demo/snapshot.json` lee el archivo exportado: responde 200 con JSON ficticio o 404 si aún falta, siempre con `Cache-Control: no-store` y las mismas cabeceras de seguridad que el resto del sitio. Nunca se monta `.demo-state/`. La interfaz muestra primero el fixture y declara esa fuente antes de ejecutar JavaScript; luego consulta el JSON público, valida formato, longitud e integridad SHA-256 y actualiza las vistas y el estado de la fuente. Utiliza WebCrypto cuando está disponible y una implementación local probada de SHA-256 en HTTP LAN sin `SubtleCrypto`; esto detecta alteraciones accidentales, pero no autentica el servidor ni reemplaza HTTPS. Si la consulta tarda más de cinco segundos o falla la validación, mantiene el fixture: el estado visible indica «Actualización fallida; datos de ejemplo» y «Detalles de la fuente» conserva el aviso completo en un control desplegable accesible por teclado. Después de un cambio en el almacén hay que ejecutar de nuevo `publish` y pulsar «Actualizar datos» o navegar; no hay publicación automática. Para aislar una prueba, fijá `CASA_MORRA_HTTP_PORT=18089` y un proyecto Compose distinto; el servicio habitual permanece en 8088.
+Compose exige un directorio `.demo-public/` **existente** y lo monta en modo de solo lectura fuera del docroot; no crea el directorio por omisión. La publicación explícita anterior lo prepara. Solo `/demo/snapshot.json` lee el archivo exportado: responde 200 con JSON ficticio o 404 si aún falta, siempre con `Cache-Control: no-store` y las mismas cabeceras de seguridad que el resto del sitio. Nunca se monta `.demo-state/` en el servicio público. La interfaz muestra primero el fixture y declara esa fuente antes de ejecutar JavaScript; luego consulta el JSON público, valida formato, longitud e integridad SHA-256 y actualiza las vistas y el estado de la fuente. Utiliza WebCrypto cuando está disponible y una implementación local probada de SHA-256 en HTTP LAN sin `SubtleCrypto`; esto detecta alteraciones accidentales, pero no autentica el servidor ni reemplaza HTTPS. Si la consulta tarda más de cinco segundos o falla la validación, mantiene el fixture: el estado visible indica «Actualización fallida; datos de ejemplo» y «Detalles de la fuente» conserva el aviso completo en un control desplegable accesible por teclado. Tras un cambio por CLI hay que ejecutar `publish` y actualizar la vista; el panel administrativo opcional publica automáticamente y ofrece reintento ante fallos. Para aislar una prueba, fijá `CASA_MORRA_HTTP_PORT=18089` y un proyecto Compose distinto; el servicio habitual permanece en 8088.
 
 El servidor entrega rutas de la SPA mediante `index.html`, pero responde 404 para módulos y recursos estáticos inexistentes (por ejemplo, `/views/no-existe.js`, `/data/no-existe.js` o `/assets/no-existe.js`). Aplica una CSP de recursos del mismo origen y encabezados contra interpretación de tipos e incrustación. No aplica HSTS porque el despliegue local no usa HTTPS.
 
@@ -50,13 +51,33 @@ La [guía de la entrega `0.9.2-demo`](docs/entrega-0.9.2-demo.md) documenta las 
 
 La [guía candidata `0.9.3-demo`](docs/entrega-0.9.3-demo.md) documenta el ensayo aislado, la reversión de `0.9.2-demo` y las comprobaciones requeridas antes de una nueva publicación. No presume que las ramas posteriores estén desplegadas.
 
+## Administración local de partidas
+
+El panel opcional permite **crear un resultado sin jugadas** y completar después esa misma partida, de forma manual o mediante PGN. Solo usuarios que conozcan la contraseña administrativa pueden escribir. El acceso está limitado a <http://127.0.0.1:8090/> en el equipo servidor; no se publica en `192.168.0.52` ni en el puerto público 8088. No reutilices la contraseña del sitio de referencia.
+
+Antes del primer arranque, comprobá que el snapshot público corresponde al fixture demo e inicializá **una sola vez** `.demo-state/admin.json` (si ya existe, conservá su auditoría; no lo reemplaces). El administrador necesita una contraseña elegida por el operador; no hay contraseña predeterminada:
+
+```powershell
+node scripts/demo-store.mjs init --store .demo-state/admin.json
+$segura = Read-Host 'Contraseña administrativa nueva' -AsSecureString
+$env:CASA_MORRA_ADMIN_PASSWORD = [System.Net.NetworkCredential]::new('', $segura).Password
+docker compose -f compose.admin.yaml up --build -d admin
+docker compose -f compose.admin.yaml ps admin
+Invoke-WebRequest http://127.0.0.1:8090/health
+Remove-Item Env:CASA_MORRA_ADMIN_PASSWORD
+```
+
+El comando `init` es solo para un almacén inexistente. `compose.admin.yaml` monta `.demo-state/` y `.demo-public/` con escritura **únicamente en el contenedor administrativo**; el Nginx público sigue montando solo `.demo-public/` en modo lectura. Tras guardar, el panel exporta el snapshot público. Si falla la exportación, informa «publicación pendiente» y permite reintentar sin duplicar la partida. El contrato está en [admin-api.md](docs/admin-api.md) y las reglas de PGN y tablas en [carga-partidas.md](docs/carga-partidas.md).
+
+Esta autenticación es deliberadamente simple y local. Docker conserva las variables de entorno en su configuración; no uses este montaje en un host compartido ni expongas el puerto administrativo a la LAN/Internet sin HTTPS y controles adicionales. No se ha verificado el panel visualmente en un navegador cuando la automatización local está deshabilitada.
+
 El botón «Modo oscuro» conserva el mismo nombre accesible al alternar el tema; `aria-pressed` indica si el modo oscuro está activo. Esta semántica tiene prueba automatizada, pero no sustituye una comprobación con lector de pantalla.
 
 En pantallas angostas, la tabla de «Clases» recibe foco con Tab como región desplazable. Toma su nombre del título visible de la tabla y muestra un contorno de foco. El desplazamiento horizontal mediante flechas no se pudo confirmar con el mecanismo de entrada del navegador utilizado; tampoco se realizó una auditoría completa con tecnologías de asistencia.
 
 ## Integración continua
 
-`.github/workflows/verify.yml` ejecuta `npm test`, `npm run verify:data` y una construcción Docker en `push` y `pull_request`. La imagen de CI se construye solo para validar el paquete: no se publica ni se accede a secretos. El trabajo usa permisos de lectura y referencias SHA completas para [checkout](https://github.com/actions/checkout/commit/3d3c42e5aac5ba805825da76410c181273ba90b1) y [setup-node](https://github.com/actions/setup-node/commit/820762786026740c76f36085b0efc47a31fe5020), conforme a la [guía de seguridad de GitHub Actions](https://docs.github.com/en/actions/reference/security/secure-use).
+`.github/workflows/verify.yml` instala las dependencias fijadas con `npm ci`, ejecuta `npm test` y `npm run verify:data`, y construye las imágenes Docker pública y administrativa en `push` y `pull_request`. Las imágenes de CI se construyen solo para validar el paquete: no se publican ni se accede a secretos. El trabajo usa permisos de lectura y referencias SHA completas para [checkout](https://github.com/actions/checkout/commit/3d3c42e5aac5ba805825da76410c181273ba90b1) y [setup-node](https://github.com/actions/setup-node/commit/820762786026740c76f36085b0efc47a31fe5020), conforme a la [guía de seguridad de GitHub Actions](https://docs.github.com/en/actions/reference/security/secure-use).
 
 Tras la construcción, CI inicia una instancia efímera enlazada a `127.0.0.1:18089`, comprueba gzip y la ruta pública primero ausente (404) y después publicada (200), y retira el contenedor. En `npm test` sin `CASA_MORRA_TEST_URL`, esos casos se omiten expresamente; para ejecutarlos localmente se necesita un contenedor de esta rama en ese puerto.
 
