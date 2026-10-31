@@ -6,5 +6,8 @@
   "scripts": {
     "test": "node --test",
     "verify:data": "node scripts/verify-data.mjs"
+  },
+  "dependencies": {
+    "chess.js": "1.4.0"
   }
 }

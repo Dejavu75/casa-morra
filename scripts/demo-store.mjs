@@ -6,6 +6,7 @@ import * as demo from '../dist/data/demo.js';
 import { decodeDemoSnapshot, encodeDemoSnapshot, snapshotMetadata } from './demo-snapshot.mjs';
 import { prepareDemoSnapshotImport } from './import-apply.mjs';
 import { normalizeCorrectionAllowlist, prepareDemoSnapshotCorrection } from './demo-correct.mjs';
+import { prepareAdminGame } from './admin-game.mjs';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const stateRoot = join(projectRoot, '.demo-state');
@@ -57,7 +58,7 @@ function validateEnvelope(value) {
   let previous = null;
   for (const [index, event] of value.audit.entries()) {
     if (!object(event) || typeof event.id !== 'string' || !event.id || ids.has(event.id) ||
-        event.source !== SOURCE || !['init', 'apply', 'correct', 'rollback', 'restore'].includes(event.operation) ||
+        event.source !== SOURCE || !['init', 'apply', 'correct', 'game', 'rollback', 'restore'].includes(event.operation) ||
         !validMeta(event.after) || typeof event.afterSnapshot !== 'string' ||
         !sameMeta(snapshotMetadata(event.afterSnapshot), event.after))
       throw new Error('Auditoría del almacén inválida');
@@ -79,6 +80,16 @@ function validateEnvelope(value) {
             JSON.stringify(prepared.journal.added) !== JSON.stringify(event.added) ||
             JSON.stringify(prepared.journal.affectedViews) !== JSON.stringify(event.affectedViews))
           throw new Error('Auditoría de importación no coincide con las altas');
+      } else if (event.operation === 'game') {
+        if (typeof event.beforeSnapshot !== 'string' ||
+            !sameMeta(snapshotMetadata(event.beforeSnapshot), event.before) ||
+            event.beforeSnapshot !== previous.afterSnapshot || !object(event.request))
+          throw new Error('Auditoría de partida inválida');
+        let result;
+        try { result = prepareAdminGame(decodeDemoSnapshot(event.beforeSnapshot), event.request); }
+        catch { throw new Error('Auditoría de partida inválida'); }
+        if (result.operation === 'unchanged' || encodeDemoSnapshot(result.next) !== event.afterSnapshot)
+          throw new Error('Auditoría de partida no coincide con los datos');
       } else if (event.operation === 'correct') {
         if (typeof event.beforeSnapshot !== 'string' ||
             !sameMeta(snapshotMetadata(event.beforeSnapshot), event.before) ||
@@ -104,7 +115,7 @@ function validateEnvelope(value) {
             event.afterSnapshot !== ancestor.afterSnapshot)
           throw new Error('Restauración de auditoría inválida');
       } else if (event.operation === 'rollback') {
-        if (!['apply', 'correct', 'restore'].includes(previous.operation) || event.reverses !== previous.id ||
+        if (!['apply', 'correct', 'game', 'restore'].includes(previous.operation) || event.reverses !== previous.id ||
             !sameMeta(event.after, previous.before) ||
             event.afterSnapshot !== previous.beforeSnapshot)
           throw new Error('Reversión de auditoría inválida');
@@ -302,13 +313,32 @@ export async function correctDemoStore(path, incoming, expectedSha, allowlist, h
   });
 }
 
+/** Registra una partida nueva o sus jugadas con CAS, integridad y auditoría. */
+export async function recordAdminGame(path, request, expectedSha, hooks) {
+  const target = await checkedPath(path);
+  return lockStore(target, async () => {
+    const { raw, value } = await readStore(target);
+    if (value.snapshot.sha256 !== expectedSha) throw new Error('CAS rechazado: hash vigente obsoleto');
+    const prepared = prepareAdminGame(decodeDemoSnapshot(value.data), request);
+    if (prepared.operation === 'unchanged') return value;
+    const data = encodeDemoSnapshot(prepared.next);
+    const snapshot = snapshotMetadata(data);
+    const next = { ...value, data, snapshot, audit: [...value.audit,
+      { id: randomUUID(), operation: 'game', source: SOURCE, before: value.snapshot,
+        beforeSnapshot: value.data, after: snapshot, afterSnapshot: data,
+        request: JSON.parse(JSON.stringify(request)) }] };
+    await writeAtomic(target, next, raw, hooks);
+    return next;
+  });
+}
+
 /** Revierte solo la última aplicación, corrección o restauración, sin borrar el historial. */
 export async function rollbackDemoStore(path, hooks) {
   const target = await checkedPath(path);
   return lockStore(target, async () => {
     const { raw, value } = await readStore(target);
     const last = value.audit.at(-1);
-    if (!['apply', 'correct', 'restore'].includes(last.operation)) throw new Error('La última operación no admite reversión');
+    if (!['apply', 'correct', 'game', 'restore'].includes(last.operation)) throw new Error('La última operación no admite reversión');
     if (!sameMeta(value.snapshot, last.after)) throw new Error('Deriva detectada antes de revertir');
     const data = last.beforeSnapshot;
     const snapshot = snapshotMetadata(data);

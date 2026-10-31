@@ -1,12 +1,13 @@
 import { routeHref } from '../router.js';
 import { escapeHtml as h, formatDate, playerName } from './common.js';
+import { Chess } from '../vendor/chess.js';
 
 export const gameEs = Object.freeze({
   missing: 'Partida no encontrada', missingText: 'No existe una partida con ese identificador en la muestra.',
   game: 'Partida', demo: 'Datos ficticios de demostración', back: '← Torneos',
   noMoves: 'Sin jugadas registradas. El resultado permanece disponible, pero no hay tablero para reproducir.',
-  invalid: 'La secuencia no se puede reproducir con este visor limitado.',
-  scope: 'Secuencia de coordenadas UCI preparada para esta muestra. No es un archivo PGN ni un validador general de legalidad ajedrecística.',
+  invalid: 'La secuencia no se puede reproducir porque contiene una jugada inválida.',
+  scope: 'Jugadas de ajedrez validadas y reproducidas desde la posición inicial.',
   boardAt: (ply) => `Tablero tras ${ply} ${ply === 1 ? 'jugada' : 'jugadas'}`, white: 'blanco', black: 'negro',
   whiteFeminine: 'blanca', blackFeminine: 'negra', empty: 'casilla vacía',
   first: 'Primera posición', previous: 'Jugada anterior', next: 'Siguiente jugada', last: 'Última posición',
@@ -18,61 +19,33 @@ export const gameEs = Object.freeze({
 
 const msg = (messages, key) => messages?.[key] ?? gameEs[key];
 const files = 'abcdefgh';
-const initialRows = [
-  'rnbqkbnr', 'pppppppp', '........', '........',
-  '........', '........', 'PPPPPPPP', 'RNBQKBNR',
-];
-// Solo esta secuencia del fixture fue revisada para el visor. No aceptar UCI arbitrario como partida legal.
-const supportedGameId = 'patio-2025-r1-p1';
-const supportedMoves = 'd2d4 g8f6 c2c4 e7e6 b1c3 d7d5 c4d5 e6d5 c1g5 f8e7 e2e3 e8g8 g1f3 c7c6 f1d3 b8d7'.split(' ');
 const glyphs = Object.freeze({
   K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙',
   k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟',
 });
 
-function initialBoard() {
-  const board = new Map();
-  for (let rank = 8; rank >= 1; rank -= 1) {
-    for (let file = 0; file < 8; file += 1) {
-      const piece = initialRows[8 - rank][file];
-      if (piece !== '.') board.set(`${files[file]}${rank}`, piece);
-    }
-  }
-  return board;
-}
-
 export function hasDemoReplay(game) {
-  return game?.id === supportedGameId && Array.isArray(game.moves)
-    && game.moves.length === supportedMoves.length
-    && game.moves.every((move, index) => move === supportedMoves[index]);
-}
-
-function applyKnownMove(board, move, index) {
-  if (typeof move !== 'string' || !/^[a-h][1-8][a-h][1-8]$/.test(move)) throw new TypeError('Coordenada UCI no soportada');
-  const from = move.slice(0, 2);
-  const to = move.slice(2, 4);
-  const piece = board.get(from);
-  const target = board.get(to);
-  if (!piece || (piece === piece.toUpperCase()) !== (index % 2 === 0)) throw new TypeError('Origen o turno incompatible');
-  if (target && (target === target.toUpperCase()) === (piece === piece.toUpperCase())) throw new TypeError('Destino ocupado por pieza propia');
-  // El fixture conocido contiene un único enroque corto negro. No se implementa un motor de reglas.
-  if (piece === 'k' && from === 'e8' && to === 'g8') {
-    if (board.get('h8') !== 'r' || board.has('f8') || board.has('g8')) throw new TypeError('Enroque incompatible');
-    board.delete('h8');
-    board.set('f8', 'r');
-  } else if (piece.toLowerCase() === 'k' && Math.abs(files.indexOf(from[0]) - files.indexOf(to[0])) > 1) {
-    throw new TypeError('Otro enroque no soportado');
-  }
-  board.delete(from);
-  board.set(to, piece);
+  if (!Array.isArray(game?.moves) || !game.moves.length) return false;
+  try { replayKnownPosition(game.moves, game.moves.length); return true; }
+  catch { return false; }
 }
 
 export function replayKnownPosition(moves, ply = 0) {
   if (!Array.isArray(moves)) throw new TypeError('Secuencia no disponible');
   const step = Number(ply);
   if (!Number.isInteger(step) || step < 0 || step > moves.length) throw new RangeError('Paso fuera de la secuencia');
-  const board = initialBoard();
-  for (let index = 0; index < step; index += 1) applyKnownMove(board, moves[index], index);
+  const chess = new Chess();
+  for (let index = 0; index < step; index += 1) {
+    const move = moves[index];
+    if (typeof move !== 'string' || !/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(move))
+      throw new TypeError('Coordenada UCI inválida');
+    try { chess.move({ from: move.slice(0, 2), to: move.slice(2, 4),
+      ...(move.length === 5 ? { promotion: move[4] } : {}) }); }
+    catch { throw new TypeError(`Jugada ilegal en posición ${index + 1}`); }
+  }
+  const board = new Map();
+  for (const row of chess.board()) for (const piece of row)
+    if (piece) board.set(piece.square, piece.color === 'w' ? piece.type.toUpperCase() : piece.type);
   return board;
 }
 
@@ -124,7 +97,7 @@ export function renderGame(data, id, { ply = 0 } = {}, messages = gameEs, locale
   let current = 0;
   if (Array.isArray(game.moves) && game.moves.length) {
     try {
-      if (!hasDemoReplay(game)) throw new TypeError('Secuencia fuera de la muestra revisada');
+      if (!hasDemoReplay(game)) throw new TypeError('Secuencia inválida');
       current = Math.max(0, Math.min(game.moves.length, Number.isInteger(Number(ply)) ? Number(ply) : 0));
       // Verificar la secuencia completa antes de ofrecer cualquier control parcial.
       replayKnownPosition(game.moves, game.moves.length);

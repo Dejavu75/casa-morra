@@ -86,9 +86,9 @@ test('4-1-3 usa 4,5/8=56 % de puntos desde el primer jugador y distingue colores
   assert.match(detail.html, /Negras/);
   assert.match(detail.html, /1-0/);
   assert.match(detail.html, /octubre de 2026/);
-  assert.doesNotMatch(detail.html, /href="\/partidas\/p-1"/);
-  assert.equal((detail.html.match(/href="\/partidas\//g) ?? []).length, 0);
-  assert.match(detail.html, /Jugadas registradas; enlace no disponible/);
+  assert.match(detail.html, /href="\/partidas\/p-1"/);
+  assert.equal((detail.html.match(/href="\/partidas\//g) ?? []).length, 1);
+  assert.match(detail.html, /Reproducir jugadas/);
   assert.match(detail.html, /Sin jugadas registradas/);
   assert.doesNotMatch(detail.html, /<img src=x|<script/i);
   assert.match(detail.html, /Ana &lt;img/);

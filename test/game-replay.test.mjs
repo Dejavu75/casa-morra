@@ -6,7 +6,15 @@ import { renderGame, attachGameReplay, hasDemoReplay, replayKnownPosition } from
 const data = { players, tournaments, games };
 const featured = games.find((game) => game.moves?.length);
 
-test('el visor limitado muestra posición inicial, avance y enroque de la partida revisada', () => {
+test('una partida nueva con jugadas legales se puede reproducir sin lista fija de IDs', () => {
+  const imported = { ...featured, id: 'admin-nueva', moves: ['e2e4', 'e7e5', 'g1f3', 'b8c6'] };
+  const source = { ...data, games: [...games, imported] };
+  assert.equal(hasDemoReplay(imported), true);
+  assert.equal(replayKnownPosition(imported.moves, 4).get('c6'), 'n');
+  assert.match(renderGame(source, imported.id, { ply: 4 }).html, /data-square="c6"[^>]*aria-label="c6: caballo negro"/);
+});
+
+test('el visor muestra posición inicial, avance y enroque de la partida demo', () => {
   assert.ok(featured);
   assert.equal(hasDemoReplay(featured), true);
   const start = renderGame(data, featured.id, { ply: 0 });
@@ -14,7 +22,7 @@ test('el visor limitado muestra posición inicial, avance y enroque de la partid
   assert.match(start.html, /data-square="d2"[^>]*aria-label="d2: peón blanco"/);
   assert.match(start.html, /data-replay-action="first"[^>]*disabled/);
   assert.match(start.html, /data-replay-action="prev"[^>]*disabled/);
-  assert.match(start.html, /No es un archivo PGN ni un validador general/);
+  assert.match(start.html, /Jugadas de ajedrez validadas/);
 
   const one = renderGame(data, featured.id, { ply: 1 });
   assert.match(one.html, /<caption>Tablero tras 1 jugada<\/caption>/);
