@@ -61,13 +61,15 @@ Antes del primer arranque, comprobá que el snapshot público corresponde al fix
 node scripts/demo-store.mjs init --store .demo-state/admin.json
 $segura = Read-Host 'Contraseña administrativa nueva' -AsSecureString
 $env:CASA_MORRA_ADMIN_PASSWORD = [System.Net.NetworkCredential]::new('', $segura).Password
-docker compose -f compose.admin.yaml up --build -d admin
-docker compose -f compose.admin.yaml ps admin
+docker compose -p casa-morra -f compose.admin.yaml up --build -d admin
+docker compose -p casa-morra -f compose.admin.yaml ps admin
 Invoke-WebRequest http://127.0.0.1:8090/health
 Remove-Item Env:CASA_MORRA_ADMIN_PASSWORD
 ```
 
 El comando `init` es solo para un almacén inexistente. `compose.admin.yaml` monta `.demo-state/` y `.demo-public/` con escritura **únicamente en el contenedor administrativo**; el Nginx público sigue montando solo `.demo-public/` en modo lectura. Tras guardar, el panel exporta el snapshot público. Si falla la exportación, informa «publicación pendiente» y permite reintentar sin duplicar la partida. El contrato está en [admin-api.md](docs/admin-api.md) y las reglas de PGN y tablas en [carga-partidas.md](docs/carga-partidas.md).
+
+La opción `-p casa-morra` conserva el proyecto Compose del servicio público aunque los comandos se ejecuten desde otro worktree. Sin ella, Compose usa el nombre del directorio actual y puede crear una pila separada. En la instalación actual, la contraseña generada está en el archivo local `.env`, ignorado por Git; consérvalo fuera del repositorio remoto y reemplázala si deja de ser privada.
 
 Esta autenticación es deliberadamente simple y local. Docker conserva las variables de entorno en su configuración; no uses este montaje en un host compartido ni expongas el puerto administrativo a la LAN/Internet sin HTTPS y controles adicionales. No se ha verificado el panel visualmente en un navegador cuando la automatización local está deshabilitada.
 
