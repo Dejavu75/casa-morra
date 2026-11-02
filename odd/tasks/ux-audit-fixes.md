@@ -1,6 +1,6 @@
 # Correcciones UX del centro estadístico
 Objetivo: aplicar los hallazgos accionables de la auditoría visual y retirar la actualización manual de datos, preservando la semántica estadística.
-Rama: `feat/ux-audit-fixes`, derivada de `feat/admin-visual-continuity`. Entrega: `feature-branch-chain` (preferencia previa «por rama») hasta `origin/main`. Pruebas: `node --test` focal, `npm test`, `npm run verify:data`, inspección visual móvil/escritorio y Docker local.
+Rama: `feat/ux-audit-fixes`, derivada de `feat/admin-visual-continuity`. Entrega: avance rápido de la rama a `origin/main` (no se abrió PR; ver L11). Pruebas: `node --test` focal, `npm test`, `npm run verify:data`, inspección visual móvil/escritorio y Docker local.
 
 ## Specs
 - S1 — Pedido literal: «Aplica todos los cambios planteados y llevalos a main». Alcance: hallazgos de la auditoría UX de Casa Morra del 2026-11-02; no reincorporar noticias, problemas ni galerías. Criterio: cambios aplicados y `origin/main` actualizado sin perder trabajo ajeno.
@@ -17,7 +17,7 @@ Rama: `feat/ux-audit-fixes`, derivada de `feat/admin-visual-continuity`. Entrega
 - [x] T3 (S5) — Ruta inline: distinguir puntos Elo del mismo día y probar secuencia. Commit: ver L7. Riesgo: ninguno.
 - [x] T4 (S6) — Ruta inline: encabezado y perspectiva de resultados en Enciclopedia con pruebas. Commit: ver L8. Riesgo: ninguno.
 - [x] T5 (S7) — Ruta inline: retirar control manual de actualización, mantener carga normal y actualizar pruebas. Commit: ver L4. Riesgo: ninguno.
-- [ ] T6 (S1) — Ruta inline: ejecutar suite y aceptación local, publicar por PR o avance seguro a `origin/main` y verificar remoto. Commit de cierre pendiente. Riesgo: ítem 5 por entrega.
+- [x] T6 (S1) — Ruta inline: ejecutar suite y aceptación local, publicar por avance rápido a `origin/main` y verificar remoto. Commits: `1b421f5` (código en main) y este cierre documental. Riesgo: ítem 5 por entrega.
 
 ## Log
 - L1 (2026-11-02) — «Aplica todos los cambios planteados y llevalos a main».
@@ -30,3 +30,4 @@ Rama: `feat/ux-audit-fixes`, derivada de `feat/admin-visual-continuity`. Entrega
 - L8 (2026-11-02) — T4: prueba RED y luego 4/4 focales GREEN. La suite completa pasó: 256 aprobadas, 5 omitidas. Enciclopedia usa «Blancas — Negras» sin filtro y «Rival» con jugador seleccionado; Enciclopedia y comparación explican el resultado desde la perspectiva de las piezas. Commit `0df6c34d7b743f28e29d9a6d32108f7206d6b873`; RDD riesgo medio, `under_budget` acumulado.
 - L9 (2026-11-02) — La primera captura de escritorio mostró la primera tabla debajo del pliegue (850 px en un alto de 720). Corrección acotada: se redujo hero y el hueco del estado de fuente, con 2 pruebas RED→GREEN y suite completa 256 aprobadas/5 omitidas. La segunda captura sitúa el índice a 521 px y la primera tabla a 687 px; móvil de 390 px sin desbordamiento horizontal. Commit `acf297251991cfcce0ce5408cbf0e5706c5356bd`, RDD riesgo medio y `under_budget`. El acumulado ronda 415 líneas con correcciones pendientes: se reutiliza la preferencia previa «por rama» documentada como `feature-branch-chain` en `odd/tasks/admin-game-entry.md`.
 - L10 (2026-11-02) — El verificador independiente detectó que el gráfico ordenaba partidas del mismo día por ronda antes que por torneo, contradiciendo `calculateElo`. Reproducción realista: `a-r5`, `b-r1` retrocedían en x. Una corrección hizo coincidir torneo/ronda/ID; prueba nueva RED→GREEN, 4/4 focales y 257 aprobadas/5 omitidas en suite. Recheck acotado del verificador: posiciones 285,333 y 512,667, PASS. Commit `a75fbc368aee5f7b422a2f779683fc15b004ba39`; RDD riesgo medio, `under_budget` acumulado.
+- L11 (2026-11-02) — Se verificó que `origin/main` era ancestro de la rama y se publicó por avance rápido hasta `1b421f59e66a345680de3612da538788f622c300`. GitHub Actions `Verificación` run 41490937093 terminó correctamente: pruebas, datos demo, dos imágenes Docker y comprobaciones HTTP/gzip. La preferencia de cadena por ramas no se pudo aplicar con PRs conformes porque este repositorio carece de Issue Forms, etiquetas `status:approved`/`type:*` y plantilla de PR; el avance rápido directo preservó la historia y fue autorizado por el pedido explícito de llevarlo a main. Las ramas históricas sólo locales no se eliminaron para no perder trabajo ajeno.
