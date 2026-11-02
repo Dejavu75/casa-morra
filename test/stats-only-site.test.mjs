@@ -19,7 +19,7 @@ test('la portada pública presenta las diez estadísticas y ningún acceso a otr
 test('el shell navega por las áreas estadísticas sin publicar las editoriales', async () => {
   const html = await read('index.html');
   const nav = html.match(/<nav\b[^>]*>([\s\S]*?)<\/nav>/)?.[1] ?? '';
-  for (const path of ['/estadisticas', '/jugadores', '/torneos', '/clasicos', '/elo']) {
+  for (const path of ['/estadisticas', '/jugadores', '/torneos', '/clasicos', '/elo', '/enciclopedia']) {
     assert.match(nav, new RegExp(`href="${path}"`));
   }
   assert.doesNotMatch(nav, /href="\/(?:novedades|clases|nosotros|socios|problemas)/);

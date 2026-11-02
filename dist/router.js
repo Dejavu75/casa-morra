@@ -8,6 +8,8 @@ const definitions = Object.freeze([
   ['player', '/jugadores/:slug', ['slug']],
   ['statistics', '/estadisticas', []],
   ['elo', '/elo', []],
+  ['encyclopedia', '/enciclopedia', []],
+  ['compare', '/comparar', []],
   ['classics', '/clasicos', []],
   ['classic', '/clasicos/:first/:second', ['first', 'second']],
   ['about', '/nosotros', []],
@@ -67,6 +69,12 @@ export function parseRoute(pathname, search = '') {
       query = { q: new URLSearchParams(search).get('q')?.trim() ?? '' };
     } else if (name === 'elo') {
       query = { jugador: [...new Set(new URLSearchParams(search).getAll('jugador').filter(validFilter))] };
+    } else if (name === 'encyclopedia') {
+      const fields = new URLSearchParams(search);
+      query = { jugador: readFilter(fields, 'jugador'), torneo: readFilter(fields, 'torneo') };
+    } else if (name === 'compare') {
+      const fields = new URLSearchParams(search);
+      query = { primero: readFilter(fields, 'primero'), segundo: readFilter(fields, 'segundo') };
     } else if (name === 'tournaments') {
       const fields = new URLSearchParams(search);
       query = { tipo: readFilter(fields, 'tipo'), temporada: readFilter(fields, 'temporada') };
@@ -106,6 +114,17 @@ export function routeHref(name, params = {}, query = {}) {
     for (const slug of [...new Set(query.jugador)]) {
       if (!validFilter(slug)) throw new TypeError('Jugador de Elo inválido');
       fields.append('jugador', slug);
+    }
+    return fields.size ? `${path}?${fields}` : path;
+  }
+  if (name === 'encyclopedia' || name === 'compare') {
+    const fields = new URLSearchParams();
+    const keys = name === 'compare' ? ['primero', 'segundo'] : ['jugador', 'torneo'];
+    for (const key of keys) {
+      const value = query?.[key];
+      if (!value) continue;
+      if (!validFilter(value)) throw new TypeError(`Filtro de ruta inválido: ${key}`);
+      fields.set(key, value);
     }
     return fields.size ? `${path}?${fields}` : path;
   }

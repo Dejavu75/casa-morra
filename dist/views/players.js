@@ -7,6 +7,7 @@ export const playersEs = Object.freeze({
   players: 'Jugadores', demo: 'Datos ficticios de demostración',
   directoryIntro: 'Explorá el padrón ficticio y sus perfiles estadísticos.',
   searchLabel: 'Buscar jugador por nombre o apellido', searchButton: 'Buscar', clear: 'Ver todos',
+  comparePlayers: 'Comparar dos jugadores', browseGames: 'Consultar partidas', viewElo: 'Ver evolución Elo',
   alphabet: 'Índice alfabético', emptyLetter: (letter) => `Sin jugadores con ${letter}`,
   rosterTotal: (total, locale = 'es-AR') => `${formatNumber(total, locale)} jugadores en el padrón`,
   resultsTotal: (shown, total, locale = 'es-AR') => `${formatNumber(shown, locale)} coincidencia${shown === 1 ? '' : 's'} de ${formatNumber(total, locale)} jugadores`,
@@ -101,7 +102,7 @@ export function renderPlayersDirectory(data, { q = '' } = {}, messages = players
     <p>${h(message(messages, 'directoryIntro'))}</p><form class="players-search" method="get" action="${h(routeHref('players'))}" role="search">
       <label for="players-q">${h(message(messages, 'searchLabel'))}</label><input id="players-q" name="q" type="search" value="${h(query)}" maxlength="120" autocomplete="off">
       <button type="submit">${h(message(messages, 'searchButton'))}</button><a href="${h(routeHref('players'))}">${h(message(messages, 'clear'))}</a>
-    </form><p class="players-count" aria-live="polite">${h(resultLabel)}</p>
+    </form><p><a href="${h(routeHref('compare'))}">${h(message(messages, 'comparePlayers'))}</a> · <a href="${h(routeHref('encyclopedia'))}">${h(message(messages, 'browseGames'))}</a></p><p class="players-count" aria-live="polite">${h(resultLabel)}</p>
     ${selected.length ? `<nav class="players-alphabet" aria-label="${h(message(messages, 'alphabet'))}">${index}</nav><div class="players-groups">${groups}</div>` : `<p class="players-empty">${h(message(messages, 'noResults'))}</p>`}
     </div>`;
   return { title: titleFor(message(messages, 'players')), html };
@@ -241,7 +242,7 @@ export function renderPlayerProfile(data, slug, messages = playersEs, locale = '
   const count = profile.record;
   const colors = profile.colors;
   const html = `<div class="players-page container"><nav class="players-back" aria-label="${h(message(messages, 'back'))}"><a href="${h(routeHref('players'))}">${h(message(messages, 'back'))}</a></nav>
-    <p class="players-eyebrow">${h(message(messages, 'demo'))}</p><h1>${h(player.name)}</h1><p class="players-membership">${h(membershipText(player, messages))}</p><p>${h(message(messages, 'accountNotice'))}</p>
+    <p class="players-eyebrow">${h(message(messages, 'demo'))}</p><h1>${h(player.name)}</h1><p class="players-membership">${h(membershipText(player, messages))}</p><p>${h(message(messages, 'accountNotice'))}</p><p><a href="${h(routeHref('elo', {}, { jugador: [player.slug] }))}">${h(message(messages, 'viewElo'))}</a> · <a href="${h(routeHref('compare', {}, { primero: player.slug }))}">${h(message(messages, 'comparePlayers'))}</a> · <a href="${h(routeHref('encyclopedia', {}, { jugador: player.slug }))}">${h(message(messages, 'browseGames'))}</a></p>
     <section class="players-summary" aria-label="${h(message(messages, 'profile'))}">
       <div><h2>${h(message(messages, 'elo'))}</h2><p><strong>${h(formatNumber(Math.round(profile.elo.rating), locale))}</strong> · ${h(profile.elo.provisional ? message(messages, 'provisional') : message(messages, 'consolidated'))}</p>
         <p>${h(message(messages, 'peakElo'))}: ${h(formatNumber(Math.round(profile.elo.peak), locale))}</p><small>${h(message(messages, 'eloMethod'))}</small></div>

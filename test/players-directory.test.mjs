@@ -16,6 +16,8 @@ test('el directorio distingue el padrón completo de los resultados y permite b�
   assert.match(view.html, /Bautista Luján/);
   assert.doesNotMatch(view.html, /Ayla Neri/);
   assert.match(view.html, /href="\/jugadores\/bautista-lujan"/);
+  assert.match(view.html, /href="\/comparar"/);
+  assert.match(view.html, /href="\/enciclopedia"/);
   assert.match(view.html, /href="\/jugadores"[^>]*>Ver todos/);
   assert.equal(parseRoute('/jugadores', '?q=Lujan').query.q, 'Lujan');
 });

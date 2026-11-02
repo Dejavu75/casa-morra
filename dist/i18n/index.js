@@ -6,6 +6,7 @@ import { homeEs } from '../views/home.js?v=0.9.3-demo';
 import { editorialEs } from '../views/editorial.js?v=0.9.3-demo';
 import { gameEs } from '../views/game.js';
 import { eloEs } from '../views/elo.js';
+import { encyclopediaEs, comparisonEs } from '../views/encyclopedia.js';
 import { puzzleEs } from '../views/puzzle.js';
 
 export const es = Object.freeze({
@@ -19,6 +20,7 @@ export const es = Object.freeze({
   'nav.players': 'Jugadores',
   'nav.statistics': 'Estadísticas',
   'nav.elo': 'Elo',
+  'nav.encyclopedia': 'Enciclopedia',
   'nav.classics': 'Clásicos',
   'nav.news': 'Novedades',
   'nav.classes': 'Clases',
@@ -59,6 +61,8 @@ export const es = Object.freeze({
     editorial: editorialEs,
     game: gameEs,
     elo: eloEs,
+    encyclopedia: encyclopediaEs,
+    comparison: comparisonEs,
     puzzle: puzzleEs,
   }),
 });

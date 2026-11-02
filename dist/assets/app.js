@@ -8,6 +8,7 @@ import { renderStatistics, renderClassics, renderClassic } from '../views/record
 import { renderAbout, renderNewsList, renderNewsDetail, renderClasses, renderMembership } from '../views/editorial.js?v=0.9.3-demo';
 import { renderGame, attachGameReplay } from '../views/game.js';
 import { renderElo } from '../views/elo.js';
+import { renderEncyclopedia, renderComparison } from '../views/encyclopedia.js';
 import { escapeHtml as h } from '../views/common.js';
 import { applyTheme, nextTheme, readTheme, saveTheme } from './theme.js';
 import { createDemoSource } from './demo-source.js';
@@ -39,6 +40,8 @@ export function renderRoute(route, source = demoData, { locale = 'es', catalogs 
     case 'player': return renderPlayerProfile(source, route.params.slug, messages('players'), formatLocale);
     case 'statistics': return renderStatistics(source, messages('records'), formatLocale);
     case 'elo': return renderElo(source, route.query, messages('elo'), formatLocale);
+    case 'encyclopedia': return renderEncyclopedia(source, route.query, messages('encyclopedia'), formatLocale);
+    case 'compare': return renderComparison(source, route.query, messages('comparison'), formatLocale);
     case 'classics': return renderClassics(source, messages('records'), formatLocale);
     case 'classic': return renderClassic(source, route.params.first, route.params.second, messages('records'), formatLocale);
     case 'about': return renderAbout(source, messages('editorial'), formatLocale);
@@ -60,7 +63,7 @@ export function renderRoute(route, source = demoData, { locale = 'es', catalogs 
 }
 
 export function resolvePublicRoute(route) {
-  if (['home', 'statistics', 'elo', 'players', 'player', 'tournaments', 'tournament',
+  if (['home', 'statistics', 'elo', 'encyclopedia', 'compare', 'players', 'player', 'tournaments', 'tournament',
     'annual', 'classics', 'classic', 'game', 'not-found'].includes(route.name)) {
     return { route, redirect: false };
   }
