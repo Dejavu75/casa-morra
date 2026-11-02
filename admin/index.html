@@ -24,7 +24,8 @@
         <section class="panel" aria-labelledby="create-title">
           <p class="step">01 · Resultado</p><h2 id="create-title">Cargar partida nueva</h2>
           <form id="create-form">
-            <label for="tournament">Torneo</label><select id="tournament" required></select>
+            <label for="tournament">Torneo</label><select id="tournament" aria-describedby="tournament-note" required></select>
+            <p class="muted" id="tournament-note">Solo se ofrecen torneos con una tabla completa para sumar el resultado. Los torneos históricos siguen visibles en las estadísticas.</p>
             <div class="pair"><div><label for="white">Blancas</label><select id="white" required></select></div><div><label for="black">Negras</label><select id="black" required></select></div></div>
             <div class="pair"><div><label for="round">Ronda</label><input id="round" type="number" min="1" step="1" required></div><div><label for="date">Fecha</label><input id="date" type="date" required></div></div>
             <label for="result">Resultado</label><select id="result" required><option value="1-0">1–0 · ganan blancas</option><option value="0-1">0–1 · ganan negras</option><option value="1/2-1/2">½–½ · empate</option></select>

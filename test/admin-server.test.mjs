@@ -28,7 +28,13 @@ test('solo una sesión admin puede crear y completar una partida; exporta sin do
   const page = await fetch(origin);
   assert.equal(page.status, 200);
   assert.match(page.headers.get('content-security-policy'), /default-src 'none'/);
-  assert.match(await page.text(), /Cargar partida|Casa Morra/);
+  const html = await page.text();
+  assert.match(html, /Cargar partida|Casa Morra/);
+  assert.match(html, /id="tournament" aria-describedby="tournament-note"/);
+  const eligibilityModule = await fetch(`${origin}/tournament-eligibility.js`);
+  assert.equal(eligibilityModule.status, 200);
+  assert.match(eligibilityModule.headers.get('content-type'), /text\/javascript/);
+  assert.match(await eligibilityModule.text(), /writableTournaments/);
   const post = (path, payload, headers = {}) => fetch(`${origin}${path}`, { method: 'POST',
     headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(payload) });
 

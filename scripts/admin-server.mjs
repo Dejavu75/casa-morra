@@ -61,6 +61,7 @@ export function createAdminServer({ password, store, output }) {
       }
       const assets = { '/': ['../admin/index.html', 'text/html; charset=utf-8'],
         '/admin.js': ['../admin/admin.js', 'text/javascript; charset=utf-8'],
+        '/tournament-eligibility.js': ['../admin/tournament-eligibility.js', 'text/javascript; charset=utf-8'],
         '/admin.css': ['../admin/admin.css', 'text/css; charset=utf-8'] };
       if (request.method === 'GET' && Object.hasOwn(assets, path)) {
         const [file, type] = assets[path];

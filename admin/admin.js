@@ -1,3 +1,5 @@
+import { writableTournaments } from './tournament-eligibility.js';
+
 const es = Object.freeze({
   loading: 'Cargando estado administrativo…',
   saved: 'Partida guardada y estadísticas públicas actualizadas.',
@@ -49,7 +51,7 @@ function render() {
   $('workspace').hidden = false;
   $('summary').textContent = es.count(current.games.length);
   const previousEvent = $('tournament').value;
-  fill($('tournament'), current.tournaments, (event) => event.name, previousEvent);
+  fill($('tournament'), writableTournaments(current.tournaments), (event) => event.name, previousEvent);
   updateRoster();
   const names = new Map(current.players.map((player) => [player.id, player.name]));
   const events = new Map(current.tournaments.map((event) => [event.id, event]));
