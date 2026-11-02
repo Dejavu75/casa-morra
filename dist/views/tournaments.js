@@ -54,7 +54,7 @@ function standingsTable(data, event, messages, locale) {
       .map((value) => `<td>${value == null ? h(label(messages, 'noDetail')) : h(formatNumber(value, locale))}</td>`).join('');
     return `<tr><td>${h(formatNumber(entry.rank, locale))}</td><th scope="row">${personHtml}</th><td>${h(formatNumber(entry.points, locale))}</td>${resultCells}</tr>`;
   }).join('');
-  return `<div class="competition-table-wrap"><table><caption>${h(label(messages, 'officialStanding'))} ${h(event.name)}</caption>
+  return `<p id="competition-scroll-hint" class="competition-scroll-hint">${h(label(messages, 'tableScrollHint'))}</p><div class="competition-table-wrap" role="region" aria-label="${h(label(messages, 'officialStanding'))} ${h(event.name)}" aria-describedby="competition-scroll-hint" tabindex="0"><table><caption>${h(label(messages, 'officialStanding'))} ${h(event.name)}</caption>
     <thead><tr><th scope="col">${h(label(messages, 'rank'))}</th><th scope="col">${h(label(messages, 'player'))}</th><th scope="col">${h(label(messages, 'points'))}</th><th scope="col"><abbr title="${h(label(messages, 'wins'))}">${h(label(messages, 'winsShort'))}</abbr></th><th scope="col"><abbr title="${h(label(messages, 'draws'))}">${h(label(messages, 'drawsShort'))}</abbr></th><th scope="col"><abbr title="${h(label(messages, 'losses'))}">${h(label(messages, 'lossesShort'))}</abbr></th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
 }

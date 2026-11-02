@@ -50,7 +50,11 @@
 .competition-season-links [aria-current="page"] { background: var(--indigo); border-color: var(--indigo); color: var(--paper); text-decoration: none; }
 
 .competition-table-wrap { overflow-x: auto; max-width: 100%; }
+.competition-table-wrap:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+.competition-scroll-hint { color: var(--muted); font-size: .9rem; }
+.competition-scroll-hint::before { content: '↔'; margin-inline-end: .35rem; }
 .competition-page table { width: 100%; border-collapse: collapse; min-width: 37rem; text-align: left; font-variant-numeric: tabular-nums; }
+.competition-page th { white-space: nowrap; }
 .competition-page caption { text-align: left; font-weight: 700; padding-block: .6rem; }
 .competition-page th,
 .competition-page td { border-bottom: 1px solid var(--line); padding: .7rem .6rem; }

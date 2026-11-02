@@ -46,6 +46,7 @@ export const competitiveEs = Object.freeze({
   eventsCount: (shown, total) => `${shown} de ${total} torneos`,
   participants: 'participantes', rounds: 'rondas', round: 'Ronda',
   officialStanding: 'Clasificación oficial de', tournamentTable: 'Tabla del torneo',
+  tableScrollHint: 'Desplace la tabla horizontalmente para ver todas las columnas.',
   rank: 'Puesto', player: 'Jugador', points: 'Puntos', wins: 'Ganadas',
   draws: 'Empatadas', losses: 'Perdidas', noDetail: 'Sin detalle',
   winsShort: 'G', drawsShort: 'E', lossesShort: 'P',

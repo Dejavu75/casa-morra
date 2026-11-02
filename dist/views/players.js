@@ -118,10 +118,10 @@ function officialHistory(data, profile, messages, locale) {
     const linked = url ? `<a href="${h(url)}">${eventName}</a>` : eventName;
     const results = [standing.wins, standing.draws, standing.losses].map((value) =>
       `<td>${value == null ? h(message(messages, 'noDetail')) : h(formatNumber(value, locale))}</td>`).join('');
-    return `<tr><th scope="row">${linked}</th><td>${h(formatDate(standing.date, locale))}</td><td>${h(formatNumber(standing.rank, locale))}</td><td>${h(formatNumber(standing.points, locale))}</td>${results}</tr>`;
+    return `<tr><th scope="row">${linked}</th><td>${h(formatNumber(standing.rank, locale))}</td><td>${h(formatDate(standing.date, locale))}</td><td>${h(formatNumber(standing.points, locale))}</td>${results}</tr>`;
   }).join('');
   return `<p id="players-official-scroll-hint" class="players-scroll-hint">${h(message(messages, 'scrollHint'))}</p><div class="players-table-wrap" role="region" aria-labelledby="players-official" aria-describedby="players-official-scroll-hint" tabindex="0"><table><caption>${h(message(messages, 'officialHistory'))}</caption><thead><tr>
-    <th scope="col">${h(message(messages, 'tournament'))}</th><th scope="col">${h(message(messages, 'date'))}</th><th scope="col">${h(message(messages, 'rank'))}</th><th scope="col">${h(message(messages, 'points'))}</th>
+    <th scope="col">${h(message(messages, 'tournament'))}</th><th scope="col">${h(message(messages, 'rank'))}</th><th scope="col">${h(message(messages, 'date'))}</th><th scope="col">${h(message(messages, 'points'))}</th>
     <th scope="col"><abbr title="${h(message(messages, 'wins'))}">${h(message(messages, 'winsShort'))}</abbr></th><th scope="col"><abbr title="${h(message(messages, 'draws'))}">${h(message(messages, 'drawsShort'))}</abbr></th><th scope="col"><abbr title="${h(message(messages, 'losses'))}">${h(message(messages, 'lossesShort'))}</abbr></th>
     </tr></thead><tbody>${rows}</tbody></table></div>`;
 }

@@ -22,6 +22,13 @@ test('las tablas anchas del perfil tienen regiones de desplazamiento identificab
   assert.match(css, /\.players-table-wrap:focus-visible\s*\{[^}]*outline:/);
 });
 
+test('el puesto oficial aparece antes de la fecha y no se recorta en móvil', () => {
+  const html = renderPlayerProfile(data, 'celia-montiel').html;
+  assert.match(html, /<th scope="col">Torneo<\/th><th scope="col">Puesto<\/th><th scope="col">Fecha<\/th>/);
+  assert.match(css, /\.players-page th\s*\{[^}]*white-space:\s*nowrap;/);
+  assert.match(css, /\.players-scroll-hint::before\s*\{[^}]*content:\s*['"]↔['"];/);
+});
+
 test('la pista de desplazamiento del perfil se puede traducir', () => {
   const html = renderPlayerProfile(data, 'celia-montiel', { ...playersEs, scrollHint: 'Move the table horizontally.' }).html;
   assert.equal((html.match(/Move the table horizontally\./g) ?? []).length, 2);

@@ -197,6 +197,7 @@
   color: var(--muted);
   font-size: 0.9rem;
 }
+.players-scroll-hint::before { content: '↔'; margin-inline-end: .35rem; }
 
 .players-page table {
   border-collapse: collapse;
@@ -217,6 +218,7 @@
   text-align: left;
   vertical-align: middle;
 }
+.players-page th { white-space: nowrap; }
 
 .players-page meter {
   max-width: 8rem;

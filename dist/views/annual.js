@@ -23,7 +23,7 @@ export function renderAnnual(data, seasonId, messages = competitiveEs, locale = 
     return `<tr><td>${h(formatNumber(row.rank, locale))}</td><th scope="row">${playerLink(data, row.playerId, routeHref)}</th>
       <td>${h(formatNumber(row.points, locale))}</td><td>${h(formatNumber(row.tournaments, locale))}</td><td>${h(movementText(row.movement, messages, locale))}</td></tr>`;
   }).join('');
-  const table = rows ? `<div class="competition-table-wrap"><table><caption>${h(label(messages, 'seasonAnnual'))} ${h(season.label)}</caption>
+  const table = rows ? `<p id="competition-scroll-hint" class="competition-scroll-hint">${h(label(messages, 'tableScrollHint'))}</p><div class="competition-table-wrap" role="region" aria-label="${h(label(messages, 'seasonAnnual'))} ${h(season.label)}" aria-describedby="competition-scroll-hint" tabindex="0"><table><caption>${h(label(messages, 'seasonAnnual'))} ${h(season.label)}</caption>
     <thead><tr><th scope="col">${h(label(messages, 'rank'))}</th><th scope="col">${h(label(messages, 'player'))}</th><th scope="col">${h(label(messages, 'points'))}</th><th scope="col">${h(label(messages, 'tournamentsColumn'))}</th><th scope="col">${h(label(messages, 'movement'))}</th></tr></thead>
     <tbody>${rows}</tbody></table></div>` : `<p class="competition-empty">${h(label(messages, 'noAnnual'))}</p>`;
   const events = annual.events.map((event) => {

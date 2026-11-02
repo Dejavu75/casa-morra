@@ -68,6 +68,14 @@ test('el detalle conserva tabla oficial, resultados y byes sin inventar jugadas'
   assert.equal(renderTournamentDetail(data, 'desconocido').title, 'Torneo no encontrado — Casa Morra');
 });
 
+test('las tablas de torneo y anual explican el desplazamiento horizontal y aceptan foco', () => {
+  for (const html of [renderTournamentDetail(data, 'archivo-de-verano-2025').html,
+    renderAnnual(data, '25-26').html]) {
+    assert.match(html, /class="competition-scroll-hint"[^>]*>[^<]*horizontal/);
+    assert.match(html, /class="competition-table-wrap" role="region" aria-label="[^"]+" aria-describedby="competition-scroll-hint" tabindex="0"/);
+  }
+});
+
 test('la anual muestra puestos compartidos, movimiento y exclusiones de la demo', () => {
   const view = renderAnnual(data, '25-26');
   assert.match(view.html, /<caption>Tabla anual/);
