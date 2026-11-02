@@ -1,13 +1,14 @@
 # Acceso a Casa Morra desde la red local
 
-La variante `compose.lan.yaml` usa la red bridge de Docker y publica el puerto únicamente en `192.168.0.52:8088`. `compose.yaml` permanece ligado a `127.0.0.1:8088` para uso local y reversión. La variante LAN requiere Docker Compose 2.24.4 o posterior por el uso de `!override`.
+La variante `compose.lan.yaml` usa la red bridge de Docker y publica el puerto únicamente en la dirección indicada por `CASA_MORRA_LAN_IP`. Esta variable es obligatoria: si falta o está vacía, Compose no crea el servicio LAN. `compose.yaml` permanece ligado a `127.0.0.1:8088` para uso local y reversión. La variante LAN requiere Docker Compose 2.24.4 o posterior por el uso de `!override`.
 
 ## Antes de activar
 
-1. Confirmar que `192.168.0.52` sigue asignada a este equipo, que el puerto `8088` está libre en esa dirección y que `.demo-public/snapshot.json` contiene solo datos ficticios. No montar `.demo-state/`.
-2. Revisar el modelo combinado y exigir un único mapeo `192.168.0.52:8088→8088`, sin `127.0.0.1`, `0.0.0.0` ni `::` adicionales:
+1. Confirmar la IP LAN asignada al anfitrión, que el puerto `8088` está libre en esa dirección y que `.demo-public/snapshot.json` contiene solo datos ficticios. No montar `.demo-state/` en el servicio público. Elegir una IP concreta, nunca `0.0.0.0` ni `::`.
+2. Definir `CASA_MORRA_LAN_IP` en el entorno o en un `.env` local ignorado por Git. En el anfitrión actual se usa `192.168.0.52`; en otro equipo hay que reemplazarla por su IP real. Revisar el modelo combinado y exigir un único mapeo de esa IP y puerto hacia `8088`, sin publicaciones adicionales:
 
 ```powershell
+$env:CASA_MORRA_LAN_IP = '192.168.0.52' # reemplazar por la IP del nuevo anfitrión
 docker compose -p casa-morra -f compose.yaml -f compose.lan.yaml config
 ```
 
@@ -18,12 +19,12 @@ docker compose -p casa-morra -f compose.yaml -f compose.lan.yaml config
 Desde este checkout, con la exportación pública validada:
 
 ```powershell
-docker compose -p casa-morra -f compose.yaml -f compose.lan.yaml up -d --build
+node scripts/compose-lan.mjs up -d --build
 docker inspect casa-morra-web-1 --format '{{.HostConfig.NetworkMode}} {{json .HostConfig.PortBindings}} {{.State.Health.Status}}'
-Invoke-WebRequest http://192.168.0.52:8088/health
+Invoke-WebRequest "http://$($env:CASA_MORRA_LAN_IP):8088/health"
 ```
 
-Confirmar una red bridge, estado `healthy` y una sola publicación con `HostIp=192.168.0.52` y `HostPort=8088`. Probar también portada, una ruta profunda, un activo y `/demo/snapshot.json`. Una solicitud hecha en el propio anfitrión a `192.168.0.52` **no** demuestra acceso desde otro dispositivo; esa aceptación requiere una prueba desde un equipo distinto de la LAN.
+Confirmar una red bridge, estado `healthy` y una sola publicación con `HostIp` igual a la IP elegida y `HostPort=8088`. Probar también portada, una ruta profunda, un activo y `/demo/snapshot.json`. Una solicitud hecha en el propio anfitrión a su IP LAN **no** demuestra acceso desde otro dispositivo; esa aceptación requiere una prueba desde un equipo distinto de la LAN.
 
 ## Reversión
 

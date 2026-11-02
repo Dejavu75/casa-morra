@@ -1,4 +1,4 @@
 services:
   web:
     ports: !override
-      - "192.168.0.52:${CASA_MORRA_HTTP_PORT:-8088}:8088"
+      - "${CASA_MORRA_LAN_IP:?Definir CASA_MORRA_LAN_IP con la dirección LAN del anfitrión}:${CASA_MORRA_HTTP_PORT:-8088}:8088"
