@@ -45,9 +45,10 @@ runtimeTest('PNG conserva su codificación y no recibe gzip', async () => {
 });
 
 runtimeTest('HTML y módulos usados por la entrega exigen revalidación de caché', async () => {
-  for (const path of ['/', '/assets/site.css?v=0.9.3-demo',
+  for (const path of ['/', '/assets/site.css?v=0.10.0-demo', '/assets/stats.css?v=0.10.0-demo',
     '/views/players.css?v=0.9.3-demo', '/views/content.css?v=0.9.3-demo',
-    '/assets/app.js?v=0.9.3-demo', '/i18n/index.js?v=0.9.3-demo',
+    '/views/elo.css', '/views/encyclopedia.css', '/views/elo.js', '/views/encyclopedia.js',
+    '/assets/app.js?v=0.10.0-demo', '/i18n/index.js?v=0.9.3-demo',
     '/views/annual.js?v=0.9.3-demo', '/views/players.js?v=0.9.3-demo',
     '/views/records.js?v=0.9.3-demo', '/views/home.js?v=0.9.3-demo',
     '/views/editorial.js?v=0.9.3-demo', '/domain/statistics.js?v=0.9.3-demo',
@@ -58,10 +59,10 @@ runtimeTest('HTML y módulos usados por la entrega exigen revalidación de cach�
     assert.match(response.headers['cache-control'] ?? '', /(?:^|,)\s*no-cache\s*(?:,|$)/i, path);
     assert.equal(response.headers['x-content-type-options'], 'nosniff', path);
   }
-  const entry = await request('/estadisticas?entrega=0.9.3-demo');
+  const entry = await request('/estadisticas?entrega=0.10.0-demo');
   assert.equal(entry.status, 200);
   assert.match(entry.headers['cache-control'] ?? '', /no-cache/i);
-  assert.match(entry.body.toString('utf8'), /src="\/assets\/app\.js\?v=0\.9\.3-demo"/);
+  assert.match(entry.body.toString('utf8'), /src="\/assets\/app\.js\?v=0\.10\.0-demo"/);
 });
 
 runtimeTest('rutas profundas, 404 y cabeceras de seguridad permanecen intactos', async () => {
