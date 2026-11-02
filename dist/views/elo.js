@@ -14,7 +14,7 @@ export const eloEs = Object.freeze({
 
 const round = (value, locale) => formatNumber(Math.round(value), locale);
 
-function chart(series, labels, locale) {
+function chart(series, labels, locale, games) {
   const points = series.flatMap(({ history }) => history.map((step) => step));
   if (!points.length) return `<p>${h(labels.empty)}</p>`;
   const dates = points.map((step) => Date.parse(`${step.date}T00:00:00Z`));
@@ -24,10 +24,12 @@ function chart(series, labels, locale) {
   const minRating = Math.floor((Math.min(...ratings) - 20) / 25) * 25;
   const maxRating = Math.ceil((Math.max(...ratings) + 20) / 25) * 25;
   const dateX = (date) => 58 + (maxDate === minDate ? 0.5 : (Date.parse(`${date}T00:00:00Z`) - minDate) / (maxDate - minDate)) * 682;
+  const gamesById = new Map(games.map((game) => [game.id, game]));
   const eventsByDate = new Map();
   for (const step of points) {
     if (!eventsByDate.has(step.date)) eventsByDate.set(step.date, new Map());
-    eventsByDate.get(step.date).set(step.gameId, step.round);
+    const game = gamesById.get(step.gameId);
+    eventsByDate.get(step.date).set(step.gameId, { tournamentId: game.tournamentId, round: step.round });
   }
   const days = [...eventsByDate.keys()].sort();
   const eventX = new Map();
@@ -35,8 +37,9 @@ function chart(series, labels, locale) {
     const center = dateX(date);
     const left = dayIndex ? (dateX(days[dayIndex - 1]) + center) / 2 : 58;
     const right = dayIndex < days.length - 1 ? (center + dateX(days[dayIndex + 1])) / 2 : 740;
-    const gameIds = [...eventsByDate.get(date)].sort(([idA, roundA], [idB, roundB]) =>
-      roundA - roundB || idA.localeCompare(idB)).map(([gameId]) => gameId);
+    const gameIds = [...eventsByDate.get(date)].sort(([idA, eventA], [idB, eventB]) =>
+      eventA.tournamentId.localeCompare(eventB.tournamentId) || eventA.round - eventB.round ||
+      idA.localeCompare(idB)).map(([gameId]) => gameId);
     gameIds.forEach((gameId, gameIndex) => {
       eventX.set(`${date}|${gameId}`, gameIds.length === 1 ? center :
         left + (gameIndex + 1) * (right - left) / (gameIds.length + 1));
@@ -80,5 +83,5 @@ export function renderElo(data, { jugador = [] } = {}, labels = eloEs, locale = 
   const series = selected.map((player) => ({ player, history: ratings[player.id].history }));
   return { title: labels.title, html: `<div class="elo-page container"><p class="elo-eyebrow">Casa Morra · datos demo</p><h1>${h(labels.title)}</h1><p>${h(labels.intro)}</p><p class="elo-method">${h(labels.method)}</p>
     <section aria-labelledby="elo-ranking"><h2 id="elo-ranking">${h(labels.ranking)}</h2><div class="elo-table-wrap" role="region" aria-label="${h(labels.ranking)}" tabindex="0"><table><caption>${h(labels.ranking)}</caption><thead><tr><th scope="col">#</th><th scope="col">${h(labels.player)}</th><th scope="col">${h(labels.rating)}</th><th scope="col">${h(labels.games)}</th><th scope="col">${h(labels.open)}</th></tr></thead><tbody>${ranking}</tbody></table></div></section>
-    <section aria-labelledby="elo-compare"><h2 id="elo-compare">${h(labels.compare)}</h2><form method="get" action="${h(routeHref('elo'))}" class="elo-select"><fieldset><legend>${h(labels.choose)}</legend><div>${choices}</div></fieldset><button type="submit">${h(labels.draw)}</button></form>${chart(series, labels, locale)}</section></div>` };
+    <section aria-labelledby="elo-compare"><h2 id="elo-compare">${h(labels.compare)}</h2><form method="get" action="${h(routeHref('elo'))}" class="elo-select"><fieldset><legend>${h(labels.choose)}</legend><div>${choices}</div></fieldset><button type="submit">${h(labels.draw)}</button></form>${chart(series, labels, locale, data.games)}</section></div>` };
 }

@@ -40,3 +40,26 @@ test('cada partida del mismo día ocupa un punto distinguible en la línea Elo',
     markers.map(([, , x]) => Number(x)).toSorted((a, b) => a - b));
   assert.match(html, /<th scope="col">Partida<\/th>/);
 });
+
+test('partidas del mismo día respetan el orden por torneo antes que por ronda', () => {
+  const player = demo.players[0];
+  const rival = demo.players[1];
+  const event = demo.tournaments.find((row) => row.eloEligible);
+  const game = demo.games.find((row) => row.tournamentId === event.id);
+  const fixture = {
+    ...demo,
+    tournaments: [{ ...event, id: 'a' }, { ...event, id: 'b' }],
+    games: [
+      { ...game, id: 'a-r5', tournamentId: 'a', date: '2025-03-15', round: 5,
+        whiteId: player.id, blackId: rival.id, result: '1-0' },
+      { ...game, id: 'b-r1', tournamentId: 'b', date: '2025-03-15', round: 1,
+        whiteId: player.id, blackId: rival.id, result: '0-1' },
+    ],
+    byes: [], titles: [],
+  };
+  const html = renderElo(fixture, { jugador: [player.slug] }).html;
+  const positions = [...html.matchAll(/<circle data-game-id="(a-r5|b-r1)"[^>]* cx="([^"]+)"/g)]
+    .map(([, gameId, x]) => [gameId, Number(x)]);
+  assert.deepEqual(positions.map(([gameId]) => gameId), ['a-r5', 'b-r1']);
+  assert.ok(positions[0][1] < positions[1][1], 'la línea no debe retroceder en el tiempo');
+});
