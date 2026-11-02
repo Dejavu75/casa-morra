@@ -1,7 +1,7 @@
 # Centro estadístico de Casa Morra
 
 Objetivo: recuperar las áreas públicas de estadísticas y completar el boceto sin contenido editorial.
-Rama: `feat/casa-morra-statistics-hub`. Entrega: rama local por unidades; sin publicación remota implícita. Runner: `npm test`, `npm run verify:data` y comprobación HTTP en Docker local. Estrategia: `exception-ok` (excepción de tamaño previamente autorizada; sin PR solicitado).
+Rama: `feat/casa-morra-statistics-hub`. Entrega: fast-forward a `main` remoto por la autorización previa del usuario de integrar las ramas necesarias; sin Sites ni Docker Hub. Runner: `npm test`, `npm run verify:data` y comprobación HTTP en Docker local. Estrategia: `exception-ok` (excepción de tamaño previamente autorizada; sin PR solicitado).
 
 ## Specs
 
@@ -31,3 +31,4 @@ L6: T2 añadió `/elo` con ranking, selección múltiple por URL, SVG temporal y
 L7: T3 añadió `/comparar` para cualquier pareja y `/enciclopedia` con filtros combinables, resultados y descarga PGN solo cuando existe una secuencia legal de jugadas; los resultados sin planilla permanecen visibles. La primera prueba usó un torneo demo sin partidas y fue corregida para seleccionar un torneo con partidas.
 L8: T4 cambió los overrides verdes a azul marino/blanco, adaptó el gráfico Elo al modo oscuro, añadió menú responsive y actualizó URL de entradas a `0.10.0-demo`. La suite detectó expectativas de caché de 0.9.3; se ajustaron solo las entradas nuevas y se preservó la cobertura de importaciones previas.
 L9: T5 reconstruyó solo el servicio web `casa-morra-web-1` en Docker bridge/LAN sin recrear admin ni modificar el montaje `.demo-public`; `/health` y rutas estadísticas dieron 200, admin permaneció healthy. Verificador independiente: S1-S5 PASS funcional y S6 parcial por no tener captura visual propia; el orquestador sí inspeccionó escritorio y menú de 375 px. La descarga PGN se validó por contenido codificado y prueba de generación, aunque el navegador de prueba no emitió evento de descarga. Suite final 248 aprobadas, 5 omitidas, `verify:data` sin errores.
+L10: Se confirmó `origin/main=be536a91` como ancestro de la rama y la sesión local `Dejavu75` activa; la entrega por fast-forward directa a `main` sigue la instrucción previa del usuario de dejar todas las ramas necesarias integradas.
