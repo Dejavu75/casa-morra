@@ -14,8 +14,8 @@ S6. «Esta página será complementaria por lo que debería mantener la misma es
 
 ## Tasks
 
-- [x] T1 · S1-S3 · ruta inline · reabrir navegación estadística, perfiles, torneos y partidas; RED 2/3, GREEN 3/3, suite 240/245 (5 omitidas); commit pendiente.
-- [ ] T2 · S4 · ruta inline · página Elo, gráfica temporal, comparación, enteros visibles; pruebas; commit pendiente.
+- [x] T1 · S1-S3 · ruta inline · reabrir navegación estadística, perfiles, torneos y partidas; RED 2/3, GREEN 3/3, suite 240/245 (5 omitidas); commit `8dba5f0`.
+- [x] T2 · S4 · ruta inline · página Elo, gráfica temporal, comparación, enteros visibles; RED 3, GREEN 12/12, suite 242 aprobadas (5 omitidas); commit pendiente.
 - [ ] T3 · S2, S5 · ruta inline · comparación jugador-jugador y Enciclopedia filtrable con PGN opcional; pruebas; commit pendiente.
 - [ ] T4 · S6 · ruta inline · armonización cromática CNSI y QA responsive/accesibilidad; pruebas y docs; commit pendiente.
 - [ ] T5 · S1-S6 · ruta inline · suite, datos, Docker local y verificación final; sin commit si no hay cambios.
@@ -27,3 +27,4 @@ L2 (2026-11-02): «tambien realiza tu consejo del cambio de colores».
 L3: Evidencia: `dist/assets/app.js` conserva renderers de jugadores/torneos/partidas pero `resolvePublicRoute` los redirige; `dist/index.html` solo navega a estadísticas. CNSI usa cabecera azul marino, blanco y escudo centrado; Casa Morra usa overrides verdes en `dist/assets/stats.css`.
 L4: Previsión: aproximadamente 700-1000 líneas authored, repartidas en unidades funcionales. No se reintroducen problemas, novedades, fotos, clases ni socios.
 L5: T1 reabrió `/jugadores`, `/torneos`, `/anual`, `/clasicos` y `/partidas/:id`; la navegación lista solo las áreas disponibles. La suite inicial detectó un test de shell obsoleto, actualizado a cuatro enlaces; suite final 240 aprobadas, 5 omitidas.
+L6: T2 añadió `/elo` con ranking, selección múltiple por URL, SVG temporal y tabla de datos equivalente. El Elo visible, incluido el récord de pico, se redondea a enteros; los empates de valor visible comparten puesto. RED 3, GREEN 12/12, suite 242 aprobadas, 5 omitidas.

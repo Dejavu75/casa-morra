@@ -1,0 +1,47 @@
+.elo-page {
+  padding-block: clamp(2rem, 5vw, 4rem) 5rem;
+}
+
+.elo-page h1 { margin: .2rem 0 1rem; }
+.elo-page section { margin-top: 2.5rem; }
+.elo-eyebrow {
+  margin: 0;
+  color: var(--accent-text);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.elo-method {
+  max-width: 62rem;
+  padding: .85rem 1rem;
+  border-left: 4px solid var(--indigo);
+  background: var(--paper);
+  color: var(--copy);
+}
+.elo-page h2 { margin-bottom: .8rem; }
+.elo-table-wrap,
+.elo-chart-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+.elo-table-wrap:focus-visible,
+.elo-chart-wrap:focus-visible { outline: 3px solid var(--focus); }
+.elo-page table { width: 100%; min-width: 540px; border-collapse: collapse; }
+.elo-page caption { padding: .8rem; font-weight: 700; text-align: left; }
+.elo-page th,
+.elo-page td { padding: .7rem .85rem; border-bottom: 1px solid var(--line); text-align: left; }
+.elo-page thead { background: var(--indigo); color: var(--paper); }
+.elo-page a { color: var(--accent-text); }
+.elo-select fieldset { border: 1px solid var(--line); padding: 1rem; }
+.elo-select legend { font-weight: 700; }
+.elo-select fieldset > div { display: flex; flex-wrap: wrap; gap: .7rem 1.4rem; }
+.elo-select label { display: inline-flex; align-items: center; gap: .4rem; }
+.elo-select button { margin-block: .85rem 1rem; padding: .65rem 1rem; background: var(--indigo); color: var(--paper); border: 0; cursor: pointer; }
+.elo-chart { display: block; width: 100%; min-width: 620px; height: auto; }
+.elo-chart-grid { fill: var(--copy); font-size: 12px; }
+.elo-legend { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; list-style: none; padding: .3rem 0; }
+.elo-legend li { display: flex; align-items: center; gap: .45rem; }
+.elo-legend span { display: inline-block; width: 1.2rem; height: .35rem; }

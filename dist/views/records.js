@@ -58,18 +58,16 @@ function playerLink(data, playerId, fallbackName) {
 
 function boardValueFormatter(board, locale) {
   if (board.id !== 'peakElo') return (value) => formatNumber(value, locale);
-  for (let digits = 1; digits <= 20; digits += 1) {
-    const formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: digits });
-    const valuesByLabel = new Map();
-    const ambiguous = board.entries.some(({ value }) => {
-      const label = formatter.format(value);
-      const previous = valuesByLabel.get(label);
-      valuesByLabel.set(label, value);
-      return previous !== undefined && previous !== value;
-    });
-    if (!ambiguous) return (value) => formatter.format(value);
-  }
-  return (value) => new Intl.NumberFormat(locale, { maximumFractionDigits: 20 }).format(value);
+  return (value) => formatNumber(Math.round(value), locale);
+}
+
+function displayedEntries(board) {
+  if (board.id !== 'peakElo') return board.entries;
+  return board.entries.map((entry, index, entries) => {
+    const value = Math.round(entry.value);
+    const first = entries.findIndex((item) => Math.round(item.value) === value);
+    return { ...entry, rank: first + 1 };
+  });
 }
 
 function boardValue(board, value, formatValue) {
@@ -85,8 +83,9 @@ export function renderStatistics(data, labels = recordsEs, locale = 'es-AR') {
   const sections = boards.map((board) => {
     const title = labels.boardTitles?.[board.id] ?? board.label;
     const description = labels.boardRules?.[board.id] ?? '';
-    const visible = board.entries.slice(0, 10);
-    const extra = board.entries.slice(10);
+    const entries = displayedEntries(board);
+    const visible = entries.slice(0, 10);
+    const extra = entries.slice(10);
     const formatValue = boardValueFormatter(board, locale);
     const table = visible.length ? boardTable(board, visible, title, labels, locale, formatValue) : `<p>${e(labels.noEligible)}</p>`;
     const more = extra.length ? `<details><summary>${e(labels.more)}</summary>${boardTable(board, extra, title, labels, locale, formatValue)}</details>` : '';

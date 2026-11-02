@@ -7,6 +7,7 @@ const definitions = Object.freeze([
   ['players', '/jugadores', []],
   ['player', '/jugadores/:slug', ['slug']],
   ['statistics', '/estadisticas', []],
+  ['elo', '/elo', []],
   ['classics', '/clasicos', []],
   ['classic', '/clasicos/:first/:second', ['first', 'second']],
   ['about', '/nosotros', []],
@@ -64,6 +65,8 @@ export function parseRoute(pathname, search = '') {
     let query = {};
     if (name === 'players') {
       query = { q: new URLSearchParams(search).get('q')?.trim() ?? '' };
+    } else if (name === 'elo') {
+      query = { jugador: [...new Set(new URLSearchParams(search).getAll('jugador').filter(validFilter))] };
     } else if (name === 'tournaments') {
       const fields = new URLSearchParams(search);
       query = { tipo: readFilter(fields, 'tipo'), temporada: readFilter(fields, 'temporada') };
@@ -97,6 +100,14 @@ export function routeHref(name, params = {}, query = {}) {
   }
   if (name === 'players' && typeof query?.q === 'string' && query.q.trim()) {
     return `${path}?${new URLSearchParams({ q: query.q.trim() })}`;
+  }
+  if (name === 'elo' && Array.isArray(query?.jugador)) {
+    const fields = new URLSearchParams();
+    for (const slug of [...new Set(query.jugador)]) {
+      if (!validFilter(slug)) throw new TypeError('Jugador de Elo inválido');
+      fields.append('jugador', slug);
+    }
+    return fields.size ? `${path}?${fields}` : path;
   }
   return path;
 }

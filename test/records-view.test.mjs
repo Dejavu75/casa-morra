@@ -21,7 +21,7 @@ test('las diez clasificaciones presentan población, regla y tabla accesible', (
   assert.doesNotMatch(page.html, /mi posición|posición personal|bye.*partida jugada/i);
 });
 
-test('el Elo visible distingue valores con puestos diferentes sin alterar otros récords', () => {
+test('el Elo visible usa enteros y empata valores iguales sin alterar otros récords', () => {
   const html = renderStatistics(sample).html;
   const elo = html.match(/<section[^>]*data-record-id="peakElo"[\s\S]*?<\/section>/)?.[0] ?? '';
   const rows = [...elo.matchAll(/<tr><th scope="row">([^<]+)<\/th><td>[^<]*(?:<a[^>]*>[^<]+<\/a>)?<\/td><td>([^<]+)<\/td><\/tr>/g)]
@@ -33,7 +33,8 @@ test('el Elo visible distingue valores con puestos diferentes sin alterar otros 
     ranksByValue.set(value, rank);
   }
   assert.match(html, /data-record-id="winRate"[\s\S]*?41,7 %/);
-  assert.match(renderStatistics(sample, recordsEs, 'en-US').html, /data-record-id="peakElo"[\s\S]*?1,409\.98/);
+  assert.match(renderStatistics(sample, recordsEs, 'en-US').html, /data-record-id="peakElo"[\s\S]*?1,410/);
+  assert.doesNotMatch(elo, /\d[.,]\d{1,2}<\/td>/);
 });
 
 test('una clasificación larga usa expansión nativa sin esconder el encabezado de tabla', () => {
