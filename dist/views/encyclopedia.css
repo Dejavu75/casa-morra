@@ -1,5 +1,6 @@
 .lookup-page { padding-block: clamp(2rem, 5vw, 4rem) 5rem; }
 .lookup-page h1 { margin: .2rem 0 1rem; }
+.lookup-page h2 { font-size: clamp(1.5rem, 3vw, 2.5rem); line-height: 1.2; }
 .lookup-eyebrow {
   margin: 0;
   color: var(--accent-text);

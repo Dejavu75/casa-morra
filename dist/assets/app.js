@@ -15,7 +15,8 @@ import { createDemoSource } from './demo-source.js';
 
 const demoData = { ...demo };
 const navGroup = Object.freeze({
-  tournament: 'tournaments', annual: 'tournaments', player: 'players',
+  tournament: 'tournaments', annual: 'tournaments', player: 'players', compare: 'players',
+  game: 'encyclopedia',
   classic: 'classics', 'news-detail': 'news',
 });
 

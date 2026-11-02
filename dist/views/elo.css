@@ -19,7 +19,7 @@
   background: var(--paper);
   color: var(--copy);
 }
-.elo-page h2 { margin-bottom: .8rem; }
+.elo-page h2 { margin-bottom: .8rem; font-size: clamp(1.5rem, 3vw, 2.5rem); line-height: 1.2; }
 .elo-table-wrap,
 .elo-chart-wrap {
   max-width: 100%;

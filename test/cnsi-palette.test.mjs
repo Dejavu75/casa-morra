@@ -20,3 +20,8 @@ test('la navegación completa usa menú accesible en pantallas estrechas', async
   assert.match(css, /@media \(max-width: 1180px\)[\s\S]*\.stats-only \.site-nav\.is-open/);
   assert.doesNotMatch(css, /@media \(max-width: 1180px\)[\s\S]*\.stats-only \.site-nav\s*\{[^}]*display:\s*flex/);
 });
+
+test('las páginas de datos limitan los encabezados secundarios para mantener la tabla visible', async () => {
+  for (const file of ['views/elo.css', 'views/encyclopedia.css'])
+    assert.match(await read(file), /h2\s*\{[^}]*font-size:\s*clamp\(1\.5rem, 3vw, 2\.5rem\)/);
+});
