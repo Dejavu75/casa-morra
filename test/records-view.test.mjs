@@ -21,6 +21,15 @@ test('las diez clasificaciones presentan población, regla y tabla accesible', (
   assert.doesNotMatch(page.html, /mi posición|posición personal|bye.*partida jugada/i);
 });
 
+test('los titulares de récord enlazan al perfil del jugador correspondiente', () => {
+  const html = renderStatistics(sample).html;
+  const boards = getLeaderboards(sample);
+  const playerIds = new Set(boards.flatMap((board) => board.entries.map((entry) => entry.playerId)));
+  for (const player of sample.players.filter((row) => playerIds.has(row.id))) {
+    assert.match(html, new RegExp(`<a href="/jugadores/${player.slug}">${player.name}</a>`));
+  }
+});
+
 test('el Elo visible usa enteros y empata valores iguales sin alterar otros récords', () => {
   const html = renderStatistics(sample).html;
   const elo = html.match(/<section[^>]*data-record-id="peakElo"[\s\S]*?<\/section>/)?.[0] ?? '';

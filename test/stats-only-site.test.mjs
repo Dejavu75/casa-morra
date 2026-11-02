@@ -7,13 +7,14 @@ import { renderRoute, resolvePublicRoute } from '../dist/assets/app.js';
 
 const read = (path) => readFile(new URL(`../dist/${path}`, import.meta.url), 'utf8');
 
-test('la portada pública presenta las diez estadísticas y ningún acceso a otras secciones', () => {
+test('la portada pública presenta diez estadísticas y enlaza perfiles sin áreas editoriales', () => {
   const home = renderRoute(parseRoute('/'), demo);
   const statistics = renderRoute(parseRoute('/estadisticas'), demo);
   assert.equal(home.title, statistics.title);
   assert.equal((home.html.match(/data-record-id=/g) ?? []).length, 10);
   assert.match(home.html, /<h1>Estadísticas y récords<\/h1>/);
-  assert.doesNotMatch(home.html, /href="\/(?:torneos|jugadores|clasicos|novedades|clases|nosotros|socios|partidas)/);
+  assert.match(home.html, /href="\/jugadores\//);
+  assert.doesNotMatch(home.html, /href="\/(?:novedades|clases|nosotros|socios|problemas)/);
 });
 
 test('el shell navega por las áreas estadísticas sin publicar las editoriales', async () => {

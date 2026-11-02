@@ -74,8 +74,8 @@ function boardValue(board, value, formatValue) {
   return `${e(formatValue(value))}${board.id === 'winRate' ? ' %' : ''}`;
 }
 
-function boardTable(board, entries, caption, labels, locale, formatValue) {
-  return `<table class="record-table"><caption>${e(caption)}</caption><thead><tr><th scope="col">${e(labels.position)}</th><th scope="col">${e(labels.player)}</th><th scope="col">${e(labels.value)}</th></tr></thead><tbody>${entries.map((entry) => `<tr><th scope="row">${e(formatNumber(entry.rank, locale))}</th><td>${e(entry.name ?? entry.playerId)}</td><td>${boardValue(board, entry.value, formatValue)}</td></tr>`).join('')}</tbody></table>`;
+function boardTable(data, board, entries, caption, labels, locale, formatValue) {
+  return `<table class="record-table"><caption>${e(caption)}</caption><thead><tr><th scope="col">${e(labels.position)}</th><th scope="col">${e(labels.player)}</th><th scope="col">${e(labels.value)}</th></tr></thead><tbody>${entries.map((entry) => `<tr><th scope="row">${e(formatNumber(entry.rank, locale))}</th><td>${playerLink(data, entry.playerId, entry.name)}</td><td>${boardValue(board, entry.value, formatValue)}</td></tr>`).join('')}</tbody></table>`;
 }
 
 export function renderStatistics(data, labels = recordsEs, locale = 'es-AR') {
@@ -87,8 +87,8 @@ export function renderStatistics(data, labels = recordsEs, locale = 'es-AR') {
     const visible = entries.slice(0, 10);
     const extra = entries.slice(10);
     const formatValue = boardValueFormatter(board, locale);
-    const table = visible.length ? boardTable(board, visible, title, labels, locale, formatValue) : `<p>${e(labels.noEligible)}</p>`;
-    const more = extra.length ? `<details><summary>${e(labels.more)}</summary>${boardTable(board, extra, title, labels, locale, formatValue)}</details>` : '';
+    const table = visible.length ? boardTable(data, board, visible, title, labels, locale, formatValue) : `<p>${e(labels.noEligible)}</p>`;
+    const more = extra.length ? `<details><summary>${e(labels.more)}</summary>${boardTable(data, board, extra, title, labels, locale, formatValue)}</details>` : '';
     return `<section class="record-board" data-record-id="${e(board.id)}" aria-labelledby="record-${e(board.id)}"><h2 id="record-${e(board.id)}">${e(title)}</h2><p>${e(description)}</p>${table}${more}</section>`;
   }).join('');
   const totals = [
