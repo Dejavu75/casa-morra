@@ -565,7 +565,6 @@ h2 em {
 .demo-source-controls {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(2.75rem, auto) minmax(1.5rem, auto);
   align-items: center;
   padding-block: .5rem;
 }

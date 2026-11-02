@@ -39,7 +39,7 @@ test('la interfaz anuncia la carga pendiente sin ofrecer recarga manual', async 
 test('los controles reservan espacio para el aviso sin desplazar la página al fallar', async () => {
   const css = await text('../dist/assets/site.css');
   assert.match(css, /\.demo-source-controls\s*\{[^}]*display:\s*grid;/);
-  assert.match(css, /\.demo-source-controls\s*\{[^}]*grid-template-rows:\s*[^;]*minmax\(/);
+  assert.doesNotMatch(css, /\.demo-source-controls\s*\{[^}]*grid-template-rows:/);
   assert.match(css, /\.demo-source-controls \[role="status"\]\s*\{[^}]*min-block-size:/);
   assert.match(css, /\.demo-source-controls \[data-demo-warning\]\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/);
 });

@@ -26,8 +26,9 @@ test('récords y clásicos tienen tablas desplazables y ancho móvil', () => {
 
 test('el hero estadístico compacto deja visible antes el índice de clasificaciones', () => {
   const css = readFileSync(fileURLToPath(new URL('../dist/assets/stats.css', import.meta.url)), 'utf8');
-  assert.match(css, /\.stats-only \.records-hero\s*\{[^}]*padding:\s*clamp\(1\.25rem, 3vw, 2\.5rem\)/);
-  assert.match(css, /\.stats-only \.records-hero h1\s*\{[^}]*font-size:\s*clamp\(2\.5rem, 5vw, 4\.5rem\)/);
+  assert.match(css, /\.stats-only \.records-page\s*\{[^}]*padding-block:\s*clamp\(\.75rem, 2vw, 1\.25rem\)/);
+  assert.match(css, /\.stats-only \.records-hero\s*\{[^}]*padding:\s*clamp\(1rem, 2vw, 1\.5rem\)/);
+  assert.match(css, /\.stats-only \.records-hero h1\s*\{[^}]*font-size:\s*clamp\(2\.25rem, 4vw, 3\.5rem\)/);
 });
 
 test('el CSS de rutas no reintroduce el hero ni el roadmap inactivos', () => {
