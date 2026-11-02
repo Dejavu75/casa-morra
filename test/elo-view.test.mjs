@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import * as demo from '../dist/data/demo.js';
 import { parseRoute, routeHref } from '../dist/router.js';
 import { renderRoute, resolvePublicRoute } from '../dist/assets/app.js';
+import { renderElo } from '../dist/views/elo.js';
 
 test('Elo tiene listado, evolución individual y comparación de jugadores', () => {
   const first = demo.players[0];
@@ -28,4 +29,14 @@ test('Elo ignora selecciones ajenas al plantel y muestra un estado sin partidas'
   assert.doesNotMatch(html, /<svg/);
   assert.match(html, /Todavía no hay partidas elegibles/);
   assert.doesNotMatch(html, /<script>/);
+});
+
+test('cada partida del mismo día ocupa un punto distinguible en la línea Elo', () => {
+  const html = renderElo(demo, { jugador: [demo.players[0].slug] }).html;
+  const markers = [...html.matchAll(/<circle data-game-id="([^"]+)" data-date="2025-03-15" cx="([^"]+)"/g)];
+  assert.equal(markers.length, 5);
+  assert.equal(new Set(markers.map(([, , x]) => x)).size, markers.length);
+  assert.deepEqual(markers.map(([, , x]) => Number(x)),
+    markers.map(([, , x]) => Number(x)).toSorted((a, b) => a - b));
+  assert.match(html, /<th scope="col">Partida<\/th>/);
 });
