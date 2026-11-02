@@ -70,7 +70,7 @@ El comando `init` es solo para un almacén inexistente. `compose.admin.yaml` mon
 
 La opción `-p casa-morra` conserva el proyecto Compose del servicio público aunque los comandos se ejecuten desde otro worktree. Sin ella, Compose usa el nombre del directorio actual y puede crear una pila separada. En la instalación actual, la contraseña generada está en el archivo local `.env`, ignorado por Git; consérvalo fuera del repositorio remoto y reemplázala si deja de ser privada.
 
-Esta autenticación es deliberadamente simple y local. Docker conserva las variables de entorno en su configuración; no uses este montaje en un host compartido ni expongas el puerto administrativo a la LAN/Internet sin HTTPS y controles adicionales. No se ha verificado el panel visualmente en un navegador cuando la automatización local está deshabilitada.
+Esta autenticación es deliberadamente simple y local. Docker conserva las variables de entorno en su configuración; no uses este montaje en un host compartido ni expongas el puerto administrativo a la LAN/Internet sin HTTPS y controles adicionales. En contenedores de prueba aislados se verificaron con navegador el acceso, la carga de un resultado y su actualización por PGN sin duplicar la partida. La imagen de la rama 89 se comprobó aparte para el nuevo selector de torneos. No se realizó una auditoría con lector de pantalla ni una prueba del panel en el host destino.
 
 El botón «Modo oscuro» conserva el mismo nombre accesible al alternar el tema; `aria-pressed` indica si el modo oscuro está activo. Esta semántica tiene prueba automatizada, pero no sustituye una comprobación con lector de pantalla.
 
