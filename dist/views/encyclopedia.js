@@ -6,7 +6,8 @@ import { escapeHtml as h, formatDate, formatNumber } from './common.js';
 export const encyclopediaEs = Object.freeze({
   title: 'Enciclopedia de partidas', intro: 'Buscá resultados por jugador y torneo. Las planillas se incorporan cuando están disponibles.',
   player: 'Jugador', allPlayers: 'Todos los jugadores', tournament: 'Torneo', allTournaments: 'Todos los torneos',
-  search: 'Buscar partidas', clear: 'Limpiar filtros', rival: 'Rival', date: 'Fecha', result: 'Resultado',
+  search: 'Buscar partidas', clear: 'Limpiar filtros', rival: 'Rival', pairing: 'Blancas — Negras', date: 'Fecha', result: 'Resultado',
+  resultPerspective: '1–0: ganan las blancas; 0–1: ganan las negras; ½–½: tablas.',
   pgn: 'Archivo PGN', pending: 'PGN pendiente', download: 'Descargar PGN', view: 'Ver partida',
   games: 'Partidas', empty: 'No hay partidas para estos filtros.', demo: 'Datos ficticios de demostración',
 });
@@ -16,6 +17,7 @@ export const comparisonEs = Object.freeze({
   first: 'Primer jugador', second: 'Segundo jugador', choose: 'Elegí un jugador', compare: 'Comparar',
   games: 'Partidas', wins: 'Ganadas', draws: 'Empatadas', losses: 'Perdidas',
   white: 'Blancas', black: 'Negras', date: 'Fecha', tournament: 'Torneo', result: 'Resultado',
+  resultPerspective: '1–0: ganan las blancas; 0–1: ganan las negras; ½–½: tablas.',
   empty: 'Elegí dos jugadores diferentes para ver la comparación.', noGames: 'Todavía no jugaron entre sí.',
 });
 
@@ -64,7 +66,7 @@ export function renderEncyclopedia(data, { jugador = '', torneo = '' } = {}, lab
   }).join('');
   return { title: labels.title, html: `<div class="lookup-page container"><p class="lookup-eyebrow">${h(labels.demo)}</p><h1>${h(labels.title)}</h1><p>${h(labels.intro)}</p>
     <form class="lookup-filters" method="get" action="${h(routeHref('encyclopedia'))}" role="search"><label>${h(labels.player)}<select name="jugador">${options(data.players, player?.slug, labels.allPlayers, locale)}</select></label><label>${h(labels.tournament)}<select name="torneo">${options(data.tournaments, event?.slug, labels.allTournaments, locale)}</select></label><button type="submit">${h(labels.search)}</button><a href="${h(routeHref('encyclopedia'))}">${h(labels.clear)}</a></form>
-    <h2>${h(labels.games)}: ${h(formatNumber(matches.length, locale))}</h2>${rows ? `<div class="lookup-table-wrap" role="region" aria-label="${h(labels.games)}" tabindex="0"><table><caption>${h(labels.title)}</caption><thead><tr><th scope="col">${h(labels.rival)}</th><th scope="col">${h(labels.tournament)}</th><th scope="col">${h(labels.date)}</th><th scope="col">${h(labels.result)}</th><th scope="col">${h(labels.pgn)}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p>${h(labels.empty)}</p>`}</div>` };
+    <h2>${h(labels.games)}: ${h(formatNumber(matches.length, locale))}</h2>${rows ? `<p class="lookup-result-note">${h(labels.resultPerspective)}</p><div class="lookup-table-wrap" role="region" aria-label="${h(labels.games)}" tabindex="0"><table><caption>${h(labels.title)}</caption><thead><tr><th scope="col">${h(player ? labels.rival : labels.pairing)}</th><th scope="col">${h(labels.tournament)}</th><th scope="col">${h(labels.date)}</th><th scope="col">${h(labels.result)}</th><th scope="col">${h(labels.pgn)}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p>${h(labels.empty)}</p>`}</div>` };
 }
 
 const countLine = (record, labels, locale) => `${formatNumber(record.played, locale)} ${labels.games} · ${formatNumber(record.wins, locale)} ${labels.wins} · ${formatNumber(record.draws, locale)} ${labels.draws} · ${formatNumber(record.losses, locale)} ${labels.losses}`;
@@ -79,6 +81,6 @@ export function renderComparison(data, { primero = '', segundo = '' } = {}, labe
     const event = data.tournaments.find((item) => item.id === game.tournamentId);
     return `<tr><td>${h(formatDate(game.date, locale))}</td><td>${h(event?.name ?? '—')}</td><td><a href="${h(routeHref('game', { id: game.id }))}">${h(resultLabel(game.result))}</a></td></tr>`;
   }).join('') ?? '';
-  const result = pair ? `<section aria-label="${h(labels.games)}"><h2>${h(first.name)} — ${h(second.name)}</h2><p>${h(countLine(pair.record, labels, locale))}</p><div class="lookup-splits"><p><strong>${h(labels.white)}:</strong> ${h(countLine(pair.colors.white, labels, locale))}</p><p><strong>${h(labels.black)}:</strong> ${h(countLine(pair.colors.black, labels, locale))}</p></div>${games ? `<div class="lookup-table-wrap" role="region" aria-label="${h(labels.games)}" tabindex="0"><table><caption>${h(labels.games)}</caption><thead><tr><th scope="col">${h(labels.date)}</th><th scope="col">${h(labels.tournament)}</th><th scope="col">${h(labels.result)}</th></tr></thead><tbody>${games}</tbody></table></div>` : `<p>${h(labels.noGames)}</p>`}</section>` : `<p>${h(labels.empty)}</p>`;
+  const result = pair ? `<section aria-label="${h(labels.games)}"><h2>${h(first.name)} — ${h(second.name)}</h2><p>${h(countLine(pair.record, labels, locale))}</p><p class="lookup-result-note">${h(labels.resultPerspective)}</p><div class="lookup-splits"><p><strong>${h(labels.white)}:</strong> ${h(countLine(pair.colors.white, labels, locale))}</p><p><strong>${h(labels.black)}:</strong> ${h(countLine(pair.colors.black, labels, locale))}</p></div>${games ? `<div class="lookup-table-wrap" role="region" aria-label="${h(labels.games)}" tabindex="0"><table><caption>${h(labels.games)}</caption><thead><tr><th scope="col">${h(labels.date)}</th><th scope="col">${h(labels.tournament)}</th><th scope="col">${h(labels.result)}</th></tr></thead><tbody>${games}</tbody></table></div>` : `<p>${h(labels.noGames)}</p>`}</section>` : `<p>${h(labels.empty)}</p>`;
   return { title: labels.title, html: `<div class="lookup-page container"><h1>${h(labels.title)}</h1><p>${h(labels.intro)}</p><form class="lookup-filters" method="get" action="${h(routeHref('compare'))}"><label>${h(labels.first)}<select name="primero">${firstOptions}</select></label><label>${h(labels.second)}<select name="segundo">${secondOptions}</select></label><button type="submit">${h(labels.compare)}</button></form>${result}</div>` };
 }
