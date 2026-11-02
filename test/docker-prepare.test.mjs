@@ -78,7 +78,7 @@ test('rechaza exportación válida pero distinta sin alterar datos', async (t) =
   assert.deepEqual(after, before);
 });
 
-test('Compose prepara sin red, puertos ni contraseña administrativa', { skip: skipCompose }, () => {
+test('Compose prepara sin red, puertos ni contraseña administrativa', { skip: skipCompose }, async () => {
   const result = spawnSync('docker', ['compose', '-f', 'compose.bootstrap.yaml',
     'config', '--format', 'json'], { cwd: root, encoding: 'utf8' });
   if (result.error || result.status !== 0) {
@@ -89,7 +89,9 @@ test('Compose prepara sin red, puertos ni contraseña administrativa', { skip: s
   assert.ok(!service.ports);
   assert.ok(!service.environment?.CASA_MORRA_ADMIN_PASSWORD);
   assert.equal(service.volumes.length, 2);
-  assert.ok(service.volumes.every((volume) => volume.bind?.create_host_path === false));
+  assert.ok(service.volumes.every((volume) => volume.type === 'bind'));
+  const source = await readFile(new URL('../compose.bootstrap.yaml', import.meta.url), 'utf8');
+  assert.equal((source.match(/create_host_path: false/g) || []).length, 2);
 });
 
 test('rechaza opciones desconocidas, repetidas, incompletas y sueltas sin crear datos', async (t) => {
