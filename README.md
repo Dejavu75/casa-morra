@@ -18,8 +18,7 @@ node --test
 npm run verify:data
 node scripts/demo-snapshot.mjs
 docker compose config
-node scripts/demo-store.mjs init --store .demo-state/casa-morra.json
-node scripts/demo-public.mjs publish --store .demo-state/casa-morra.json --output .demo-public/snapshot.json
+node scripts/docker-prepare.mjs
 docker compose up --build -d
 docker compose ps
 Invoke-WebRequest http://127.0.0.1:8088/health
@@ -27,7 +26,7 @@ Invoke-WebRequest http://127.0.0.1:8088/
 docker compose down
 ```
 
-La aplicación está disponible en <http://127.0.0.1:8088/>. Compose publica exclusivamente en el bucle local. No reemplazar `127.0.0.1` por `0.0.0.0` ni considerar un HTTP 200 o un contenedor saludable como aceptación funcional o visual.
+La aplicación está disponible en <http://127.0.0.1:8088/>. Compose publica exclusivamente en el bucle local. No reemplazar `127.0.0.1` por `0.0.0.0` ni considerar un HTTP 200 o un contenedor saludable como aceptación funcional o visual. Para instalar web y panel en otro equipo, seguir la [guía Docker portable](docs/docker-otro-host.md).
 
 Compose configura `restart: unless-stopped`: Docker reinicia el servicio tras una salida o un reinicio del motor si no se lo detuvo expresamente. `docker compose down` lo detiene y elimina; para volver a servir el sitio, ejecutar `docker compose up -d`. Esta política no inicia Docker Desktop ni reemplaza la comprobación de `/health` y las rutas después de reiniciar el equipo.
 
@@ -55,10 +54,10 @@ La [guía candidata `0.9.3-demo`](docs/entrega-0.9.3-demo.md) documenta el ensay
 
 El panel opcional permite **crear un resultado sin jugadas** y completar después esa misma partida, de forma manual o mediante PGN. Solo usuarios que conozcan la contraseña administrativa pueden escribir. El acceso está limitado a <http://127.0.0.1:8090/> en el equipo servidor; no se publica en `192.168.0.52` ni en el puerto público 8088. No reutilices la contraseña del sitio de referencia.
 
-Antes del primer arranque, comprobá que el snapshot público corresponde al fixture demo e inicializá **una sola vez** `.demo-state/admin.json` (si ya existe, conservá su auditoría; no lo reemplaces). El administrador necesita una contraseña elegida por el operador; no hay contraseña predeterminada:
+Antes del primer arranque, prepará `.demo-state/admin.json` y la exportación pública con `node scripts/docker-prepare.mjs` o con el servicio de preparación de la [guía Docker portable](docs/docker-otro-host.md). Repetir la preparación no reemplaza un almacén existente. El administrador necesita una contraseña elegida por el operador; no hay contraseña predeterminada:
 
 ```powershell
-node scripts/demo-store.mjs init --store .demo-state/admin.json
+node scripts/docker-prepare.mjs
 $segura = Read-Host 'Contraseña administrativa nueva' -AsSecureString
 $env:CASA_MORRA_ADMIN_PASSWORD = [System.Net.NetworkCredential]::new('', $segura).Password
 docker compose -p casa-morra -f compose.admin.yaml up --build -d admin

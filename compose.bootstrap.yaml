@@ -1,0 +1,26 @@
+services:
+  prepare:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+    image: casa-morra-admin:local
+    command: ["node", "scripts/docker-prepare.mjs"]
+    network_mode: none
+    volumes:
+      - type: bind
+        source: ./.demo-state
+        target: /app/.demo-state
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./.demo-public
+        target: /app/.demo-public
+        bind:
+          create_host_path: false
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,noexec,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
