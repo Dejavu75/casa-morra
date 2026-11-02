@@ -31,3 +31,6 @@
 .lookup-page a { color: var(--accent-text); }
 .lookup-splits { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1rem; }
 .lookup-splits p { margin: 0; padding: 1rem; background: var(--paper); border: 1px solid var(--line); }
+:root[data-theme="oscuro"] .lookup-page .lookup-filters,
+:root[data-theme="oscuro"] .lookup-page .lookup-table-wrap,
+:root[data-theme="oscuro"] .lookup-page .lookup-splits p { background: #233352; }

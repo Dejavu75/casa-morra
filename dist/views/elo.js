@@ -12,7 +12,6 @@ export const eloEs = Object.freeze({
   selected: 'Jugadores seleccionados', initial: 'Valor inicial',
 });
 
-const palette = ['#1d2a5f', '#a64b25', '#0d7673', '#6a4b96', '#8b6500', '#a42d56'];
 const round = (value, locale) => formatNumber(Math.round(value), locale);
 
 function chart(series, labels, locale) {
@@ -33,12 +32,11 @@ function chart(series, labels, locale) {
   }).join('');
   const lines = series.map(({ player, history }, index) => {
     if (!history.length) return '';
-    const color = palette[index % palette.length];
     const path = [`58,${y(1400)}`, ...history.map((step) => `${x(step.date)},${y(step.after)}`)].join(' ');
-    const markers = history.map((step) => `<circle cx="${x(step.date)}" cy="${y(step.after)}" r="4" fill="${color}"><title>${h(player.name)} · ${h(formatDate(step.date, locale))}: ${h(round(step.after, locale))}</title></circle>`).join('');
-    return `<g><polyline points="${path}" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round"/>${markers}</g>`;
+    const markers = history.map((step) => `<circle cx="${x(step.date)}" cy="${y(step.after)}" r="4" fill="currentColor"><title>${h(player.name)} · ${h(formatDate(step.date, locale))}: ${h(round(step.after, locale))}</title></circle>`).join('');
+    return `<g class="elo-series-${index % 6}"><polyline points="${path}" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>${markers}</g>`;
   }).join('');
-  const legend = series.map(({ player }, index) => `<li><span style="background:${palette[index % palette.length]}"></span>${h(player.name)}</li>`).join('');
+  const legend = series.map(({ player }, index) => `<li><span class="elo-series-${index % 6}"></span>${h(player.name)}</li>`).join('');
   const rows = series.flatMap(({ player, history }) => history.map((step) => ({ player, ...step })))
     .sort((a, b) => a.date.localeCompare(b.date) || a.gameId.localeCompare(b.gameId))
     .map((step) => `<tr><td>${h(formatDate(step.date, locale))}</td><th scope="row">${h(step.player.name)}</th><td>${h(round(step.after, locale))}</td></tr>`).join('');

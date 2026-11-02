@@ -44,4 +44,20 @@
 .elo-chart-grid { fill: var(--copy); font-size: 12px; }
 .elo-legend { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; list-style: none; padding: .3rem 0; }
 .elo-legend li { display: flex; align-items: center; gap: .45rem; }
-.elo-legend span { display: inline-block; width: 1.2rem; height: .35rem; }
+.elo-legend span { display: inline-block; width: 1.2rem; height: .35rem; background: currentColor; }
+.elo-series-0 { color: #1d2a5f; }
+.elo-series-1 { color: #9b4527; }
+.elo-series-2 { color: #176e69; }
+.elo-series-3 { color: #694793; }
+.elo-series-4 { color: #795e00; }
+.elo-series-5 { color: #a02c54; }
+:root[data-theme="oscuro"] .elo-series-0 { color: #a8beff; }
+:root[data-theme="oscuro"] .elo-series-1 { color: #ffb69a; }
+:root[data-theme="oscuro"] .elo-series-2 { color: #8ee1d5; }
+:root[data-theme="oscuro"] .elo-series-3 { color: #d6b3ff; }
+:root[data-theme="oscuro"] .elo-series-4 { color: #f2dc82; }
+:root[data-theme="oscuro"] .elo-series-5 { color: #ffa2c1; }
+:root[data-theme="oscuro"] .elo-chart-grid line { stroke: #71809e; }
+:root[data-theme="oscuro"] .elo-page .elo-method,
+:root[data-theme="oscuro"] .elo-page .elo-table-wrap,
+:root[data-theme="oscuro"] .elo-page .elo-chart-wrap { background: #233352; }

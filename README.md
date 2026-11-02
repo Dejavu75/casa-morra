@@ -8,6 +8,8 @@ La portada `/` y `/estadisticas` muestran el mismo tablero: totales de jugadores
 
 Los totales y clasificaciones se calculan sobre el fixture original o sobre la exportación pública verificada que el sitio cargue. «Datos de demostración» permanece visible; no son estadísticas del club de referencia.
 
+La identidad visual usa azul marino, blanco y acentos cálidos para convivir con la estética del Club Náutico San Isidro sin replicar su portal. En pantallas estrechas, la navegación estadística se abre con un botón «Menú» accesible por teclado.
+
 ## Verificación local
 
 Requiere Node.js 22 para las pruebas nativas y Docker con Compose para ejecutar el sitio. `npm ci` instala la dependencia de ajedrez fijada en `package-lock.json` antes de las pruebas.

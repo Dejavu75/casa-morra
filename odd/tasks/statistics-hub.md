@@ -16,8 +16,8 @@ S6. «Esta página será complementaria por lo que debería mantener la misma es
 
 - [x] T1 · S1-S3 · ruta inline · reabrir navegación estadística, perfiles, torneos y partidas; RED 2/3, GREEN 3/3, suite 240/245 (5 omitidas); commit `8dba5f0`.
 - [x] T2 · S4 · ruta inline · página Elo, gráfica temporal, comparación, enteros visibles; RED 3, GREEN 12/12, suite 242 aprobadas (5 omitidas); commit `48fa03c`.
-- [x] T3 · S2, S5 · ruta inline · comparación jugador-jugador y Enciclopedia filtrable con PGN opcional; RED 3, GREEN 3/3, suite 245 aprobadas (5 omitidas); commit pendiente.
-- [ ] T4 · S6 · ruta inline · armonización cromática CNSI y QA responsive/accesibilidad; pruebas y docs; commit pendiente.
+- [x] T3 · S2, S5 · ruta inline · comparación jugador-jugador y Enciclopedia filtrable con PGN opcional; RED 3, GREEN 3/3, suite 245 aprobadas (5 omitidas); commit `baeb59d`.
+- [x] T4 · S6 · ruta inline · armonización cromática CNSI y QA responsive/accesibilidad; RED 2, GREEN 7/7, suite 247 aprobadas (5 omitidas); commit pendiente.
 - [ ] T5 · S1-S6 · ruta inline · suite, datos, Docker local y verificación final; sin commit si no hay cambios.
 
 ## Log
@@ -29,3 +29,4 @@ L4: Previsión: aproximadamente 700-1000 líneas authored, repartidas en unidade
 L5: T1 reabrió `/jugadores`, `/torneos`, `/anual`, `/clasicos` y `/partidas/:id`; la navegación lista solo las áreas disponibles. La suite inicial detectó un test de shell obsoleto, actualizado a cuatro enlaces; suite final 240 aprobadas, 5 omitidas.
 L6: T2 añadió `/elo` con ranking, selección múltiple por URL, SVG temporal y tabla de datos equivalente. El Elo visible, incluido el récord de pico, se redondea a enteros; los empates de valor visible comparten puesto. RED 3, GREEN 12/12, suite 242 aprobadas, 5 omitidas.
 L7: T3 añadió `/comparar` para cualquier pareja y `/enciclopedia` con filtros combinables, resultados y descarga PGN solo cuando existe una secuencia legal de jugadas; los resultados sin planilla permanecen visibles. La primera prueba usó un torneo demo sin partidas y fue corregida para seleccionar un torneo con partidas.
+L8: T4 cambió los overrides verdes a azul marino/blanco, adaptó el gráfico Elo al modo oscuro, añadió menú responsive y actualizó URL de entradas a `0.10.0-demo`. La suite detectó expectativas de caché de 0.9.3; se ajustaron solo las entradas nuevas y se preservó la cobertura de importaciones previas.

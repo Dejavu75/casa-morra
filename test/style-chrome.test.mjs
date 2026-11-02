@@ -22,12 +22,12 @@ test('menú y pie responden a pantalla estrecha sin estilos de vistas', () => {
   assert.match(css, /@media \(max-width: 560px\)\s*\{[\s\S]*\.brand-name\s*\{[\s\S]*font-size: 1\.25rem/);
 });
 
-test('la navegación estadística permanece visible sin menú en pantallas de 320 píxeles', () => {
+test('la navegación estadística abre un menú en pantallas estrechas', () => {
   const css = readFileSync(fileURLToPath(new URL('../dist/assets/stats.css', import.meta.url)), 'utf8');
   const html = readFileSync(fileURLToPath(new URL('../dist/index.html', import.meta.url)), 'utf8');
-  assert.doesNotMatch(html, /data-menu-toggle/);
+  assert.match(html, /data-menu-toggle/);
   assert.match(html, /href="\/estadisticas"/);
-  assert.match(css, /@media \(max-width: 1180px\)[\s\S]*\.stats-only \.site-nav\s*\{[\s\S]*display: flex/);
+  assert.match(css, /@media \(max-width: 1180px\)[\s\S]*\.stats-only \.site-nav\.is-open\s*\{\s*display: flex/);
 });
 
 test('los títulos de perfil caben en 320 píxeles sin cambiar el directorio', () => {
