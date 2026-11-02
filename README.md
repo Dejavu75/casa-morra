@@ -28,7 +28,7 @@ Invoke-WebRequest http://127.0.0.1:8088/
 docker compose down
 ```
 
-La aplicación está disponible en <http://127.0.0.1:8088/>. Compose publica exclusivamente en el bucle local. No reemplazar `127.0.0.1` por `0.0.0.0` ni considerar un HTTP 200 o un contenedor saludable como aceptación funcional o visual. Para instalar web y panel en otro equipo, seguir la [guía Docker portable](docs/docker-otro-host.md).
+El Compose base publica en <http://127.0.0.1:8088/>. La instalación LAN actual añade `compose.lan.yaml` con `CASA_MORRA_LAN_IP=192.168.0.52` y se consulta en <http://192.168.0.52:8088/estadisticas>. No reemplazar la IP por `0.0.0.0` ni considerar un HTTP 200 o un contenedor saludable como aceptación funcional o visual. Para instalar web y panel en otro equipo, seguir la [guía Docker portable](docs/docker-otro-host.md).
 
 Compose configura `restart: unless-stopped`: Docker reinicia el servicio tras una salida o un reinicio del motor si no se lo detuvo expresamente. `docker compose down` lo detiene y elimina; para volver a servir el sitio, ejecutar `docker compose up -d`. Esta política no inicia Docker Desktop ni reemplaza la comprobación de `/health` y las rutas después de reiniciar el equipo.
 
