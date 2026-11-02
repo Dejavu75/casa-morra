@@ -2,10 +2,18 @@
   padding-block: clamp(2rem, 5vw, 5rem);
 }
 
+.players-profile { padding-block: clamp(1.5rem, 3vw, 2.75rem); }
+
 .players-page h1,
 .players-page h2 {
   color: var(--heading);
   font-family: var(--font-serif);
+}
+
+.players-profile h2 {
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .players-page h1 {
@@ -14,9 +22,13 @@
   margin-block: 0.3em;
 }
 
+.players-profile h1 { font-size: clamp(2.2rem, 4vw, 3.4rem); margin-block: 0.2em; }
+
 .players-page section {
   margin-block: 2rem;
 }
+
+.players-profile section { margin-block: 1.35rem; }
 
 .players-eyebrow {
   color: var(--accent-text);
@@ -164,8 +176,11 @@
   border: 1px solid var(--line);
   border-radius: 0.6rem;
   margin: 0;
-  padding: 1rem 1.25rem;
+  padding: 0.75rem 1rem;
 }
+
+.players-summary p { margin-block: 0.45rem; }
+.players-summary small { display: block; line-height: 1.4; }
 
 .players-summary h2 {
   margin-top: 0;
@@ -180,7 +195,53 @@
 }
 
 .players-colors dd {
-  margin: 0.3rem 0 0;
+  margin: 0.15rem 0 0;
+}
+
+.players-colors dd strong {
+  color: var(--heading);
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.players-results-bar {
+  background: var(--line);
+  border-radius: 999px;
+  display: block;
+  height: 0.55rem;
+  margin-block: 0.55rem;
+  overflow: hidden;
+  width: 100%;
+}
+
+.players-results-win { background: var(--teal); fill: var(--teal); }
+.players-results-draw { background: #aeb4be; fill: #aeb4be; }
+.players-results-loss { background: var(--copper); fill: var(--copper); }
+
+.players-results-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.8rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.players-results-key li {
+  align-items: center;
+  display: inline-flex;
+  font-size: 0.85rem;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.players-results-key li span {
+  border-radius: 0.2rem;
+  flex: none;
+  height: 0.65rem;
+  width: 0.65rem;
 }
 
 .players-table-wrap {

@@ -58,6 +58,22 @@ test('el perfil separa partidas, puntos, colores, Elo e historial oficial', () =
   assert.equal(profile.elo.history.length, profile.elo.played);
 });
 
+test('el balance por color muestra cantidades explícitas y barras compactas', () => {
+  const html = renderPlayerProfile(data, 'celia-montiel').html;
+  const section = html.match(/<section aria-labelledby="players-colors">([\s\S]*?)<\/section>/)?.[1] ?? '';
+  assert.match(section, /Resultados por color/);
+  assert.equal((section.match(/12 partidas/g) ?? []).length, 2);
+  assert.match(section, /Con blancas[\s\S]*?5 ganadas[\s\S]*?6 empatadas[\s\S]*?1 perdida/);
+  assert.match(section, /Con negras[\s\S]*?5 ganadas[\s\S]*?4 empatadas[\s\S]*?3 perdidas/);
+  assert.equal((section.match(/<svg class="players-results-bar"/g) ?? []).length, 2);
+  assert.match(section, /<rect class="players-results-win" x="0\.00" width="41\.67" height="8"/);
+  assert.match(section, /<rect class="players-results-draw" x="41\.67" width="50\.00" height="8"/);
+  assert.doesNotMatch(section, /style="/);
+  assert.doesNotMatch(section, /G–E–P/);
+  assert.match(css, /\.players-profile h2\s*\{[^}]*font-size:\s*clamp\(1\.4rem,/);
+  assert.match(css, /\.players-colors > div\s*\{[^}]*padding:\s*0\.75rem 1rem;/);
+});
+
 test('el perfil explica los tres grupos de Elo previo y mantiene las etiquetas traducibles', () => {
   const html = renderPlayerProfile(data, 'celia-montiel').html;
   assert.match(html, /Rendimiento por Elo previo del rival/);

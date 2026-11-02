@@ -32,11 +32,12 @@ test('la navegación estadística abre un menú en pantallas estrechas', () => {
 
 test('los títulos de perfil caben en 320 píxeles sin cambiar el directorio', () => {
   const css = readFileSync(cssPath, 'utf8');
+  const playersCss = readFileSync(fileURLToPath(new URL('../dist/views/players.css', import.meta.url)), 'utf8');
   assert.match(css, /^h2\s*\{[^}]*font-size:\s*clamp\(3rem, 5\.2vw, 5\.5rem\)/m);
-  const mobile = css.match(/@media \(max-width: 600px\)\s*\{\s*\.players-page > \.players-back ~ section h2\s*\{([^}]*)\}/)?.[1] ?? '';
-  assert.match(mobile, /font-size:\s*clamp\(2rem, 8vw, 3rem\)/);
-  assert.match(renderPlayerProfile(demo, 'ayla-neri').html, /<nav class="players-back"/);
-  assert.doesNotMatch(renderPlayersDirectory(demo).html, /<nav class="players-back"/);
+  assert.match(playersCss, /\.players-profile h2\s*\{[^}]*font-size:\s*clamp\(1\.4rem, 2\.5vw, 2rem\)/);
+  assert.doesNotMatch(css, /\.players-page > \.players-back ~ section h2/);
+  assert.match(renderPlayerProfile(demo, 'ayla-neri').html, /<div class="players-page players-profile container"><nav class="players-back"/);
+  assert.doesNotMatch(renderPlayersDirectory(demo).html, /players-profile|<nav class="players-back"/);
 });
 
 test('no queda estilo de actualización y los controles nativos comparten foco visible', () => {

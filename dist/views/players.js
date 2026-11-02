@@ -21,14 +21,15 @@ export const playersEs = Object.freeze({
   consolidated: 'Consolidado', eloMethod: 'Elo interno de demostración; no es Elo FIDE. Provisorio con menos de 10 partidas elegibles.',
   games: 'Partidas al tablero', record: 'G–E–P', winsRate: 'Victorias/partidas',
   scoreRate: 'Puntos/partidas', rateExplanation: 'Victorias/partidas cuenta solo triunfos. Puntos/partidas también incorpora medio punto por empate.',
-  white: 'Con blancas', black: 'Con negras',
+  white: 'Con blancas', black: 'Con negras', resultsByColor: 'Resultados por color',
   opponentEloTitle: 'Rendimiento por Elo previo del rival',
   opponentEloRule: 'Solo partidas con Elo de Casa Morra; se compara el Elo de ambos jugadores antes de cada partida. Los descansos y torneos sin Elo quedan excluidos. Rendimiento = (G + 0,5 × E) / partidas del grupo.',
   higherElo: 'Rival con Elo superior', equalElo: 'Rival con Elo igual', lowerElo: 'Rival con Elo inferior',
   officialHistory: 'Historial oficial de torneos', officialHistoryInfo: 'La clasificación oficial conserva puntos y puesto aun cuando no haya resultados individuales.',
   scrollHint: 'Desplace la tabla con las flechas del teclado o con un gesto horizontal para ver todas las columnas.',
   tournament: 'Torneo', date: 'Fecha', rank: 'Puesto', points: 'Puntos',
-  wins: 'Ganadas', draws: 'Empatadas', losses: 'Perdidas', noDetail: 'Sin detalle',
+  wins: 'Ganadas', draws: 'Empatadas', losses: 'Perdidas',
+  winOne: 'ganada', drawOne: 'empatada', lossOne: 'perdida', noDetail: 'Sin detalle',
   winsShort: 'G', drawsShort: 'E', lossesShort: 'P',
   noEvents: 'Todavía no hay torneos oficiales para este jugador.',
   eloHistory: 'Historial Elo', eloHistoryInfo: 'Cada fila corresponde a una partida elegible; los torneos que solo tienen tabla no modifican el Elo.',
@@ -63,6 +64,26 @@ function playerUrl(player) {
 
 function recordText(record, locale) {
   return `${formatNumber(record.wins, locale)}–${formatNumber(record.draws, locale)}–${formatNumber(record.losses, locale)}`;
+}
+
+function colorResults(record, colorKey, messages, locale) {
+  const results = [
+    ['wins', 'winOne', 'players-results-win', record.wins],
+    ['draws', 'drawOne', 'players-results-draw', record.draws],
+    ['losses', 'lossOne', 'players-results-loss', record.losses],
+  ];
+  const percentageOf = (count) => (count / (record.played || 1) * 100).toFixed(2);
+  let offset = 0;
+  const bar = results.map(([, , className, count]) => {
+    const segment = `<rect class="${className}" x="${percentageOf(offset)}" width="${percentageOf(count)}" height="8"></rect>`;
+    offset += count;
+    return segment;
+  }).join('');
+  const legend = results.map(([plural, singular, className, count]) =>
+    `<li><span class="${className}" aria-hidden="true"></span>${h(formatNumber(count, locale))} ${h(count === 1 ? message(messages, singular) : message(messages, plural).toLocaleLowerCase(locale))}</li>`).join('');
+  return `<div><dt>${h(message(messages, colorKey))}</dt><dd><strong>${h(message(messages, 'gamesSample')(record.played, locale))}</strong>
+    <svg class="players-results-bar" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false">${bar}</svg>
+    <ul class="players-results-key">${legend}</ul></dd></div>`;
 }
 
 function percentage(value, messages, locale) {
@@ -241,16 +262,15 @@ export function renderPlayerProfile(data, slug, messages = playersEs, locale = '
   const badgeItems = badges.map((title) => `<li>${h(title.label)}</li>`).join('');
   const count = profile.record;
   const colors = profile.colors;
-  const html = `<div class="players-page container"><nav class="players-back" aria-label="${h(message(messages, 'back'))}"><a href="${h(routeHref('players'))}">${h(message(messages, 'back'))}</a></nav>
+  const html = `<div class="players-page players-profile container"><nav class="players-back" aria-label="${h(message(messages, 'back'))}"><a href="${h(routeHref('players'))}">${h(message(messages, 'back'))}</a></nav>
     <p class="players-eyebrow">${h(message(messages, 'demo'))}</p><h1>${h(player.name)}</h1><p class="players-membership">${h(membershipText(player, messages))}</p><p>${h(message(messages, 'accountNotice'))}</p><p><a href="${h(routeHref('elo', {}, { jugador: [player.slug] }))}">${h(message(messages, 'viewElo'))}</a> · <a href="${h(routeHref('compare', {}, { primero: player.slug }))}">${h(message(messages, 'comparePlayers'))}</a> · <a href="${h(routeHref('encyclopedia', {}, { jugador: player.slug }))}">${h(message(messages, 'browseGames'))}</a></p>
     <section class="players-summary" aria-label="${h(message(messages, 'profile'))}">
       <div><h2>${h(message(messages, 'elo'))}</h2><p><strong>${h(formatNumber(Math.round(profile.elo.rating), locale))}</strong> · ${h(profile.elo.provisional ? message(messages, 'provisional') : message(messages, 'consolidated'))}</p>
         <p>${h(message(messages, 'peakElo'))}: ${h(formatNumber(Math.round(profile.elo.peak), locale))}</p><small>${h(message(messages, 'eloMethod'))}</small></div>
       <div><h2>${h(message(messages, 'games'))}</h2><p>${h(formatNumber(count.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(count, locale))}</p>
         <p>${h(message(messages, 'winsRate'))}: ${h(percentage(count.winRate, messages, locale))}</p><p>${h(message(messages, 'scoreRate'))}: ${h(percentage(count.scoreRate, messages, locale))}</p><small>${h(message(messages, 'rateExplanation'))}</small></div>
-    </section><section aria-labelledby="players-colors"><h2 id="players-colors">${h(message(messages, 'games'))} · ${h(message(messages, 'white'))}/${h(message(messages, 'black'))}</h2>
-      <dl class="players-colors"><div><dt>${h(message(messages, 'white'))}</dt><dd>${h(formatNumber(colors.white.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(colors.white, locale))}</dd></div>
-      <div><dt>${h(message(messages, 'black'))}</dt><dd>${h(formatNumber(colors.black.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(colors.black, locale))}</dd></div></dl></section>
+    </section><section aria-labelledby="players-colors"><h2 id="players-colors">${h(message(messages, 'resultsByColor'))}</h2>
+      <dl class="players-colors">${colorResults(colors.white, 'white', messages, locale)}${colorResults(colors.black, 'black', messages, locale)}</dl></section>
     ${opponentEloSummary(profile, messages, locale)}
     ${officialAchievements(profile, badges.length, messages, locale)}
     ${personalComparisons(data, player.id, messages, locale)}
