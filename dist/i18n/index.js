@@ -1,8 +1,8 @@
 // El español es el idioma publicado. Otros catálogos pueden añadirse sin cambiar las vistas.
 import { competitiveEs } from '../views/common.js';
 import { playersEs } from '../views/players.js?v=0.9.3-demo';
-import { recordsEs } from '../views/records.js';
-import { homeEs } from '../views/home.js';
+import { recordsEs } from '../views/records.js?v=0.9.3-demo';
+import { homeEs } from '../views/home.js?v=0.9.3-demo';
 import { editorialEs } from '../views/editorial.js?v=0.9.3-demo';
 import { gameEs } from '../views/game.js';
 import { puzzleEs } from '../views/puzzle.js';
@@ -31,6 +31,7 @@ export const es = Object.freeze({
   'hero.demo': 'Datos de demostración · Sitio en desarrollo',
   'demo.refresh': 'Actualizar datos',
   'demo.status.fixture': 'Datos de ejemplo del sitio',
+  'demo.status.loading': 'Actualizando datos…',
   'demo.status.export': 'Exportación pública verificada',
   'demo.status.unavailable': 'Actualización fallida; datos de ejemplo',
   'demo.sourceDetails': 'Detalles de la fuente',
