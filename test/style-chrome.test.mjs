@@ -39,12 +39,8 @@ test('los títulos de perfil caben en 320 píxeles sin cambiar el directorio', (
   assert.doesNotMatch(renderPlayersDirectory(demo).html, /<nav class="players-back"/);
 });
 
-test('el botón de actualización conserva su estilo y los controles nativos comparten foco visible', () => {
+test('no queda estilo de actualización y los controles nativos comparten foco visible', () => {
   const css = readFileSync(cssPath, 'utf8');
-  const control = css.match(/\.demo-source-controls \[data-demo-refresh\]\s*\{([^}]*)\}/)?.[1] ?? '';
-  assert.match(control, /background:\s*var\(--indigo\)/);
-  assert.match(control, /color:\s*var\(--paper\)/);
-  assert.match(control, /border:\s*1px solid var\(--accent-text\)/);
-  assert.match(control, /min-block-size:\s*2\.75rem/);
+  assert.doesNotMatch(css, /data-demo-refresh/);
   assert.match(css, /a:focus-visible,\s*button:focus-visible,\s*input:focus-visible,\s*select:focus-visible,\s*summary:focus-visible\s*\{\s*outline:\s*3px solid var\(--focus\)/);
 });

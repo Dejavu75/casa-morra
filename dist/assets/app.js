@@ -111,7 +111,6 @@ function startApp() {
   const menuButton = document.querySelector('[data-menu-toggle]');
   const navigation = document.querySelector('#navegacion-principal');
   const themeButton = document.querySelector('[data-theme-toggle]');
-  const refreshButton = document.querySelector('[data-demo-refresh]');
   const sourceStatus = document.querySelector('[data-demo-status]');
   const warning = document.querySelector('[data-demo-warning]');
   const warningText = document.querySelector('[data-demo-warning-text]');
@@ -126,9 +125,7 @@ function startApp() {
   const source = createDemoSource({ fixture: demoData, fetch: (...args) => window.fetch(...args),
     crypto: window.crypto, onPending() {
       if (sourceStatus) sourceStatus.textContent = translate('demo.status.loading', locale);
-      if (refreshButton) refreshButton.disabled = true;
     }, onChange(state) {
-      if (refreshButton) refreshButton.disabled = false;
       activeData = state.data;
       if (sourceStatus) sourceStatus.textContent = translate(state.warning ?
         'demo.status.unavailable' : state.kind === 'export' ? 'demo.status.export' : 'demo.status.fixture', locale);
@@ -182,7 +179,6 @@ function startApp() {
   menuButton?.addEventListener('click', () => {
     setMenuOpen(menuButton.getAttribute('aria-expanded') !== 'true');
   });
-  refreshButton?.addEventListener('click', () => { void source.refresh(); });
   document.addEventListener('keydown', (event) => {
     closeMenuOnEscape(event, menuButton, navigation, () => setMenuOpen(false));
   });

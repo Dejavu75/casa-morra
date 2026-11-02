@@ -200,13 +200,14 @@ test('la recarga posterior gana aunque la consulta anterior expire después', as
   assert.deepEqual(events.map((event) => event.kind), ['export']);
 });
 
-test('la aplicación inicia desde exportación y ofrece recarga explícita accesible', async () => {
+test('la aplicación carga la exportación al abrir la página sin botón de actualización', async () => {
   const app = await readFile(new URL('../dist/assets/app.js', import.meta.url), 'utf8');
   const html = await readFile(new URL('../dist/index.html', import.meta.url), 'utf8');
   assert.match(app, /renderLocation\(\);\s*void source\.refresh\(\)/);
   assert.match(app, /renderRoute\(route, activeData/);
   assert.match(app, /attachGameReplay\([^,]+, activeData/);
-  assert.match(html, /data-demo-refresh/);
+  assert.doesNotMatch(html, /data-demo-refresh|Actualizar datos/i);
+  assert.doesNotMatch(app, /refreshButton/);
   assert.match(html, /data-demo-status[^>]+role="status"/);
   assert.match(html, /data-demo-warning[^>]+hidden/);
 });
