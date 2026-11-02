@@ -74,7 +74,7 @@ Esta autenticación es deliberadamente simple y local. Docker conserva las varia
 
 El botón «Modo oscuro» conserva el mismo nombre accesible al alternar el tema; `aria-pressed` indica si el modo oscuro está activo. Esta semántica tiene prueba automatizada, pero no sustituye una comprobación con lector de pantalla.
 
-En pantallas angostas, la tabla de «Clases» recibe foco con Tab como región desplazable. Toma su nombre del título visible de la tabla y muestra un contorno de foco. El desplazamiento horizontal mediante flechas no se pudo confirmar con el mecanismo de entrada del navegador utilizado; tampoco se realizó una auditoría completa con tecnologías de asistencia.
+No se realizó una auditoría completa con tecnologías de asistencia. Las pruebas de teclado y ARIA documentadas corresponden a componentes conservados en el código, pero no convierten esas secciones históricas en parte de la experiencia pública estadística actual.
 
 ## Integración continua
 
