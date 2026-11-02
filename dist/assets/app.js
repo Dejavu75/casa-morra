@@ -58,7 +58,8 @@ export function renderRoute(route, source = demoData, { locale = 'es', catalogs 
 }
 
 export function resolvePublicRoute(route) {
-  if (route.name === 'home' || route.name === 'statistics' || route.name === 'not-found') {
+  if (['home', 'statistics', 'players', 'player', 'tournaments', 'tournament',
+    'annual', 'classics', 'classic', 'game', 'not-found'].includes(route.name)) {
     return { route, redirect: false };
   }
   return { route: parseRoute(routeHref('statistics')), redirect: true };

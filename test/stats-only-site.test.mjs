@@ -16,22 +16,23 @@ test('la portada pública presenta las diez estadísticas y ningún acceso a otr
   assert.doesNotMatch(home.html, /href="\/(?:torneos|jugadores|clasicos|novedades|clases|nosotros|socios|partidas)/);
 });
 
-test('el shell publica solo navegación estadística sin descartar rutas históricas', async () => {
+test('el shell navega por las áreas estadísticas sin publicar las editoriales', async () => {
   const html = await read('index.html');
   const nav = html.match(/<nav\b[^>]*>([\s\S]*?)<\/nav>/)?.[1] ?? '';
-  assert.match(nav, /href="\/estadisticas"/);
-  assert.equal((nav.match(/<a\b/g) ?? []).length, 1);
-  assert.doesNotMatch(html, /Para consultar torneos, jugadores y partidas/);
+  for (const path of ['/estadisticas', '/jugadores', '/torneos', '/clasicos']) {
+    assert.match(nav, new RegExp(`href="${path}"`));
+  }
+  assert.doesNotMatch(nav, /href="\/(?:novedades|clases|nosotros|socios|problemas)/);
   assert.match(renderRoute(parseRoute('/torneos'), demo).html, /<h1\b/);
 });
 
-test('las rutas históricas conocidas abren estadísticas y las desconocidas mantienen 404', () => {
-  for (const path of ['/torneos', '/jugadores/ayla-neri', '/clasicos', '/novedades', '/clases', '/socios', '/partidas/demo']) {
+test('las rutas estadísticas siguen accesibles y las editoriales redirigen', () => {
+  for (const path of ['/novedades', '/clases', '/socios', '/nosotros']) {
     const result = resolvePublicRoute(parseRoute(path));
     assert.equal(result.route.name, 'statistics', path);
     assert.equal(result.redirect, true, path);
   }
-  for (const path of ['/', '/estadisticas', '/ruta-desconocida', '/jugadores/%3Cscript%3E']) {
+  for (const path of ['/', '/estadisticas', '/torneos', '/torneos/copa-morra-2026', '/jugadores', '/jugadores/ayla-neri', '/clasicos', '/anual/2026', '/partidas/demo', '/ruta-desconocida', '/jugadores/%3Cscript%3E']) {
     const route = parseRoute(path);
     const result = resolvePublicRoute(route);
     assert.equal(result.route.name, route.name, path);

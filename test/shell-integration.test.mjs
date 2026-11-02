@@ -6,11 +6,12 @@ import { es } from '../dist/i18n/index.js';
 
 const read = (path) => readFile(new URL(`../dist/${path}`, import.meta.url), 'utf8');
 
-test('el shell ofrece solo navegación estadística y conserva estilos para rutas históricas', async () => {
+test('el shell ofrece áreas estadísticas y conserva estilos para sus rutas', async () => {
   const html = await read('index.html');
   assert.ok(html.includes('href="/estadisticas"'));
   const navigation = html.match(/<nav\b[^>]*>([\s\S]*?)<\/nav>/)?.[1] ?? '';
-  assert.equal((navigation.match(/<a\b/g) ?? []).length, 1);
+  assert.equal((navigation.match(/<a\b/g) ?? []).length, 4);
+  assert.doesNotMatch(navigation, /href="\/(?:novedades|clases|nosotros|socios)/);
   for (const css of ['competitive.css', 'players.css', 'content.css', 'puzzle.css']) {
     assert.ok(html.includes(`/views/${css}`), css);
   }
