@@ -19,7 +19,7 @@ test('Elo tiene listado, evolución individual y comparación de jugadores', () 
   assert.match(html, new RegExp(first.name));
   assert.match(html, new RegExp(second.name));
   assert.match(html, /<table/);
-  assert.match(html, /Elo interno de demostración/);
+  assert.match(html, /Elo interno; no es Elo FIDE/);
   assert.doesNotMatch(html, /\d[.,]\d{1,2}\s*Elo/);
 });
 

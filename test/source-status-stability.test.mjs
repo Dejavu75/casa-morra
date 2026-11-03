@@ -4,42 +4,34 @@ import { readFile } from 'node:fs/promises';
 
 const text = (path) => readFile(new URL(path, import.meta.url), 'utf8');
 
-test('el documento inicial identifica los datos incluidos aunque no haya JavaScript', async () => {
+test('el documento inicial no ocupa espacio con un estado de fuente normal', async () => {
   const html = await text('../dist/index.html');
-  assert.match(html, /data-demo-status[^>]+role="status"[^>]*>Datos de ejemplo del sitio<\/p>/);
-  assert.match(html, /data-demo-warning[^>]+hidden/);
+  assert.match(html, /data-demo-alert hidden/);
+  assert.doesNotMatch(html, /data-demo-status|Exportación pública verificada|Datos de demostración/);
+  assert.match(html, /data-demo-warning[^>]+role="status"[^>]+hidden/);
   assert.match(html, /<summary[^>]+data-i18n="demo\.sourceDetails"/);
   assert.match(html, /<main id="contenido">[\s\S]*se necesita JavaScript/);
 });
 
-test('el estado de la fuente usa el catálogo y conserva el aviso completo', async () => {
+test('la falla de actualización mantiene un aviso sin etiquetas de demostración', async () => {
   const [app, catalog] = await Promise.all([
     text('../dist/assets/app.js'), text('../dist/i18n/index.js'),
   ]);
-  assert.match(catalog, /'demo\.status\.fixture':/);
-  assert.match(catalog, /'demo\.status\.export':/);
-  assert.match(catalog, /'demo\.status\.unavailable': 'Actualización fallida; datos de ejemplo'/);
+  assert.match(catalog, /'demo\.status\.unavailable': 'No se pudo actualizar la información'/);
   assert.match(catalog, /'demo\.sourceDetails':/);
-  assert.match(app, /state\.warning\s*\?\s*'demo\.status\.unavailable'/);
+  assert.match(app, /sourceAlert\.hidden = !state\.warning/);
   assert.match(app, /warning\.hidden = !state\.warning/);
   assert.match(app, /renderLocation\(\);\s*void source\.refresh\(\)/);
 });
 
-test('la interfaz anuncia la carga pendiente sin ofrecer recarga manual', async () => {
-  const [app, source, catalog] = await Promise.all([
-    text('../dist/assets/app.js'), text('../dist/assets/demo-source.js'), text('../dist/i18n/index.js'),
-  ]);
-  assert.match(catalog, /'demo\.status\.loading': 'Actualizando datos…'/);
-  assert.match(source, /onPending\?\.\(\)/);
-  assert.match(app, /onPending\(\)\s*\{[^}]*sourceStatus\.textContent = translate\('demo\.status\.loading'/);
+test('la interfaz carga los datos sin barra permanente ni recarga manual', async () => {
+  const app = await text('../dist/assets/app.js');
+  assert.doesNotMatch(app, /sourceStatus|onPending\(\)/);
   assert.doesNotMatch(app, /refreshButton|data-demo-refresh/);
-  assert.doesNotMatch(catalog, /'demo\.refresh':/);
+  assert.match(app, /void source\.refresh\(\)/);
 });
 
-test('los controles reservan espacio para el aviso sin desplazar la página al fallar', async () => {
-  const css = await text('../dist/assets/site.css');
-  assert.match(css, /\.demo-source-controls\s*\{[^}]*display:\s*grid;/);
-  assert.doesNotMatch(css, /\.demo-source-controls\s*\{[^}]*grid-template-rows:/);
-  assert.match(css, /\.demo-source-controls \[role="status"\]\s*\{[^}]*min-block-size:/);
-  assert.match(css, /\.demo-source-controls \[data-demo-warning\]\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/);
+test('el aviso oculto no reserva espacio en la página', async () => {
+  const css = await text('../dist/assets/stats.css');
+  assert.match(css, /\.stats-only \.demo-source-controls\[hidden\]\s*\{\s*display:\s*none;/);
 });

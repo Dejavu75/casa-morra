@@ -14,12 +14,12 @@ function contrast(foreground, background) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-test('el shell conserva contenido útil sin JavaScript y reserva la altura visible antes de hidratar', async () => {
+test('el shell conserva contenido útil sin JavaScript sin forzar un viewport vacío', async () => {
   const html = await read('index.html');
-  const css = await read('assets/site.css');
+  const css = await read('assets/stats.css');
   assert.match(html, /<main id="contenido">[\s\S]*<h1 id="fallback-title">Centro de estadísticas<\/h1>/);
-  assert.match(html, /Datos de demostración\. Para consultar las estadísticas se necesita JavaScript\./);
-  assert.match(css, /#contenido\s*\{[^}]*min-height:\s*100vh;[^}]*min-height:\s*100svh;/);
+  assert.match(html, /Para consultar las estadísticas se necesita JavaScript\./);
+  assert.match(css, /\.stats-only #contenido\s*\{[^}]*min-height:\s*0/);
 });
 
 test('el aviso de exportación conserva contraste de texto normal en ambos temas', async () => {

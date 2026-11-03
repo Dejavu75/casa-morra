@@ -38,7 +38,7 @@ test('el perfil separa partidas, puntos, colores, Elo e historial oficial', () =
   const profile = getPlayerProfile(data, 'celia-montiel');
   const view = renderPlayerProfile(data, 'celia-montiel');
   assert.equal(view.title, 'Celia Montiel — Centro de estadísticas');
-  assert.match(view.html, /Datos ficticios de demostración/);
+  assert.doesNotMatch(view.html, /Datos ficticios de demostración/);
   assert.match(view.html, /Elo del Centro de estadísticas/);
   assert.match(view.html, /Mejor Elo/);
   assert.match(view.html, /Provisorio|Consolidado/);
@@ -93,9 +93,9 @@ test('el perfil explica los tres grupos de Elo previo y mantiene las etiquetas t
   }).html, /Previous opponent rating comparison/);
 });
 
-test('el estado de socio se declara demo y no se sugiere una cuenta autenticada', () => {
+test('el estado de socio no se confunde con una cuenta autenticada', () => {
   const view = renderPlayerProfile(data, 'dante-arce').html;
-  assert.match(view, /No socio · dato demo/);
+  assert.match(view, /No socio/);
   assert.doesNotMatch(view, /[Mm]i cuenta|[Ee]ditar foto|[Ii]niciar sesión/);
 });
 
@@ -136,7 +136,7 @@ test('trayectoria personal usa tablas oficiales sin convertirlas en partidas o t
     ],
   };
   const html = renderPlayerProfile(fixture, 'ana').html;
-  assert.match(html, /Puntos oficiales acumulados<\/dt><dd>3,5<\/dd>/);
+  assert.match(html, /Puntos acumulados<\/dt><dd>3,5<\/dd>/);
   assert.match(html, /Primeros puestos oficiales<\/dt><dd>1<\/dd>/);
   assert.match(html, /Podios oficiales<\/dt><dd>2<\/dd>/);
   assert.match(html, /Racha máxima de victorias<\/dt><dd>0<\/dd>/);
@@ -154,7 +154,7 @@ test('trayectoria sin torneos ni partidas presenta ceros y vacíos explícitos',
   const fixture = { players: [{ id: 'ana', slug: 'ana', name: 'Ana', membership: 'socia' }],
     seasons: [], tournaments: [], games: [], byes: [], titles: [] };
   const html = renderPlayerProfile(fixture, 'ana').html;
-  for (const title of ['Puntos oficiales acumulados', 'Primeros puestos oficiales', 'Podios oficiales',
+  for (const title of ['Puntos acumulados', 'Primeros puestos oficiales', 'Podios oficiales',
     'Racha máxima de victorias', 'Racha máxima sin perder', 'Títulos registrados']) {
     assert.match(html, new RegExp(`${title}</dt><dd>0</dd>`));
   }

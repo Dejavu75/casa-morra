@@ -17,7 +17,7 @@ const SHAPES = Object.freeze({
   tournaments: {
     id: 'string', slug: 'string', name: 'string', seasonId: 'string', date: 'string',
     type: 'string', format: 'string', rounds: 'number', annualEligible: 'boolean',
-    eloEligible: 'boolean', standings: 'standings',
+    eloEligible: 'boolean', standings: 'standings', modality: 'optional-string',
   },
   standings: {
     playerId: 'string', order: 'number', rank: 'number', points: 'number',
@@ -45,18 +45,23 @@ function checkFields(value, shape, path, errors) {
   for (const [key, type] of Object.entries(shape)) {
     const field = value[key];
     const place = `${path}.${key}`;
-    if (!Object.hasOwn(value, key)) { problem(errors, 'MISSING_FIELD', place); continue; }
+    if (!Object.hasOwn(value, key)) {
+      if (!type.startsWith('optional-')) problem(errors, 'MISSING_FIELD', place);
+      continue;
+    }
     if (type === 'standings') { checkRows(field, SHAPES.standings, place, errors); continue; }
     if (type === 'moves') {
       if (field !== null && (!Array.isArray(field) || !field.every((move) => typeof move === 'string')))
         problem(errors, 'INVALID_FIELD', place);
       continue;
     }
-    const optional = type.startsWith('nullable-');
-    const baseType = optional ? type.slice('nullable-'.length) : type;
-    const valid = optional && field === null ||
+    const nullable = type.startsWith('nullable-');
+    const baseType = type.replace(/^(nullable|optional)-/, '');
+    const valid = nullable && field === null ||
       (baseType === 'number' ? typeof field === 'number' && Number.isFinite(field) : typeof field === baseType);
-    if (!valid) problem(errors, 'INVALID_FIELD', place);
+    if (!valid || type === 'optional-string' &&
+        (!field.trim() || field !== field.trim() || field.length > 80 || /[\x00-\x1f\x7f]/.test(field)))
+      problem(errors, 'INVALID_FIELD', place);
   }
 }
 

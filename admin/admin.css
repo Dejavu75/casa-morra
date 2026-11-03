@@ -81,6 +81,8 @@ p { line-height: 1.5; }
 }
 #login-panel { max-width: 480px; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+.modality-panel { margin-top: 1.2rem; }
+.modality-panel form { max-width: 38rem; }
 .toolbar {
   display: flex;
   align-items: center;

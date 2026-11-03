@@ -4,13 +4,15 @@ const es = Object.freeze({
   loading: 'Cargando estado administrativo…',
   saved: 'Partida guardada y estadísticas públicas actualizadas.',
   pending: 'Partida guardada. La publicación pública está pendiente; usá «Reintentar publicación».',
+  modalitySaved: 'Modalidad guardada y estadísticas públicas actualizadas.',
+  modalityPending: 'Modalidad guardada. La publicación pública está pendiente; usá «Reintentar publicación».',
   published: 'Estadísticas públicas actualizadas.',
   login: 'Acceso administrativo habilitado.',
   logout: 'Sesión cerrada.',
   missingTournament: 'Elegí un torneo.',
   samePlayer: 'Blancas y negras deben ser jugadores distintos.',
   missingMoves: 'Ingresá jugadas o elegí «Solo resultado».',
-  count: (games) => `${games} partidas registradas en la muestra`,
+  count: (games) => `${games} partidas registradas`,
   game: (game, names, event) => `${names.get(game.whiteId)} — ${names.get(game.blackId)} · ${event?.name ?? game.tournamentId} · ${game.result}${game.moves?.length ? ' · con jugadas' : ' · pendiente de jugadas'}`,
 });
 
@@ -53,12 +55,20 @@ function render() {
   const previousEvent = $('tournament').value;
   fill($('tournament'), writableTournaments(current.tournaments), (event) => event.name, previousEvent);
   updateRoster();
+  const previousMetadataEvent = $('metadata-tournament').value;
+  fill($('metadata-tournament'), current.tournaments, (event) => event.name, previousMetadataEvent);
+  updateModality();
   const names = new Map(current.players.map((player) => [player.id, player.name]));
   const events = new Map(current.tournaments.map((event) => [event.id, event]));
   const previousGame = $('game').value;
   const games = [...current.games].sort((a, b) => Number(Boolean(a.moves)) - Number(Boolean(b.moves)) ||
     b.date.localeCompare(a.date));
   fill($('game'), games, (game) => es.game(game, names, events.get(game.tournamentId)), previousGame);
+}
+
+function updateModality() {
+  const event = current?.tournaments.find((row) => row.id === $('metadata-tournament').value);
+  $('modality').value = event?.modality ?? '';
 }
 
 function updateRoster() {
@@ -78,10 +88,10 @@ async function refresh() {
   render();
 }
 
-async function save(path, method, payload) {
+async function save(path, method, payload, messages = { saved: es.saved, pending: es.pending }) {
   const result = await api(path, method, { expectedSha: current.sha256, ...payload });
   await refresh();
-  message(result.published ? es.saved : es.pending, result.published ? 'success' : 'warning');
+  message(result.published ? messages.saved : messages.pending, result.published ? 'success' : 'warning');
 }
 
 $('login-form').addEventListener('submit', async (event) => {
@@ -95,6 +105,15 @@ $('login-form').addEventListener('submit', async (event) => {
 });
 
 $('tournament').addEventListener('change', updateRoster);
+$('metadata-tournament').addEventListener('change', updateModality);
+$('modality-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const tournamentId = $('metadata-tournament').value;
+  try {
+    await save(`/api/tournaments/${encodeURIComponent(tournamentId)}/modality`, 'PUT',
+      { modality: $('modality').value }, { saved: es.modalitySaved, pending: es.modalityPending });
+  } catch (error) { message(error.message, 'error'); }
+});
 $('create-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   if ($('white').value === $('black').value) { message(es.samePlayer, 'error'); return; }

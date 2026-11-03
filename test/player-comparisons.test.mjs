@@ -32,7 +32,7 @@ function comparisonsFixture() {
 
 test('mejor y peor evento usan solo rendimiento al tablero, con N, desempate y sin byes ni tabla aislada', () => {
   const html = renderPlayerProfile(comparisonsFixture(), 'ana').html;
-  assert.match(html, /Comparativos propios de demostración/);
+  assert.match(html, /Comparativos de rendimiento/);
   assert.match(html, /Mejor evento al tablero[\s\S]*?Victoria doble[\s\S]*?100 %[\s\S]*?2 partidas/);
   assert.match(html, /Peor evento al tablero[\s\S]*?Dos derrotas[\s\S]*?25 %[\s\S]*?4 partidas/);
   assert.doesNotMatch(html, /Mejor evento al tablero[\s\S]*?Tabla aislada[\s\S]*?Peor evento/);

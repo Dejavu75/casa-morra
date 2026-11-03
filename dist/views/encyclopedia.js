@@ -9,7 +9,7 @@ export const encyclopediaEs = Object.freeze({
   search: 'Buscar partidas', clear: 'Limpiar filtros', rival: 'Rival', pairing: 'Blancas — Negras', date: 'Fecha', result: 'Resultado',
   resultPerspective: '1–0: ganan las blancas; 0–1: ganan las negras; ½–½: tablas.',
   pgn: 'Archivo PGN', pending: 'PGN pendiente', download: 'Descargar PGN', view: 'Ver partida',
-  games: 'Partidas', empty: 'No hay partidas para estos filtros.', demo: 'Datos ficticios de demostración',
+  games: 'Partidas', empty: 'No hay partidas para estos filtros.', demo: 'Archivo de partidas',
 });
 
 export const comparisonEs = Object.freeze({

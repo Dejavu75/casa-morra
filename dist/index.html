@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#17213a">
-    <meta name="description" content="Centro de estadísticas: estadísticas y récords de ajedrez con datos de demostración." data-i18n-content="meta.description">
+    <meta name="description" content="Centro de estadísticas: estadísticas, jugadores, torneos y partidas de ajedrez." data-i18n-content="meta.description">
     <title>Estadísticas y récords — Centro de estadísticas</title>
     <link rel="icon" type="image/png" href="/assets/rook-small.png">
     <link rel="stylesheet" href="/assets/site.css?v=0.10.1-brand">
@@ -40,18 +40,17 @@
       </div>
     </header>
 
-    <div class="demo-source-controls container">
-      <p data-demo-status role="status" data-i18n="demo.status.fixture">Datos de ejemplo del sitio</p>
-      <details data-demo-warning hidden>
-        <summary data-i18n="demo.sourceDetails">Detalles de la fuente</summary>
-        <p data-demo-warning-text data-i18n="demo.fallback">No se pudo cargar la exportación pública. Se muestran datos de demostración incluidos en el sitio; pueden estar desactualizados.</p>
+    <div class="demo-source-controls container" data-demo-alert hidden>
+      <details data-demo-warning role="status" hidden>
+        <summary data-i18n="demo.sourceDetails">No se pudo actualizar la información</summary>
+        <p data-demo-warning-text data-i18n="demo.fallback">La información disponible puede estar desactualizada.</p>
       </details>
     </div>
 
     <main id="contenido">
       <section class="content-page container" aria-labelledby="fallback-title">
         <h1 id="fallback-title">Centro de estadísticas</h1>
-        <p>Datos de demostración. Para consultar las estadísticas se necesita JavaScript.</p>
+        <p>Para consultar las estadísticas se necesita JavaScript.</p>
       </section>
     </main>
 
@@ -62,7 +61,7 @@
           <p data-i18n="footer.tagline">El ajedrez contado en cifras.</p>
         </div>
         <div class="footer-meta">
-          <p data-i18n="footer.demo">Datos de demostración. Sin cuentas ni inscripción en esta etapa.</p>
+          <p data-i18n="footer.demo">Estadísticas, torneos y partidas de ajedrez.</p>
           <p>© <span data-year>2026</span> Centro de estadísticas</p>
         </div>
       </div>

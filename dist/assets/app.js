@@ -111,7 +111,7 @@ function startApp() {
   const menuButton = document.querySelector('[data-menu-toggle]');
   const navigation = document.querySelector('#navegacion-principal');
   const themeButton = document.querySelector('[data-theme-toggle]');
-  const sourceStatus = document.querySelector('[data-demo-status]');
+  const sourceAlert = document.querySelector('[data-demo-alert]');
   const warning = document.querySelector('[data-demo-warning]');
   const warningText = document.querySelector('[data-demo-warning-text]');
   if (!main) return;
@@ -123,12 +123,9 @@ function startApp() {
   let detachReplay = () => {};
   let activeData = demoData;
   const source = createDemoSource({ fixture: demoData, fetch: (...args) => window.fetch(...args),
-    crypto: window.crypto, onPending() {
-      if (sourceStatus) sourceStatus.textContent = translate('demo.status.loading', locale);
-    }, onChange(state) {
+    crypto: window.crypto, onChange(state) {
       activeData = state.data;
-      if (sourceStatus) sourceStatus.textContent = translate(state.warning ?
-        'demo.status.unavailable' : state.kind === 'export' ? 'demo.status.export' : 'demo.status.fixture', locale);
+      if (sourceAlert) sourceAlert.hidden = !state.warning;
       if (warning) {
         warning.hidden = !state.warning;
         if (warningText && state.warning) warningText.textContent = translate(state.warning, locale);

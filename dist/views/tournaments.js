@@ -1,5 +1,5 @@
 import { routeHref } from '../router.js';
-import { competitiveEs, escapeHtml as h, formatDate, formatNumber, playerLink, playerName, safeRouteHref, typeName } from './common.js';
+import { competitiveEs, escapeHtml as h, formatShortDate, formatNumber, playerLink, playerName, safeRouteHref, typeName } from './common.js';
 import { hasDemoReplay } from './game.js';
 import { renderResults } from './results.js';
 
@@ -12,6 +12,10 @@ function tournamentUrl(event) {
 
 function seasonUrl(seasonId) {
   return safeRouteHref(routeHref, 'annual', { seasonId });
+}
+
+function modalityText(event, messages) {
+  return event.modality ? ` · ${h(label(messages, 'modality'))}: ${h(event.modality)}` : '';
 }
 
 function filterSelect(name, caption, choices, selected) {
@@ -32,7 +36,7 @@ export function renderTournamentList(data, { tipo = '', temporada = '' } = {}, m
     const season = seasons.find((item) => item.id === event.seasonId);
     const detail = url ? `<a href="${h(url)}" aria-label="${h(label(messages, 'tournamentDetailAccessible')(event.name))}">${h(label(messages, 'tournamentDetailLink'))}</a>` : `<span>${h(label(messages, 'unavailableDetail'))}</span>`;
     return `<li class="competition-card"><article><p class="competition-meta">${h(typeName(event.type, messages))} · ${h(season?.label ?? event.seasonId)}</p>
-      <h2>${h(event.name)}</h2><p>${h(formatDate(event.date, locale))} · ${h(formatNumber(event.standings?.length ?? 0, locale))} ${h(label(messages, 'participants'))} · ${h(formatNumber(event.rounds, locale))} ${h(label(messages, 'rounds'))}</p>
+      <h2>${h(event.name)}</h2><p>${h(formatShortDate(event.date, locale))} · ${h(formatNumber(event.standings?.length ?? 0, locale))} ${h(label(messages, 'participants'))} · ${h(formatNumber(event.rounds, locale))} ${h(label(messages, 'rounds'))}${modalityText(event, messages)}</p>
       ${detail}</article></li>`;
   }).join('');
   const html = `<div class="competition-page container"><p class="competition-eyebrow">${h(label(messages, 'demo'))}</p><h1>${h(label(messages, 'tournaments'))}</h1>
@@ -90,7 +94,7 @@ export function renderTournamentDetail(data, slug, messages = competitiveEs, loc
   const annualUrl = seasonUrl(event.seasonId);
   return { title: titleFor(event.name), html: `<div class="competition-page container"><nav class="competition-back" aria-label="${h(label(messages, 'backTournaments'))}"><a href="${h(routeHref('tournaments'))}">${h(label(messages, 'backTournaments'))}</a></nav>
     <p class="competition-eyebrow">${h(label(messages, 'demo'))} · ${h(typeName(event.type, messages))}</p><h1>${h(event.name)}</h1>
-    <p>${h(formatDate(event.date, locale))} · ${h(season?.label ?? event.seasonId)} · ${h(formatNumber(event.rounds, locale))} ${h(label(messages, 'rounds'))}</p>
+    <p>${h(formatShortDate(event.date, locale))} · ${h(season?.label ?? event.seasonId)} · ${h(formatNumber(event.rounds, locale))} ${h(label(messages, 'rounds'))}${modalityText(event, messages)}</p>
     ${annualUrl ? `<p><a href="${h(annualUrl)}">${h(label(messages, 'annualLink'))} ${h(season?.label ?? event.seasonId)}</a></p>` : ''}
     <section aria-labelledby="event-standings"><h2 id="event-standings">${h(label(messages, 'tournamentTable'))}</h2>${standingsTable(data, event, messages, locale)}</section>
     ${eventResults(data, event, messages, locale)}</div>` };

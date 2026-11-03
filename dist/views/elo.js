@@ -4,7 +4,7 @@ import { escapeHtml as h, formatDate, formatNumber } from './common.js';
 
 export const eloEs = Object.freeze({
   title: 'Evolución Elo', intro: 'Clasificación y trayectoria de los jugadores.',
-  method: 'Elo interno de demostración; no es Elo FIDE. Se calcula tras cada partida elegible y se muestra redondeado a enteros. Los puntos del mismo día se separan para distinguir cada partida.',
+  method: 'Elo interno; no es Elo FIDE. Se calcula tras cada partida elegible y se muestra redondeado a enteros. Los puntos del mismo día se separan para distinguir cada partida.',
   ranking: 'Jugadores por Elo actual', player: 'Jugador', rating: 'Elo actual', games: 'Partidas elegibles',
   open: 'Ver evolución', compare: 'Comparar evolución', choose: 'Elegí jugadores para comparar',
   draw: 'Mostrar comparación', reset: 'Ver un jugador', date: 'Fecha', chart: 'Gráfico de evolución Elo',
@@ -81,7 +81,7 @@ export function renderElo(data, { jugador = [] } = {}, labels = eloEs, locale = 
     return `<tr><th scope="row">${h(formatNumber(rank, locale))}</th><td><a href="${h(routeHref('player', { slug: player.slug }))}">${h(player.name)}</a></td><td>${h(round(value, locale))}</td><td>${h(formatNumber(ratings[player.id].played, locale))}</td><td><a href="${h(routeHref('elo', {}, { jugador: [player.slug] }))}">${h(labels.open)}</a></td></tr>`;
   }).join('');
   const series = selected.map((player) => ({ player, history: ratings[player.id].history }));
-  return { title: labels.title, html: `<div class="elo-page container"><p class="elo-eyebrow">Centro de estadísticas · datos demo</p><h1>${h(labels.title)}</h1><p>${h(labels.intro)}</p><p class="elo-method">${h(labels.method)}</p>
+  return { title: labels.title, html: `<div class="elo-page container"><p class="elo-eyebrow">Centro de estadísticas</p><h1>${h(labels.title)}</h1><p>${h(labels.intro)}</p><p class="elo-method">${h(labels.method)}</p>
     <section aria-labelledby="elo-ranking"><h2 id="elo-ranking">${h(labels.ranking)}</h2><div class="elo-table-wrap" role="region" aria-label="${h(labels.ranking)}" tabindex="0"><table><caption>${h(labels.ranking)}</caption><thead><tr><th scope="col">#</th><th scope="col">${h(labels.player)}</th><th scope="col">${h(labels.rating)}</th><th scope="col">${h(labels.games)}</th><th scope="col">${h(labels.open)}</th></tr></thead><tbody>${ranking}</tbody></table></div></section>
     <section aria-labelledby="elo-compare"><h2 id="elo-compare">${h(labels.compare)}</h2><form method="get" action="${h(routeHref('elo'))}" class="elo-select"><fieldset><legend>${h(labels.choose)}</legend><div>${choices}</div></fieldset><button type="submit">${h(labels.draw)}</button></form>${chart(series, labels, locale, data.games)}</section></div>` };
 }

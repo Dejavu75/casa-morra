@@ -16,6 +16,8 @@ Este contrato prepara una futura migración local de **datos ficticios originale
 
 El objeto `data` contiene `seasons`, `players`, `tournaments`, `games`, `byes`, `titles` y `editorial`. La tabla oficial permanece en `tournaments[].standings`, con su `order` y `rank` explícitos; no se reconstruye a partir de partidas. `games[].moves` puede ser `null`: un resultado sin jugadas no obtiene PGN artificial. `editorial` contiene `club`, `news` y `classes`. El snapshot no incorpora agregados derivados, Elo calculado ni información de cuentas.
 
+`tournaments[].modality` es un texto descriptivo **opcional** de una línea y hasta 80 caracteres, por ejemplo `20'+3`. Su ausencia en snapshots anteriores conserva exactamente los mismos bytes y hashes; no se rellena automáticamente. La interfaz muestra la fecha ISO del torneo como `DD/MM/AAAA` sin cambiar su valor almacenado ni el orden cronológico.
+
 La versión 1 acepta únicamente los campos presentes en el fixture actual. `encodeDemoSnapshot` rechaza claves adicionales, también a nivel de `data` y de cada registro; un campo nuevo exige revisión del esquema y, cuando corresponda, otra versión. Esto evita exportar silenciosamente un correo, token u otro dato ajeno a la demo.
 
 ## Codificación, lectura e integridad

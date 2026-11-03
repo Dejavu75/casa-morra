@@ -3,8 +3,8 @@ import { escapeHtml as h, formatDate, playerName } from './common.js';
 import { Chess } from '../vendor/chess.js';
 
 export const gameEs = Object.freeze({
-  missing: 'Partida no encontrada', missingText: 'No existe una partida con ese identificador en la muestra.',
-  game: 'Partida', demo: 'Datos ficticios de demostración', back: '← Torneos',
+  missing: 'Partida no encontrada', missingText: 'No existe una partida con ese identificador.',
+  game: 'Partida', demo: 'Archivo de partidas', back: '← Torneos',
   noMoves: 'Sin jugadas registradas. El resultado permanece disponible, pero no hay tablero para reproducir.',
   invalid: 'La secuencia no se puede reproducir porque contiene una jugada inválida.',
   scope: 'Jugadas de ajedrez validadas y reproducidas desde la posición inicial.',

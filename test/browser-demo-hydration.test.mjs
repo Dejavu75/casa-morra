@@ -208,6 +208,6 @@ test('la aplicación carga la exportación al abrir la página sin botón de act
   assert.match(app, /attachGameReplay\([^,]+, activeData/);
   assert.doesNotMatch(html, /data-demo-refresh|Actualizar datos/i);
   assert.doesNotMatch(app, /refreshButton/);
-  assert.match(html, /data-demo-status[^>]+role="status"/);
+  assert.match(html, /data-demo-alert hidden/);
   assert.match(html, /data-demo-warning[^>]+hidden/);
 });

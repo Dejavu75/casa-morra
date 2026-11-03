@@ -20,7 +20,7 @@ test('el catálogo español cubre etiquetas visibles y conserva un fallback', as
   assert.equal(translate('not.available', 'en'), 'not.available');
   assert.match(html, /<html lang="es">/);
   assert.match(html, /<title>Estadísticas y récords — Centro de estadísticas/);
-  assert.match(html, /Datos de demostración/);
+  assert.doesNotMatch(html, /Datos de demostración|Exportación pública verificada/);
 });
 
 test('el selector de tema persiste una preferencia propia y tolera almacenamiento indisponible', async () => {

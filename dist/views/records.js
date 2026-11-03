@@ -8,7 +8,7 @@ import { renderResults } from './results.js';
 export const recordsEs = Object.freeze({
   statisticsTitle: 'Estadísticas y récords', classicsTitle: 'Clásicos',
   missingClassic: 'Clásico no encontrado',
-  demo: 'Cifras ficticias de demostración. Las reglas de cálculo son propias del Centro de estadísticas.',
+  demo: 'Las reglas de cálculo son propias del Centro de estadísticas.',
   eyebrow: 'Observatorio de ajedrez',
   lead: 'Una lectura clara de cada partida, torneo y trayectoria registrada.',
   playersCount: 'Jugadores', tournamentsCount: 'Torneos', gamesCount: 'Partidas al tablero',
@@ -33,7 +33,7 @@ export const recordsEs = Object.freeze({
     tournamentsWon: 'Torneos ganados', championships: 'Campeonatos del club',
     gamesPlayed: 'Partidas jugadas', gamesWon: 'Partidas ganadas',
     winRate: 'Porcentaje de victorias', winningStreak: 'Racha ganadora',
-    unbeatenStreak: 'Racha invicta', peakElo: 'Mayor Elo demo',
+    unbeatenStreak: 'Racha invicta', peakElo: 'Mayor Elo',
     tournamentsPlayed: 'Torneos jugados', podiums: 'Podios',
   }),
   boardRules: Object.freeze({
@@ -44,7 +44,7 @@ export const recordsEs = Object.freeze({
     winRate: 'Población: jugadores con al menos 15 partidas al tablero. Valor: victorias / partidas al tablero × 100; no es rendimiento por puntos.',
     winningStreak: 'Población: jugadores con racha ganadora. Valor: victorias consecutivas al tablero; los descansos no son partidas.',
     unbeatenStreak: 'Población: jugadores con racha invicta. Valor: partidas al tablero consecutivas sin derrota; los descansos no son partidas.',
-    peakElo: 'Población: jugadores con partidas elegibles para Elo demo. Valor: máximo calculado con fórmula propia; no es Elo FIDE.',
+    peakElo: 'Población: jugadores con partidas elegibles para Elo interno. Valor: máximo calculado con fórmula propia; no es Elo FIDE.',
     tournamentsPlayed: 'Población: participantes de tablas oficiales. Valor: torneos con una posición oficial registrada.',
     podiums: 'Población: participantes de tablas oficiales. Valor: puestos primero, segundo o tercero registrados.',
   }),
@@ -100,7 +100,7 @@ export function renderStatistics(data, labels = recordsEs, locale = 'es-AR') {
     [data.games.length, labels.gamesCount],
   ].map(([value, label]) => `<li><strong>${e(formatNumber(value, locale))}</strong><span>${e(label)}</span></li>`).join('');
   const index = boards.map((board, position) => `<a href="#record-${e(board.id)}"><span>${e(formatNumber(position + 1, locale).padStart(2, '0'))}</span>${e(labels.boardTitles?.[board.id] ?? board.label)}</a>`).join('');
-  return { title: labels.statisticsTitle, html: `<section class="records-page"><header class="records-hero"><img class="records-brand-art" src="/assets/rook-large.png" width="128" height="128" alt="" aria-hidden="true"><p class="records-eyebrow">${e(labels.eyebrow)}</p><h1>${e(labels.statisticsTitle)}</h1><p class="records-lead">${e(labels.lead)}</p><ul class="records-totals" aria-label="${e(labels.totalsLabel)}">${totals}</ul><p class="records-demo">${e(labels.demo)}</p></header><nav class="records-index" aria-label="${e(labels.boardIndex)}"><h2>${e(labels.boardIndex)}</h2><div>${index}</div></nav><div class="records-grid">${sections}</div></section>` };
+  return { title: labels.statisticsTitle, html: `<section class="records-page"><header class="records-hero"><img class="records-brand-art" src="/assets/rook-large.png" width="128" height="128" alt="" aria-hidden="true"><p class="records-eyebrow">${e(labels.eyebrow)}</p><h1>${e(labels.statisticsTitle)}</h1><p class="records-lead">${e(labels.lead)}</p><ul class="records-totals" aria-label="${e(labels.totalsLabel)}">${totals}</ul></header><nav class="records-index" aria-label="${e(labels.boardIndex)}"><h2>${e(labels.boardIndex)}</h2><div>${index}</div></nav><div class="records-grid">${sections}</div></section>` };
 }
 
 function scorePoints(record, locale) {
@@ -121,7 +121,7 @@ export function renderClassics(data, labels = recordsEs, locale = 'es-AR') {
     const heading = href ? `<a href="${e(href)}">${names}</a>` : names;
     return `<article class="classic-pair"><h2>${heading}</h2><p>${e(labels.perspective)}</p>${renderResults(pair.record, labels, locale, recordsEs)}<p>${e(labels.pointsRate)}: ${e(scorePoints(pair.record, locale))} (${e(scorePercent(pair.record, locale))})</p></article>`;
   }).join('');
-  return { title: labels.classicsTitle, html: `<section class="classics-page"><h1>${e(labels.classicsTitle)}</h1><p>${e(labels.classicsIntro)}</p>${cards || `<p>${e(labels.noClassics)}</p>`}</section>` };
+  return { title: labels.classicsTitle, html: `<section class="classics-page"><h1>${e(labels.classicsTitle)}</h1><p>${e(labels.classicsIntro)}</p><div class="classics-list">${cards || `<p>${e(labels.noClassics)}</p>`}</div></section>` };
 }
 
 function colorLine(label, record, labels, locale) {

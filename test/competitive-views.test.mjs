@@ -81,7 +81,7 @@ test('la anual muestra puestos compartidos, movimiento y exclusiones de la demo'
   assert.match(view.html, /<caption>Tabla anual/);
   assert.match(view.html, /Respecto del torneo anterior de la misma temporada/);
   assert.match(view.html, /No se incluyen torneos marcados como no elegibles/);
-  assert.match(view.html, /la tabla no otorga cupos ni inscripciones/);
+  assert.match(view.html, /no calcula plazas ni otorga cupos o inscripciones/);
   assert.match(view.html, /href="\/torneos\/ronda-de-invierno-2025"/);
   assert.equal(renderAnnual(data, 'no-existe').title, 'Temporada no encontrada — Centro de estadísticas');
 

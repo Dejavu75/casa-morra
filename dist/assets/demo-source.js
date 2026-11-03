@@ -11,7 +11,7 @@ const shapes = {
   players: { id: 'string', slug: 'string', name: 'string', membership: 'string', demo: 'boolean' },
   tournaments: { id: 'string', slug: 'string', name: 'string', seasonId: 'string', date: 'string',
     type: 'string', format: 'string', rounds: 'number', annualEligible: 'boolean',
-    eloEligible: 'boolean', standings: 'standings' },
+    eloEligible: 'boolean', standings: 'standings', modality: 'optional-string' },
   standings: { playerId: 'string', order: 'number', rank: 'number', points: 'number',
     wins: 'nullable-number', draws: 'nullable-number', losses: 'nullable-number' },
   games: { id: 'string', tournamentId: 'string', round: 'number', date: 'string',
@@ -26,8 +26,11 @@ const collections = ['byes', 'games', 'players', 'seasons', 'titles', 'tournamen
 const dataKeys = [...collections, 'editorial'];
 
 function fields(row, shape) {
-  if (!exact(row, Object.keys(shape))) throw invalid();
+  if (!object(row) || Object.keys(row).some((key) => !Object.hasOwn(shape, key)) ||
+      Object.entries(shape).some(([key, type]) => !type.startsWith('optional-') && !Object.hasOwn(row, key)))
+    throw invalid();
   for (const [key, type] of Object.entries(shape)) {
+    if (type.startsWith('optional-') && !Object.hasOwn(row, key)) continue;
     const value = row[key];
     if (type === 'standings') { rows(value, shapes.standings); continue; }
     if (type === 'moves') {
@@ -36,8 +39,11 @@ function fields(row, shape) {
       continue;
     }
     if (type.startsWith('nullable-') && value === null) continue;
-    const base = type.replace('nullable-', '');
-    if (typeof value !== base || (base === 'number' && !Number.isFinite(value))) throw invalid();
+    const base = type.replace(/^(nullable|optional)-/, '');
+    if (typeof value !== base || (base === 'number' && !Number.isFinite(value)) ||
+        type === 'optional-string' &&
+        (!value.trim() || value !== value.trim() || value.length > 80 || /[\x00-\x1f\x7f]/.test(value)))
+      throw invalid();
   }
 }
 

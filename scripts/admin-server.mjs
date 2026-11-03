@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { decodeDemoSnapshot } from './demo-snapshot.mjs';
 import { recordAdminGame, statusDemoStore } from './demo-store.mjs';
 import { publishPublicDemo } from './demo-public.mjs';
+import { updateTournamentModality } from './admin-tournament.mjs';
 
 const SESSION_AGE_MS = 8 * 60 * 60 * 1000;
 const MAX_BODY_BYTES = 200_000;
@@ -107,6 +108,18 @@ export function createAdminServer({ password, store, output }) {
       if (request.method === 'POST' && path === '/api/publish') {
         const published = await publishPublicDemo(store, output);
         json(response, 200, { sha256: published.source.sha256, published: true }); return;
+      }
+      const modalityRoute = path.match(/^\/api\/tournaments\/([a-zA-Z0-9_-]+)\/modality$/);
+      if (request.method === 'PUT' && modalityRoute) {
+        const state = await updateTournamentModality(store, modalityRoute[1], await bodyJson(request));
+        try {
+          await publishPublicDemo(store, output);
+          json(response, 200, { sha256: state.snapshot.sha256, published: true });
+        } catch {
+          json(response, 202, { sha256: state.snapshot.sha256, saved: true, published: false,
+            warning: 'Modalidad guardada, publicación pendiente. Use Reintentar publicación.' });
+        }
+        return;
       }
       let operation;
       let input;

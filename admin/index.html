@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Administración de partidas — Centro de estadísticas</title>
-  <meta name="description" content="Carga local de resultados y jugadas del Centro de estadísticas.">
+  <title>Administración — Centro de estadísticas</title>
+  <meta name="description" content="Carga local de partidas y modalidad de torneos del Centro de estadísticas.">
   <link rel="icon" type="image/png" href="/rook-small.png">
   <link rel="stylesheet" href="/admin.css">
   <script type="module" src="/admin.js"></script>
@@ -12,7 +12,7 @@
 <body>
   <header class="masthead"><div class="shell"><span class="brand"><img class="brand-mark" src="/rook-small.png" width="43" height="43" alt="" aria-hidden="true"><span class="brand-name">Centro de estadísticas</span></span><span class="badge">Administración local</span></div></header>
   <main class="shell">
-    <div class="intro"><p class="eyebrow">Estadísticas · Ajedrez</p><h1>Partidas</h1><p>Registrá primero el resultado y completá las jugadas cuando recibas la planilla.</p></div>
+    <div class="intro"><p class="eyebrow">Estadísticas · Ajedrez</p><h1>Administración</h1><p>Registrá resultados, completá jugadas y describí la modalidad de cada torneo.</p></div>
     <p id="status" class="status" role="status" aria-live="polite"></p>
     <section id="login-panel" class="panel" aria-labelledby="login-title">
       <h2 id="login-title">Acceso administrativo</h2>
@@ -46,8 +46,17 @@
           </form>
         </section>
       </div>
+      <section class="panel modality-panel" aria-labelledby="modality-title">
+        <p class="step">03 · Torneo</p><h2 id="modality-title">Modalidad de torneo</h2>
+        <form id="modality-form">
+          <label for="metadata-tournament">Torneo</label><select id="metadata-tournament" required></select>
+          <label for="modality">Modalidad</label><input id="modality" name="modality" type="text" maxlength="80" placeholder="20'+3" autocomplete="off">
+          <p class="muted">Texto libre, por ejemplo 20'+3. Dejá el campo vacío para quitar una modalidad cargada.</p>
+          <button type="submit">Guardar modalidad</button>
+        </form>
+      </section>
     </div>
   </main>
-  <footer class="shell">Centro de estadísticas · datos ficticios de demostración</footer>
+  <footer class="shell">Centro de estadísticas</footer>
 </body>
 </html>

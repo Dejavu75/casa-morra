@@ -30,10 +30,61 @@
 .stats-only .header-inner { gap: clamp(.8rem, 2vw, 2rem); }
 .stats-only .site-nav { margin-left: auto; }
 .stats-only .site-nav a { color: var(--paper); }
+.stats-only #contenido { min-height: 0; }
+.stats-only .demo-source-controls[hidden] { display: none; }
+
+.stats-only .classics-page,
+.stats-only .classic-detail,
+.stats-only .competition-page,
+.stats-only .players-page,
+.stats-only .elo-page,
+.stats-only .lookup-page,
+.stats-only .content-page {
+  min-height: 0;
+  padding-block: clamp(1.25rem, 2.5vw, 2.25rem) clamp(2rem, 3.5vw, 3rem);
+}
+
+.stats-only .classics-page h1,
+.stats-only .classic-detail h1,
+.stats-only .competition-page h1,
+.stats-only .players-page h1,
+.stats-only .elo-page h1,
+.stats-only .lookup-page h1,
+.stats-only .content-page h1 {
+  margin: 0 0 .65rem;
+  font-size: clamp(2rem, 3.3vw, 3rem);
+  line-height: 1.1;
+}
+
+.stats-only .competition-page h2,
+.stats-only .players-page h2,
+.stats-only .elo-page h2,
+.stats-only .lookup-page h2,
+.stats-only .content-page h2 {
+  margin-block: 1.35rem .7rem;
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+}
+
+.stats-only .players-page section,
+.stats-only .elo-page section { margin-block: 1.35rem; }
+.stats-only .competition-filters { margin-block: 1.25rem .75rem; }
+.stats-only .classics-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .85rem;
+  margin-top: 1rem;
+}
+.stats-only .classic-pair {
+  min-width: 0;
+  margin: 0;
+  padding: clamp(.85rem, 1.5vw, 1.25rem);
+}
+.stats-only .classic-pair h2 { margin: 0 0 .5rem; font-size: clamp(1.35rem, 2vw, 1.75rem); }
+.stats-only .classic-pair p { margin-block: .5rem; }
 
 .stats-only .records-page {
   width: min(100% - 2.5rem, 1320px);
-  padding-block: clamp(.75rem, 2vw, 1.25rem) 5rem;
+  padding-block: clamp(.75rem, 2vw, 1.25rem) clamp(2rem, 3.5vw, 3rem);
 }
 
 .stats-only .records-hero {
@@ -123,7 +174,6 @@
 }
 
 .stats-only .records-totals span { color: #f2e6d1; font-size: .82rem; }
-.stats-only .records-demo { margin: .7rem 0 0; color: #e3e8df; font-size: .82rem; }
 
 .stats-only .records-index { padding-block: 1rem .75rem; }
 .stats-only .records-index h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 2.4vw, 2rem); }
@@ -155,7 +205,7 @@
 }
 :root[data-theme="oscuro"] .stats-only .record-board { background: #233352; }
 .stats-only .record-board h2 { font-size: clamp(1.4rem, 2.5vw, 2rem); }
-.stats-only .record-board > p { min-height: 4.5em; color: var(--copy); font-size: .86rem; }
+.stats-only .record-board > p { color: var(--copy); font-size: .86rem; }
 .stats-only .record-board table { min-width: 0; table-layout: fixed; font-size: .84rem; }
 .stats-only .record-board th,
 .stats-only .record-board td { padding: .6rem .45rem; overflow-wrap: anywhere; }
@@ -172,7 +222,7 @@
 
 @media (max-width: 850px) {
   .stats-only .records-grid { grid-template-columns: 1fr; }
-  .stats-only .record-board > p { min-height: 0; }
+  .stats-only .classics-list { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {

@@ -21,14 +21,14 @@ const route = (path) => parseRoute(path, '');
 test('el locale inyectado atraviesa vistas, fechas, números y fallback español', () => {
   const tournament = renderRoute(route('/torneos'), demo, { locale: 'en-US', catalogs });
   assert.match(tournament.html, /<h1>Events<\/h1>/);
-  assert.match(tournament.html, /October 3, 2026/);
+  assert.match(tournament.html, /10\/03\/2026/);
   const annual = renderRoute(route('/anual/26-27'), demo, { locale: 'en-US', catalogs });
   assert.match(annual.html, /6\.5/);
   const players = renderRoute(route('/jugadores'), demo, { locale: 'en-US', catalogs });
   assert.match(players.html, /<h1>Players<\/h1>/);
   assert.match(players.html, /No players under G/);
   const spanish = renderRoute(route('/torneos'), demo, { locale: 'fr-FR', catalogs });
-  assert.match(spanish.html, /3 de octubre de 2026/);
+  assert.match(spanish.html, /03\/10\/2026/);
   assert.match(spanish.html, /<h1>Torneos<\/h1>/);
   assert.match(renderRoute(route('/'), demo, { locale: 'en-US', catalogs }).html, /<strong>70<\/strong><span>Partidas al tablero/);
   assert.match(renderRoute(route('/novedades'), demo, { locale: 'en-US', catalogs }).html, /October 4, 2026/);
