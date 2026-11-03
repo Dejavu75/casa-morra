@@ -1,0 +1,46 @@
+services:
+  proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.tls
+    image: casa-morra-tls:local
+    restart: unless-stopped
+    ports:
+      - "${CASA_MORRA_LAN_IP:?Definir CASA_MORRA_LAN_IP con la IP LAN del anfitrión}:8080:8443"
+    volumes:
+      - type: bind
+        source: "${CASA_MORRA_CERT_ROOT:?Definir CASA_MORRA_CERT_ROOT con el directorio del certificado}/live/ingenieros.deyzone.com.ar"
+        target: /etc/letsencrypt/live/ingenieros.deyzone.com.ar
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: "${CASA_MORRA_CERT_ROOT:?Definir CASA_MORRA_CERT_ROOT con el directorio del certificado}/archive/ingenieros.deyzone.com.ar"
+        target: /etc/letsencrypt/archive/ingenieros.deyzone.com.ar
+        read_only: true
+        bind:
+          create_host_path: false
+    networks:
+      - casa_morra
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,noexec,size=16m
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null --no-check-certificate https://127.0.0.1:8443/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  casa_morra:
+    external: true
+    name: casa-morra_default
