@@ -30,3 +30,17 @@ test('el aviso de exportación conserva contraste de texto normal en ambos temas
   assert.ok(contrast(light.slice(1), 'f5f0e6') >= 4.5, 'contraste claro inferior a 4,5:1');
   assert.ok(contrast(dark.slice(1), '1d2b43') >= 4.5, 'contraste oscuro inferior a 4,5:1');
 });
+
+test('el realce rojo sustituye al mostaza sin perder contraste de lectura', async () => {
+  const [site, stats, admin] = await Promise.all([
+    read('assets/site.css'), read('assets/stats.css'),
+    readFile(new URL('../admin/admin.css', import.meta.url), 'utf8'),
+  ]);
+  assert.match(site, /--copper:\s*#b84f55/i);
+  assert.match(stats, /--copper:\s*#b84f55/i);
+  assert.match(stats, /\.stats-only \.records-eyebrow\s*\{[^}]*color:\s*#f0a5a7/i);
+  assert.match(admin, /\.eyebrow, \.step\s*\{[^}]*color:\s*#8b3038/i);
+  assert.doesNotMatch(site + stats + admin, /#d4a766|#efc991|#f1ce87|#765020|#b46f42/i);
+  assert.ok(contrast('f0a5a7', '2b417b') >= 4.5, 'el rojo claro necesita 4,5:1 sobre el hero');
+  assert.ok(contrast('8b3038', 'f7f8fb') >= 4.5, 'el rojo oscuro necesita 4,5:1 en el panel');
+});

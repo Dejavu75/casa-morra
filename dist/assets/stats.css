@@ -5,7 +5,7 @@
   --paper: #ffffff;
   --surface-light: #f7f8fb;
   --surface: #f7f8fb;
-  --copper: #d4a766;
+  --copper: #b84f55;
   --teal: #47658c;
   --heading: #1d2a5f;
   --accent-text: #253b78;
@@ -25,7 +25,7 @@
 .stats-only .site-footer {
   background: var(--indigo-deep);
 }
-.stats-only .site-header { --focus: #f1ce87; }
+.stats-only .site-header { --focus: #b84f55; }
 
 .stats-only .header-inner { gap: clamp(.8rem, 2vw, 2rem); }
 .stats-only .site-nav { margin-left: auto; }
@@ -127,7 +127,7 @@
 }
 .stats-only .records-eyebrow {
   margin: 0 0 .6rem;
-  color: #efc991;
+  color: #f0a5a7;
   font-size: .76rem;
   font-weight: 800;
   letter-spacing: .19em;

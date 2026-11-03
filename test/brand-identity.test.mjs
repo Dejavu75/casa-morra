@@ -21,13 +21,13 @@ test('la identidad visible y accesible anuncia Centro de estadísticas', async (
   assert.doesNotMatch(app, /Casa Morra/);
 });
 
-test('la torre usa huecos en tamaño pequeño y barras de color en tamaño grande', async () => {
+test('la torre usa barras de color en cabeceras, favicon y emblema grande', async () => {
   const [publicHtml, adminHtml, statsCss] = await Promise.all([
     read('dist/index.html'), read('admin/index.html'), read('dist/assets/stats.css'),
   ]);
   const hero = renderStatistics(demo).html;
-  assert.match(publicHtml, /assets\/rook-small\.png/);
-  assert.match(adminHtml, /rook-small\.png/);
+  assert.match(publicHtml, /assets\/rook-large\.png/);
+  assert.match(adminHtml, /rook-large\.png/);
   assert.match(hero, /assets\/rook-large\.png/);
   assert.match(statsCss, /records-brand-art/);
   for (const name of ['rook-small.png', 'rook-large.png']) {

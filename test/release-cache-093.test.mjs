@@ -4,11 +4,12 @@ import { readFile } from 'node:fs/promises';
 
 test('la identidad nueva versiona las entradas y conserva hojas no modificadas', async () => {
   const html = await readFile(new URL('../dist/index.html', import.meta.url), 'utf8');
-  for (const asset of ['assets/site.css', 'assets/stats.css', 'assets/app.js'])
-    assert.match(html, new RegExp(`(?:href|src)="/${asset.replace('.', '\\.') }\\?v=0\\.10\\.1-brand"`), asset);
+  for (const asset of ['assets/site.css', 'assets/stats.css'])
+    assert.match(html, new RegExp(`href="/${asset.replace('.', '\\.') }\\?v=0\\.10\\.2-red"`), asset);
+  assert.match(html, /src="\/assets\/app\.js\?v=0\.10\.1-brand"/);
   for (const asset of ['views/players.css', 'views/content.css'])
     assert.match(html, new RegExp(`href="/${asset.replace('.', '\\.') }\\?v=0\\.9\\.3-demo"`), asset);
-  assert.match(html, /href="\/assets\/rook-small\.png"/);
+  assert.match(html, /href="\/assets\/rook-large\.png"/);
 });
 
 test('la identidad nueva versiona todo el grafo de módulos modificados', async () => {

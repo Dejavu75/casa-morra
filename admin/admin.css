@@ -4,7 +4,7 @@
   --indigo-deep: #17213a;
   --surface: #f7f8fb;
   --paper: #ffffff;
-  --copper: #d4a766;
+  --copper: #b84f55;
   --ink: #202633;
   --muted: #59606b;
   --focus: #253b78;
@@ -59,7 +59,7 @@ body { margin: 0; min-height: 100vh; }
   text-transform: uppercase;
   letter-spacing: .14em;
   font-weight: 800;
-  color: #765020;
+  color: #8b3038;
   font-size: .78rem;
 }
 h1 {

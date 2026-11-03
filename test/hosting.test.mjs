@@ -66,7 +66,8 @@ test('los recursos de la entrega se revalidan y sus cambios tienen URL nueva', (
   const html = read('dist/index.html');
   const app = read('dist/assets/app.js');
   assert.match(nginx, /add_header\s+Cache-Control\s+no-cache\s+always;/);
-  assert.match(html, /href="\/assets\/site\.css\?v=0\.10\.1-brand"/);
+  assert.match(html, /href="\/assets\/site\.css\?v=0\.10\.2-red"/);
+  assert.match(html, /href="\/assets\/stats\.css\?v=0\.10\.2-red"/);
   assert.match(html, /src="\/assets\/app\.js\?v=0\.10\.1-brand"/);
   assert.match(app, /from '\.\.\/views\/records\.js\?v=0\.10\.1-brand'/);
 });

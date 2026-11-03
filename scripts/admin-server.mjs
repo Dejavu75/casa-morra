@@ -64,7 +64,8 @@ export function createAdminServer({ password, store, output }) {
         '/admin.js': ['../admin/admin.js', 'text/javascript; charset=utf-8'],
         '/tournament-eligibility.js': ['../admin/tournament-eligibility.js', 'text/javascript; charset=utf-8'],
         '/admin.css': ['../admin/admin.css', 'text/css; charset=utf-8'],
-        '/rook-small.png': ['../dist/assets/rook-small.png', 'image/png'] };
+        '/rook-small.png': ['../dist/assets/rook-small.png', 'image/png'],
+        '/rook-large.png': ['../dist/assets/rook-large.png', 'image/png'] };
       if (request.method === 'GET' && Object.hasOwn(assets, path)) {
         const [file, type] = assets[path];
         const source = await readFile(new URL(file, import.meta.url));
