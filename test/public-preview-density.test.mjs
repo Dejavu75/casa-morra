@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import * as demo from '../dist/data/demo.js';
+import { encodeDemoSnapshot } from '../scripts/demo-snapshot.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (name) => readFile(path.join(root, name), 'utf8');
@@ -18,10 +20,10 @@ test('la vista pública conserva cifras sin avisos de datos ficticios', async ()
     const source = await read(name);
     assert.doesNotMatch(source, /exportación pública verificada|datos? (?:ficticios?|de demostración|de ejemplo|demo)|(?:cifras|contenido|torneos?|padrón|perfil) fictici[oa]s?|elo demo/i, name);
   }
-  const snapshot = JSON.parse(await read('.demo-public/snapshot.json'));
-  assert.equal(snapshot.snapshot.classification, 'public-demo');
-  assert.ok(snapshot.snapshot.data.players.length > 0);
-  assert.ok(snapshot.snapshot.data.games.length > 0);
+  const snapshot = JSON.parse(encodeDemoSnapshot(demo));
+  assert.equal(snapshot.classification, 'public-demo');
+  assert.ok(snapshot.data.players.length > 0);
+  assert.ok(snapshot.data.games.length > 0);
 });
 
 test('las páginas de consulta usan una escala compacta y clásicos en grilla adaptable', async () => {

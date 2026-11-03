@@ -24,14 +24,16 @@ test('el proxy TLS expone solo 8080 LAN y monta solo el certificado exacto', { s
   assert.deepEqual(proxy.cap_drop, ['ALL']);
   assert.deepEqual(proxy.cap_add, ['CHOWN', 'SETGID', 'SETUID']);
   assert.ok(proxy.security_opt.includes('no-new-privileges:true'));
-  assert.deepEqual(proxy.volumes.map(({ source, target, read_only, bind }) => ({
-    source: source.replaceAll('\\', '/'), target, read_only, create_host_path: bind?.create_host_path,
+  assert.deepEqual(proxy.volumes.map(({ source, target, read_only }) => ({
+    source: source.replaceAll('\\', '/'), target, read_only,
   })), [
     { source: `C:/certificados-de-prueba/live/${domain}`, target: `/etc/letsencrypt/live/${domain}`,
-      read_only: true, create_host_path: false },
+      read_only: true },
     { source: `C:/certificados-de-prueba/archive/${domain}`, target: `/etc/letsencrypt/archive/${domain}`,
-      read_only: true, create_host_path: false },
+      read_only: true },
   ]);
+  const source = readFileSync(new URL('../compose.tls.yaml', import.meta.url), 'utf8');
+  assert.equal((source.match(/create_host_path:\s*false/g) ?? []).length, 2);
 });
 
 test('el activador TLS rechaza direcciones comodín', { skip: skipCompose }, () => {
