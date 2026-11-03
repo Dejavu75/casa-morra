@@ -63,6 +63,15 @@ function render() {
   fill($('player-edit'), [{ id: '', name: 'Nuevo jugador' }, ...current.players],
     (player) => player.name, selectedPlayer);
   updatePlayerForm();
+  const selectedSeason = $('season-edit').value;
+  fill($('season-edit'), [{ id: '', label: 'Nueva temporada' }, ...current.seasons],
+    (season) => season.label, selectedSeason);
+  updateSeasonForm();
+  const selectedTournament = $('tournament-edit').value;
+  fill($('tournament-edit'), [{ id: '', name: 'Nuevo torneo' }, ...current.tournaments],
+    (event) => event.name, selectedTournament);
+  fill($('tournament-season'), current.seasons, (season) => season.label);
+  updateTournamentForm();
   const events = new Map(current.tournaments.map((event) => [event.id, event]));
   const previousGame = $('game').value;
   const games = [...current.games].sort((a, b) => Number(Boolean(a.moves)) - Number(Boolean(b.moves)) ||
@@ -79,6 +88,38 @@ function updatePlayerForm() {
   const player = current?.players.find((row) => row.id === $('player-edit').value);
   $('player-name').value = player?.name ?? '';
   $('player-membership').value = player?.membership ?? 'socio';
+}
+
+function updateSeasonForm() {
+  const season = current?.seasons.find((row) => row.id === $('season-edit').value);
+  $('season-label').value = season?.label ?? '';
+  $('season-start').value = season?.start ?? '';
+  $('season-end').value = season?.end ?? '';
+}
+
+function updateTournamentForm() {
+  const event = current?.tournaments.find((row) => row.id === $('tournament-edit').value);
+  $('tournament-name').value = event?.name ?? '';
+  $('tournament-season').value = event?.seasonId ?? current?.seasons.at(-1)?.id ?? '';
+  $('tournament-date').value = event?.date ?? localDate();
+  $('tournament-type').value = event?.type ?? 'interno';
+  $('tournament-format').value = event?.format ?? 'round-robin';
+  $('tournament-modality').value = event?.modality ?? '';
+  $('tournament-annual').checked = event?.annualEligible ?? true;
+  $('tournament-elo').checked = event?.eloEligible ?? true;
+  const existing = new Set(event?.standings.map((row) => row.playerId) ?? []);
+  const list = $('participant-list');
+  list.replaceChildren();
+  for (const player of current?.players ?? []) {
+    const label = document.createElement('label');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.value = player.id;
+    checkbox.checked = existing.has(player.id);
+    checkbox.disabled = existing.has(player.id);
+    label.append(checkbox, document.createTextNode(player.name));
+    list.append(label);
+  }
 }
 
 function updateRoster() {
@@ -127,6 +168,39 @@ $('player-form').addEventListener('submit', async (event) => {
       { saved: 'Jugador guardado y publicado.', pending: 'Jugador guardado; publicación pendiente.' });
     $('player-edit').value = result.id;
     updatePlayerForm();
+  } catch (error) { message(error.message, 'error'); }
+});
+$('season-edit').addEventListener('change', updateSeasonForm);
+$('season-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const id = $('season-edit').value;
+  try {
+    const result = await save(id ? `/api/seasons/${encodeURIComponent(id)}` : '/api/seasons',
+      id ? 'PUT' : 'POST', { label: $('season-label').value,
+        start: $('season-start').value, end: $('season-end').value },
+      { saved: 'Temporada guardada y publicada.', pending: 'Temporada guardada; publicación pendiente.' });
+    $('season-edit').value = result.id;
+    updateSeasonForm();
+  } catch (error) { message(error.message, 'error'); }
+});
+$('tournament-edit').addEventListener('change', updateTournamentForm);
+$('tournament-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const id = $('tournament-edit').value;
+  const playerIds = [...$('participant-list').querySelectorAll('input:checked')]
+    .map((input) => input.value);
+  if (playerIds.length < 2) { message('Elegí al menos dos participantes.', 'error'); return; }
+  const payload = { name: $('tournament-name').value, seasonId: $('tournament-season').value,
+    date: $('tournament-date').value, type: $('tournament-type').value,
+    format: $('tournament-format').value, modality: $('tournament-modality').value,
+    annualEligible: $('tournament-annual').checked, eloEligible: $('tournament-elo').checked,
+    playerIds };
+  try {
+    const result = await save(id ? `/api/tournaments/${encodeURIComponent(id)}` : '/api/tournaments',
+      id ? 'PUT' : 'POST', payload,
+      { saved: 'Torneo guardado y publicado.', pending: 'Torneo guardado; publicación pendiente.' });
+    $('tournament-edit').value = result.id;
+    updateTournamentForm();
   } catch (error) { message(error.message, 'error'); }
 });
 $('metadata-tournament').addEventListener('change', updateModality);

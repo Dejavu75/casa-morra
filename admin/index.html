@@ -56,8 +56,33 @@
           <button type="submit">Guardar jugador</button>
         </form>
       </section>
+      <div class="grid catalog-grid">
+        <section class="panel" aria-labelledby="season-title">
+          <p class="step">04 · Temporadas</p><h2 id="season-title">Cargar o editar temporada</h2>
+          <form id="season-form">
+            <label for="season-edit">Registro</label><select id="season-edit"><option value="">Nueva temporada</option></select>
+            <label for="season-label">Nombre</label><input id="season-label" type="text" maxlength="80" placeholder="2027–2028" required>
+            <div class="pair"><div><label for="season-start">Desde</label><input id="season-start" type="date" required></div><div><label for="season-end">Hasta</label><input id="season-end" type="date" required></div></div>
+            <button type="submit">Guardar temporada</button>
+          </form>
+        </section>
+        <section class="panel" aria-labelledby="tournament-title">
+          <p class="step">05 · Torneos</p><h2 id="tournament-title">Cargar o editar torneo</h2>
+          <form id="tournament-form">
+            <label for="tournament-edit">Registro</label><select id="tournament-edit"><option value="">Nuevo torneo</option></select>
+            <label for="tournament-name">Nombre</label><input id="tournament-name" type="text" maxlength="120" required>
+            <div class="pair"><div><label for="tournament-season">Temporada</label><select id="tournament-season" required></select></div><div><label for="tournament-date">Fecha</label><input id="tournament-date" type="date" required></div></div>
+            <div class="pair"><div><label for="tournament-type">Tipo</label><input id="tournament-type" type="text" maxlength="80" placeholder="interno" required></div><div><label for="tournament-format">Formato</label><input id="tournament-format" type="text" maxlength="80" placeholder="round-robin" required></div></div>
+            <label for="tournament-modality">Modalidad</label><input id="tournament-modality" type="text" maxlength="80" placeholder="20'+3">
+            <div class="check-row"><label><input id="tournament-annual" type="checkbox" checked> Cuenta para anual</label><label><input id="tournament-elo" type="checkbox" checked> Cuenta para Elo</label></div>
+            <fieldset><legend>Participantes</legend><div id="participant-list" class="participant-list"></div></fieldset>
+            <p class="muted">Elegí al menos dos jugadores. Una vez inscriptos, no se quitan desde este formulario para preservar resultados.</p>
+            <button type="submit">Guardar torneo</button>
+          </form>
+        </section>
+      </div>
       <section class="panel modality-panel" aria-labelledby="modality-title">
-        <p class="step">04 · Torneo</p><h2 id="modality-title">Modalidad de torneo</h2>
+        <p class="step">06 · Torneo</p><h2 id="modality-title">Modalidad de torneo</h2>
         <form id="modality-form">
           <label for="metadata-tournament">Torneo</label><select id="metadata-tournament" required></select>
           <label for="modality">Modalidad</label><input id="modality" name="modality" type="text" maxlength="80" placeholder="20'+3" autocomplete="off">

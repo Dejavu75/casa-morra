@@ -58,6 +58,8 @@ La [guía candidata `0.9.3-demo`](docs/entrega-0.9.3-demo.md) documenta el ensay
 
 El panel opcional permite **crear y corregir jugadores**, **crear un resultado sin jugadas** y completar después esa misma partida, de forma manual o mediante PGN. También permite editar la **modalidad** de cada torneo existente como texto libre (`20'+3`, por ejemplo); dejarla vacía la elimina. La fecha pública se presenta como `DD/MM/AAAA` sin modificar el dato ISO. Solo usuarios que conozcan la contraseña administrativa pueden escribir. El acceso está limitado a <http://127.0.0.1:8090/> en el equipo servidor; no se publica en `192.168.0.52` ni en el puerto público 8088. No reutilices la contraseña del sitio de referencia.
 
+El panel también permite crear y corregir temporadas, crear torneos con participantes y completar sus metadatos. Los participantes nuevos empiezan en cero sin partidas inventadas; un torneo existente puede incorporar jugadores, pero no quitar los que ya figuran en su tabla. Los resultados y descansos se mantienen separados de los datos descriptivos.
+
 Antes del primer arranque, prepará `.demo-state/admin.json` y la exportación pública con `node scripts/docker-prepare.mjs` o con el servicio de preparación de la [guía Docker portable](docs/docker-otro-host.md). Repetir la preparación no reemplaza un almacén existente. El administrador necesita una contraseña elegida por el operador; no hay contraseña predeterminada:
 
 ```powershell

@@ -82,7 +82,14 @@ p { line-height: 1.5; }
 #login-panel { max-width: 480px; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
 .modality-panel { margin-top: 1.2rem; }
+.catalog-grid { margin-top: 1.2rem; }
 .modality-panel form { max-width: 38rem; }
+.participant-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: .35rem .8rem; }
+.participant-list label, .check-row label { display: flex; align-items: center; gap: .45rem; margin: 0; font-weight: 500; }
+.participant-list input, .check-row input { width: auto; margin: 0; }
+.check-row { display: flex; flex-wrap: wrap; gap: 1rem; margin: .5rem 0; }
+fieldset { border: 1px solid #8792aa; border-radius: .25rem; margin: .5rem 0 0; }
+legend { font-weight: 700; font-size: .9rem; padding: 0 .3rem; }
 .toolbar {
   display: flex;
   align-items: center;

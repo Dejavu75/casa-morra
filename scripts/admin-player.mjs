@@ -4,7 +4,7 @@ import { applyDemoStore, correctDemoStore, statusDemoStore } from './demo-store.
 
 const membershipValues = new Set(['socia', 'socio', 'no_socio']);
 const fail = (message, status = 400) => { throw Object.assign(new Error(message), { status }); };
-const slugFrom = (name) => name.normalize('NFD').replace(/\p{M}/gu, '')
+export const slugFrom = (name) => name.normalize('NFD').replace(/\p{M}/gu, '')
   .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 function validateInput(input) {

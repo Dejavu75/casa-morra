@@ -8,6 +8,8 @@ import { recordAdminGame, statusDemoStore } from './demo-store.mjs';
 import { publishPublicDemo } from './demo-public.mjs';
 import { updateTournamentModality } from './admin-tournament.mjs';
 import { createAdminPlayer, updateAdminPlayer } from './admin-player.mjs';
+import { createAdminSeason, updateAdminSeason, createAdminTournament,
+  updateAdminTournament } from './admin-catalog.mjs';
 
 const SESSION_AGE_MS = 8 * 60 * 60 * 1000;
 const MAX_BODY_BYTES = 200_000;
@@ -95,7 +97,8 @@ export function createAdminServer({ password, store, output }) {
         const state = await statusDemoStore(store);
         const data = decodeDemoSnapshot(state.data);
         json(response, 200, { sha256: state.snapshot.sha256,
-          players: data.players, tournaments: data.tournaments, games: data.games });
+          players: data.players, seasons: data.seasons, tournaments: data.tournaments,
+          games: data.games, byes: data.byes, titles: data.titles });
         return;
       }
       if (['POST', 'PUT', 'DELETE'].includes(request.method) && !sameOrigin) {
@@ -110,6 +113,26 @@ export function createAdminServer({ password, store, output }) {
       if (request.method === 'POST' && path === '/api/publish') {
         const published = await publishPublicDemo(store, output);
         json(response, 200, { sha256: published.source.sha256, published: true }); return;
+      }
+      const seasonRoute = path.match(/^\/api\/seasons\/([a-zA-Z0-9_-]+)$/);
+      const tournamentRoute = path.match(/^\/api\/tournaments\/([a-zA-Z0-9_-]+)$/);
+      if (request.method === 'POST' && (path === '/api/seasons' || path === '/api/tournaments') ||
+          request.method === 'PUT' && (seasonRoute || tournamentRoute)) {
+        const input = await bodyJson(request);
+        const result = path === '/api/seasons' ? await createAdminSeason(store, input) :
+          seasonRoute ? await updateAdminSeason(store, seasonRoute[1], input) :
+            path === '/api/tournaments' ? await createAdminTournament(store, input) :
+              await updateAdminTournament(store, tournamentRoute[1], input);
+        try {
+          await publishPublicDemo(store, output);
+          json(response, request.method === 'POST' ? 201 : 200,
+            { id: result.id, sha256: result.state.snapshot.sha256, published: true });
+        } catch {
+          json(response, 202, { id: result.id, sha256: result.state.snapshot.sha256,
+            saved: true, published: false,
+            warning: 'Registro guardado, publicación pendiente. Use Reintentar publicación.' });
+        }
+        return;
       }
       const playerRoute = path.match(/^\/api\/players\/([a-zA-Z0-9_-]+)$/);
       if (request.method === 'POST' && path === '/api/players' ||

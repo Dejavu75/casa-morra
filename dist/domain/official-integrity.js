@@ -1,5 +1,5 @@
 // Contrato semántico común del snapshot público y la verificación local.
-function calendarDate(value) {
+export function calendarDate(value) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const parsed = new Date(`${value}T00:00:00Z`);
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
@@ -57,7 +57,12 @@ export function validateOfficialStandings(data, errors) {
       if (!standingIds.has(id)) errors.push({ code: 'MISSING_STANDING', detail: `${event.id}/${id}` });
     for (const row of event.standings ?? []) {
       const expected = totals.get(row.playerId);
-      if (!expected) { errors.push({ code: 'UNEXPLAINED_STANDING', detail: `${event.id}/${row.playerId}` }); continue; }
+      if (!expected) {
+        const unplayed = row.points === 0 && ['wins', 'draws', 'losses']
+          .every((key) => row[key] === 0);
+        if (!unplayed) errors.push({ code: 'UNEXPLAINED_STANDING', detail: `${event.id}/${row.playerId}` });
+        continue;
+      }
       if (!Number.isFinite(row.points) || !Number.isFinite(expected.points) || Math.abs(row.points - expected.points) >= 1e-7)
         errors.push({ code: 'STANDING_POINTS', detail: `${event.id}/${row.playerId}: ${row.points} ≠ ${expected.points}` });
       for (const key of ['wins', 'draws', 'losses'])

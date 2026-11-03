@@ -64,7 +64,7 @@ function incrementStanding(row, result, color) {
   row.points += key === 'wins' ? 1 : key === 'draws' ? 0.5 : 0;
 }
 
-function rankStandings(event) {
+export function rankStandings(event) {
   const ranked = [...event.standings].sort((a, b) => b.points - a.points || a.order - b.order);
   let previous = null;
   let rank = 0;
