@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { get } from 'node:http';
+import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 
 const baseUrl = process.env.CASA_MORRA_TEST_URL;
@@ -62,7 +63,10 @@ runtimeTest('HTML y módulos usados por la entrega exigen revalidación de cach�
   const entry = await request('/estadisticas?entrega=0.10.0-demo');
   assert.equal(entry.status, 200);
   assert.match(entry.headers['cache-control'] ?? '', /no-cache/i);
-  assert.match(entry.body.toString('utf8'), /src="\/assets\/app\.js\?v=0\.10\.0-demo"/);
+  const expectedEntry = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8');
+  const appAsset = expectedEntry.match(/src="(\/assets\/app\.js\?v=[^"]+)"/)?.[1];
+  assert.ok(appAsset, 'el HTML fuente declara la versión del módulo principal');
+  assert.ok(entry.body.toString('utf8').includes(`src="${appAsset}"`));
 });
 
 runtimeTest('rutas profundas, 404 y cabeceras de seguridad permanecen intactos', async () => {
