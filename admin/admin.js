@@ -59,6 +59,10 @@ function render() {
   fill($('metadata-tournament'), current.tournaments, (event) => event.name, previousMetadataEvent);
   updateModality();
   const names = new Map(current.players.map((player) => [player.id, player.name]));
+  const selectedPlayer = $('player-edit').value;
+  fill($('player-edit'), [{ id: '', name: 'Nuevo jugador' }, ...current.players],
+    (player) => player.name, selectedPlayer);
+  updatePlayerForm();
   const events = new Map(current.tournaments.map((event) => [event.id, event]));
   const previousGame = $('game').value;
   const games = [...current.games].sort((a, b) => Number(Boolean(a.moves)) - Number(Boolean(b.moves)) ||
@@ -69,6 +73,12 @@ function render() {
 function updateModality() {
   const event = current?.tournaments.find((row) => row.id === $('metadata-tournament').value);
   $('modality').value = event?.modality ?? '';
+}
+
+function updatePlayerForm() {
+  const player = current?.players.find((row) => row.id === $('player-edit').value);
+  $('player-name').value = player?.name ?? '';
+  $('player-membership').value = player?.membership ?? 'socio';
 }
 
 function updateRoster() {
@@ -92,6 +102,7 @@ async function save(path, method, payload, messages = { saved: es.saved, pending
   const result = await api(path, method, { expectedSha: current.sha256, ...payload });
   await refresh();
   message(result.published ? messages.saved : messages.pending, result.published ? 'success' : 'warning');
+  return result;
 }
 
 $('login-form').addEventListener('submit', async (event) => {
@@ -105,6 +116,19 @@ $('login-form').addEventListener('submit', async (event) => {
 });
 
 $('tournament').addEventListener('change', updateRoster);
+$('player-edit').addEventListener('change', updatePlayerForm);
+$('player-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const id = $('player-edit').value;
+  try {
+    const result = await save(id ? `/api/players/${encodeURIComponent(id)}` : '/api/players',
+      id ? 'PUT' : 'POST',
+      { name: $('player-name').value, membership: $('player-membership').value },
+      { saved: 'Jugador guardado y publicado.', pending: 'Jugador guardado; publicación pendiente.' });
+    $('player-edit').value = result.id;
+    updatePlayerForm();
+  } catch (error) { message(error.message, 'error'); }
+});
 $('metadata-tournament').addEventListener('change', updateModality);
 $('modality-form').addEventListener('submit', async (event) => {
   event.preventDefault();

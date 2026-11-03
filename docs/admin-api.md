@@ -7,6 +7,8 @@ El servicio administrativo es **separado** del Nginx público. Solo debe exponer
 | `POST /api/login` | `{ "password": "…" }` | `200` y cookie `HttpOnly; SameSite=Strict` | Crea una sesión temporal. |
 | `POST /api/logout` | Cookie administrativa | `204` | Cierra la sesión. |
 | `GET /api/state` | Cookie administrativa | `200` con `sha256`, `players`, `tournaments`, `games` | Solo lectura del estado demo vigente. |
+| `POST /api/players` | Cookie, `Origin` local, `{ "expectedSha": "…", "name": "María Pérez", "membership": "socia" }` | `201` con `id`, `sha256` y `published` | Agrega un jugador sin alterar los registros previos; el slug se deriva del nombre y no se modifica después. |
+| `PUT /api/players/{id}` | Cookie, `Origin` local, mismo cuerpo | `200` con `id`, `sha256` y `published` | Corrige nombre y condición de un jugador existente conservando su identidad y URL. |
 | `POST /api/games` | Cookie, `Origin` local, `{ "expectedSha": "…", "game": {…}, "format"?: "manual"|"pgn", "text"?: "…" }` | `201` con `sha256` y `published` | Registra una partida y concilia su tabla. `text` omitido deja las jugadas pendientes. |
 | `PUT /api/games/{id}/moves` | Cookie, `Origin` local, `{ "expectedSha": "…", "format": "manual"|"pgn", "text": "…" }` | `200` con `sha256` y `published` | Agrega o reemplaza jugadas sin sumar otro resultado. |
 | `PUT /api/tournaments/{id}/modality` | Cookie, `Origin` local, `{ "expectedSha": "…", "modality": "20'+3" }` | `200` con `sha256` y `published` | Cambia solo la modalidad descriptiva de un torneo existente. Texto libre de una línea y hasta 80 caracteres; cadena vacía quita el campo. |

@@ -279,6 +279,8 @@ export async function applyDemoStore(path, incoming, hooks) {
   const target = await checkedPath(path);
   return lockStore(target, async () => {
     const { raw, value } = await readStore(target);
+    if (hooks?.expectedSha !== undefined && value.snapshot.sha256 !== hooks.expectedSha)
+      throw new Error('CAS rechazado: hash vigente obsoleto');
     const prepared = prepareDemoSnapshotImport(incoming, decodeDemoSnapshot(value.data));
     if (!prepared.journal.added.length) return value;
     const next = { ...value, data: prepared.afterSnapshot, snapshot: prepared.journal.after,

@@ -46,8 +46,18 @@
           </form>
         </section>
       </div>
+      <section class="panel modality-panel" aria-labelledby="players-title">
+        <p class="step">03 · Jugadores</p><h2 id="players-title">Cargar o editar jugador</h2>
+        <form id="player-form">
+          <label for="player-edit">Registro</label><select id="player-edit"><option value="">Nuevo jugador</option></select>
+          <label for="player-name">Nombre</label><input id="player-name" type="text" maxlength="120" autocomplete="off" required>
+          <label for="player-membership">Condición</label><select id="player-membership" required><option value="socio">Socio</option><option value="socia">Socia</option><option value="no_socio">No socio</option></select>
+          <p class="muted">La dirección del perfil permanece estable si se corrige el nombre. No se eliminan jugadores con historial.</p>
+          <button type="submit">Guardar jugador</button>
+        </form>
+      </section>
       <section class="panel modality-panel" aria-labelledby="modality-title">
-        <p class="step">03 · Torneo</p><h2 id="modality-title">Modalidad de torneo</h2>
+        <p class="step">04 · Torneo</p><h2 id="modality-title">Modalidad de torneo</h2>
         <form id="modality-form">
           <label for="metadata-tournament">Torneo</label><select id="metadata-tournament" required></select>
           <label for="modality">Modalidad</label><input id="modality" name="modality" type="text" maxlength="80" placeholder="20'+3" autocomplete="off">
