@@ -44,7 +44,8 @@ test('el perfil separa partidas, puntos, colores, Elo e historial oficial', () =
   assert.match(view.html, /Provisorio|Consolidado/);
   assert.match(view.html, /Victorias\/partidas/);
   assert.match(view.html, /Puntos\/partidas/);
-  assert.match(view.html, /G–E–P/);
+  assert.doesNotMatch(view.html, /G–E–P/);
+  assert.match(view.html, /24 partidas[\s\S]*?10 ganadas[\s\S]*?10 empatadas[\s\S]*?4 perdidas/);
   assert.match(view.html, /Con blancas/);
   assert.match(view.html, /Con negras/);
   assert.match(view.html, /Historial oficial de torneos/);
@@ -74,6 +75,10 @@ test('el balance por color muestra cantidades explícitas y barras compactas', (
   assert.match(css, /\.players-colors > div\s*\{[^}]*padding:\s*0\.75rem 1rem;/);
 });
 
+test('las derrotas usan rojo en la barra y su leyenda', () => {
+  assert.match(css, /\.players-results-loss\s*\{[^}]*background:\s*#b84f55;[^}]*fill:\s*#b84f55;/);
+});
+
 test('el perfil explica los tres grupos de Elo previo y mantiene las etiquetas traducibles', () => {
   const html = renderPlayerProfile(data, 'celia-montiel').html;
   assert.match(html, /Rendimiento por Elo previo del rival/);
@@ -81,7 +86,8 @@ test('el perfil explica los tres grupos de Elo previo y mantiene las etiquetas t
   assert.match(html, /Rival con Elo igual/);
   assert.match(html, /Rival con Elo inferior/);
   assert.match(html, /Solo partidas con Elo del Centro de estadísticas/);
-  assert.match(html, /G–E–P/);
+  assert.doesNotMatch(html, /G–E–P/);
+  assert.match(html, /Rival con Elo superior[\s\S]*?players-results-bar/);
   assert.match(renderPlayerProfile(data, 'celia-montiel', { ...playersEs,
     opponentEloTitle: 'Previous opponent rating comparison',
   }).html, /Previous opponent rating comparison/);

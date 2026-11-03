@@ -41,7 +41,8 @@ test('el locale inyectado atraviesa vistas, fechas, números y fallback español
   const pair = demo.players.slice(0, 2);
   const classic = renderRoute(route(routeHref('classic', { first: pair[0].slug, second: pair[1].slug })), demo, { locale: 'en-US', catalogs });
   assert.match(classic.html, /March 15, 2025/);
-  assert.match(classic.html, /G-E-P/);
+  assert.doesNotMatch(classic.html, /G-E-P/);
+  assert.match(classic.html, /players-results-bar/);
 });
 
 test('el contexto mantiene los mensajes inyectados en puzzle y replay interactivos', () => {

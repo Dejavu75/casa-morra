@@ -88,8 +88,8 @@ const pair = {
 test('4-1-3 usa 4,5/8=56 % de puntos desde el primer jugador y distingue colores', () => {
   const list = renderClassics(pair);
   const detail = renderClassic(pair, 'ana', 'bruno');
-  assert.match(list.html, /4-1-3/);
-  assert.match(detail.html, /4-1-3/);
+  assert.match(list.html, /4 ganadas[\s\S]*?1 empatada[\s\S]*?3 perdidas/);
+  assert.match(detail.html, /4 ganadas[\s\S]*?1 empatada[\s\S]*?3 perdidas/);
   assert.match(detail.html, /4,5 \/ 8/);
   assert.match(detail.html, /56 %/);
   assert.match(detail.html, /Blancas/);

@@ -48,18 +48,18 @@ test('igual rendimiento y muestra se resuelven por fecha e ID sin usar puntos of
     { ...fixture.games[2], id: 'z2', tournamentId: 'zeta' },
   );
   const html = renderPlayerProfile(fixture, 'ana').html;
-  assert.match(html, /Mejor evento al tablero[\s\S]*?Victoria doble[\s\S]*?100 % · 2 partidas/);
+  assert.match(html, /Mejor evento al tablero[\s\S]*?Victoria doble[\s\S]*?100 %[\s\S]*?2 partidas/);
   assert.doesNotMatch(html, /Mejor evento al tablero[\s\S]*?Victoria Zeta[\s\S]*?Peor evento/);
 });
 
 test('rivales favorables y adversos usan H2H al tablero, umbral 2 y perspectiva correcta', () => {
   const fixture = comparisonsFixture();
   const ana = renderPlayerProfile(fixture, 'ana').html;
-  assert.match(ana, /Balance favorable[\s\S]*?BEA[\s\S]*?3–0–0[\s\S]*?3 partidas/);
-  assert.match(ana, /Balance adverso[\s\S]*?CORA[\s\S]*?0–0–2[\s\S]*?2 partidas/);
+  assert.match(ana, /Balance favorable[\s\S]*?BEA[\s\S]*?3 partidas[\s\S]*?3 ganadas[\s\S]*?0 empatadas[\s\S]*?0 perdidas/);
+  assert.match(ana, /Balance adverso[\s\S]*?CORA[\s\S]*?2 partidas[\s\S]*?0 ganadas[\s\S]*?0 empatadas[\s\S]*?2 perdidas/);
   assert.doesNotMatch(ana, /Balance favorable[\s\S]*?DORA[\s\S]*?Balance adverso/);
   const bea = renderPlayerProfile(fixture, 'bea').html;
-  assert.match(bea, /Balance adverso[\s\S]*?ANA[\s\S]*?0–0–3[\s\S]*?3 partidas/);
+  assert.match(bea, /Balance adverso[\s\S]*?ANA[\s\S]*?3 partidas[\s\S]*?0 ganadas[\s\S]*?0 empatadas[\s\S]*?3 perdidas/);
   assert.match(bea, /Sin rival con balance favorable/);
 });
 

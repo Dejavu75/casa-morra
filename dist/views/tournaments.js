@@ -1,6 +1,7 @@
 import { routeHref } from '../router.js';
 import { competitiveEs, escapeHtml as h, formatDate, formatNumber, playerLink, playerName, safeRouteHref, typeName } from './common.js';
 import { hasDemoReplay } from './game.js';
+import { renderResults } from './results.js';
 
 const titleFor = (title) => `${title} — Centro de estadísticas`;
 const label = (messages, key) => messages?.[key] ?? competitiveEs[key];
@@ -50,12 +51,10 @@ function standingsTable(data, event, messages, locale) {
   if (!standings.length) return `<p>${h(label(messages, 'noStandings'))}</p>`;
   const rows = standings.map((entry) => {
     const personHtml = playerLink(data, entry.playerId, routeHref);
-    const resultCells = [entry.wins, entry.draws, entry.losses]
-      .map((value) => `<td>${value == null ? h(label(messages, 'noDetail')) : h(formatNumber(value, locale))}</td>`).join('');
-    return `<tr><td>${h(formatNumber(entry.rank, locale))}</td><th scope="row">${personHtml}</th><td>${h(formatNumber(entry.points, locale))}</td>${resultCells}</tr>`;
+    return `<tr><td>${h(formatNumber(entry.rank, locale))}</td><th scope="row">${personHtml}</th><td>${h(formatNumber(entry.points, locale))}</td><td>${renderResults(entry, messages, locale, competitiveEs)}</td></tr>`;
   }).join('');
   return `<p id="competition-scroll-hint" class="competition-scroll-hint">${h(label(messages, 'tableScrollHint'))}</p><div class="competition-table-wrap" role="region" aria-label="${h(label(messages, 'officialStanding'))} ${h(event.name)}" aria-describedby="competition-scroll-hint" tabindex="0"><table><caption>${h(label(messages, 'officialStanding'))} ${h(event.name)}</caption>
-    <thead><tr><th scope="col">${h(label(messages, 'rank'))}</th><th scope="col">${h(label(messages, 'player'))}</th><th scope="col">${h(label(messages, 'points'))}</th><th scope="col"><abbr title="${h(label(messages, 'wins'))}">${h(label(messages, 'winsShort'))}</abbr></th><th scope="col"><abbr title="${h(label(messages, 'draws'))}">${h(label(messages, 'drawsShort'))}</abbr></th><th scope="col"><abbr title="${h(label(messages, 'losses'))}">${h(label(messages, 'lossesShort'))}</abbr></th></tr></thead>
+    <thead><tr><th scope="col">${h(label(messages, 'rank'))}</th><th scope="col">${h(label(messages, 'player'))}</th><th scope="col">${h(label(messages, 'points'))}</th><th scope="col">${h(label(messages, 'results'))}</th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
 }
 

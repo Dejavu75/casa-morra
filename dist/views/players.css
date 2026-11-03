@@ -206,6 +206,32 @@
   line-height: 1.25;
 }
 
+.result-breakdown { width: min(100%, 22rem); }
+.result-breakdown > strong {
+  color: var(--heading);
+  display: block;
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+.players-page td .result-breakdown,
+.competition-page td .result-breakdown { min-width: 13rem; }
+.players-page td .players-results-key,
+.competition-page td .players-results-key { gap: 0.1rem 0.45rem; }
+.players-page td .players-results-key li,
+.competition-page td .players-results-key li { font-size: 0.76rem; }
+.classic-pair .result-breakdown,
+.classic-detail > .result-breakdown { margin-block: 0.65rem; }
+.classic-colors { margin-block: 1rem; }
+.classic-colors > li {
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  flex: 1 1 15rem;
+  padding: 0.75rem 1rem;
+}
+.classic-colors > li > strong { color: var(--heading); }
+.classic-colors > li p { margin-block: 0.5rem 0; }
+.classic-detail .players-results-key { gap: 0.2rem 0.8rem; }
+
 .players-results-bar {
   background: var(--line);
   border-radius: 999px;
@@ -218,7 +244,7 @@
 
 .players-results-win { background: var(--teal); fill: var(--teal); }
 .players-results-draw { background: #aeb4be; fill: #aeb4be; }
-.players-results-loss { background: var(--copper); fill: var(--copper); }
+.players-results-loss { background: #b84f55; fill: #b84f55; }
 
 .players-results-key {
   display: flex;

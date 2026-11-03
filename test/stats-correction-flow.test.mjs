@@ -58,9 +58,9 @@ function assertViews(data, expected) {
   assert.match(html[0], new RegExp(`${expected.annualDante.toString().replace('.', ',')} puntos`));
   assert.match(html[1], new RegExp(`${expected.dantePoints.toString().replace('.', ',')}`));
   assert.match(html[2], new RegExp(`${expected.annualDante.toString().replace('.', ',')}`));
-  assert.match(html[3], new RegExp(`${expected.danteWins}–`));
+  assert.match(html[3], new RegExp(`${expected.danteWins} ganada`));
   assert.match(html[4], new RegExp(`data-record-id="gamesWon"[\\s\\S]*?Dante Arce[\\s\\S]*?${expected.danteWins}`));
-  assert.match(html[5], new RegExp(`G-E-P: ${expected.classicWins}-${expected.classicDraws}-${expected.classicLosses}`));
+  assert.match(html[5], new RegExp(`${expected.classicWins} ganada[\\s\\S]*?${expected.classicDraws} empatada[\\s\\S]*?${expected.classicLosses} perdida`));
 }
 
 test('corrección estadística: CLI, exportación obsoleta, publicación y reversión concilian seis vistas', async (t) => {

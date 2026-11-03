@@ -216,7 +216,12 @@ function validateClassics(data, errors, deps) {
           !close(pair.record.scoreRate, 100 * points / raw.played))
           errors.push({ code: 'CLASSIC_RATES', detail });
         const html = deps.renderClassic(data, left.slug, right.slug).html;
-        if (!html.includes(`G-E-P: ${raw.wins}-${raw.draws}-${raw.losses}`) ||
+        const summary = html.split('<ul class="classic-colors">')[0];
+        const hasResults = summary.includes('<svg class="players-results-bar"') &&
+          summary.includes(`${raw.wins} ganada`) &&
+          summary.includes(`${raw.draws} empatada`) &&
+          summary.includes(`${raw.losses} perdida`);
+        if (!hasResults ||
           !html.includes(`Rendimiento por puntos: ${formatNumber(points)} / ${raw.played} (${Math.round(100 * points / raw.played)} %)`) ||
           !html.includes(`Porcentaje de victorias: ${Math.round(100 * raw.wins / raw.played)} %`))
           errors.push({ code: 'CLASSIC_VIEW', detail });

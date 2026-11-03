@@ -2,6 +2,7 @@ import { getClassics, getHeadToHead, getLeaderboards } from '../domain/statistic
 import { routeHref } from '../router.js';
 import { escapeHtml, formatDate, formatNumber, safeRouteHref } from './common.js';
 import { hasDemoReplay } from './game.js';
+import { renderResults } from './results.js';
 
 // Diccionario inyectable: el catálogo global puede incorporar estas claves al ampliar idiomas.
 export const recordsEs = Object.freeze({
@@ -18,10 +19,12 @@ export const recordsEs = Object.freeze({
   classicsIntro: 'Se muestran parejas con al menos cuatro partidas al tablero. Los descansos no cuentan.',
   noClassics: 'Todavía no hay enfrentamientos con cuatro partidas al tablero.',
   perspective: 'Resultados desde la perspectiva del primer jugador.',
-  scoreAbbrev: 'G-E-P',
+  scoreAbbrev: 'Resultados',
   pointsRate: 'Rendimiento por puntos', winsRate: 'Porcentaje de victorias',
   colorWhite: 'Blancas', colorBlack: 'Negras', games: 'Partidas al tablero',
   points: 'puntos', wins: 'ganadas', draws: 'empatadas', losses: 'perdidas',
+  winOne: 'ganada', drawOne: 'empatada', lossOne: 'perdida', noDetail: 'Sin detalle',
+  gamesSample: (played, locale = 'es-AR') => `${formatNumber(played, locale)} partida${played === 1 ? '' : 's'}`,
   date: 'Fecha', white: 'Blancas', black: 'Negras', result: 'Resultado', sheet: 'Jugadas',
   viewGame: 'Reproducir jugadas', noMoves: 'Sin jugadas registradas',
   movesUnavailable: 'Jugadas registradas; enlace no disponible',
@@ -100,10 +103,6 @@ export function renderStatistics(data, labels = recordsEs, locale = 'es-AR') {
   return { title: labels.statisticsTitle, html: `<section class="records-page"><header class="records-hero"><img class="records-brand-art" src="/assets/rook-large.png" width="128" height="128" alt="" aria-hidden="true"><p class="records-eyebrow">${e(labels.eyebrow)}</p><h1>${e(labels.statisticsTitle)}</h1><p class="records-lead">${e(labels.lead)}</p><ul class="records-totals" aria-label="${e(labels.totalsLabel)}">${totals}</ul><p class="records-demo">${e(labels.demo)}</p></header><nav class="records-index" aria-label="${e(labels.boardIndex)}"><h2>${e(labels.boardIndex)}</h2><div>${index}</div></nav><div class="records-grid">${sections}</div></section>` };
 }
 
-function scoreSummary(record, locale) {
-  return `${formatNumber(record.wins, locale)}-${formatNumber(record.draws, locale)}-${formatNumber(record.losses, locale)}`;
-}
-
 function scorePoints(record, locale) {
   return `${formatNumber(record.points, locale)} / ${formatNumber(record.played, locale)}`;
 }
@@ -120,13 +119,13 @@ export function renderClassics(data, labels = recordsEs, locale = 'es-AR') {
     const href = first && second && safeRouteHref(routeHref, 'classic', { first: first.slug, second: second.slug });
     const names = `${e(first?.name ?? pair.firstId)} — ${e(second?.name ?? pair.secondId)}`;
     const heading = href ? `<a href="${e(href)}">${names}</a>` : names;
-    return `<article class="classic-pair"><h2>${heading}</h2><p>${e(labels.perspective)}</p><p>${e(labels.scoreAbbrev)}: ${scoreSummary(pair.record, locale)} · ${e(labels.pointsRate)}: ${e(scorePoints(pair.record, locale))} (${e(scorePercent(pair.record, locale))})</p></article>`;
+    return `<article class="classic-pair"><h2>${heading}</h2><p>${e(labels.perspective)}</p>${renderResults(pair.record, labels, locale, recordsEs)}<p>${e(labels.pointsRate)}: ${e(scorePoints(pair.record, locale))} (${e(scorePercent(pair.record, locale))})</p></article>`;
   }).join('');
   return { title: labels.classicsTitle, html: `<section class="classics-page"><h1>${e(labels.classicsTitle)}</h1><p>${e(labels.classicsIntro)}</p>${cards || `<p>${e(labels.noClassics)}</p>`}</section>` };
 }
 
-function colorLine(label, record, locale) {
-  return `<li><strong>${e(label)}:</strong> ${scoreSummary(record, locale)} · ${e(scorePoints(record, locale))}</li>`;
+function colorLine(label, record, labels, locale) {
+  return `<li><strong>${e(label)}</strong>${renderResults(record, labels, locale, recordsEs)}<p>${e(labels.pointsRate)}: ${e(scorePoints(record, locale))}</p></li>`;
 }
 
 function gameRows(data, games, labels, locale) {
@@ -152,6 +151,6 @@ export function renderClassic(data, firstSlug, secondSlug, labels = recordsEs, l
   const rows = gameRows(data, pair.games, labels, locale);
   return {
     title,
-    html: `<article class="classic-detail"><h1>${e(title)}</h1><p>${e(labels.perspective)}</p><p><strong>${e(labels.scoreAbbrev)}: ${scoreSummary(record, locale)}</strong> · ${e(labels.pointsRate)}: ${e(scorePoints(record, locale))} (${e(scorePercent(record, locale))}) · ${e(labels.winsRate)}: ${e(`${formatNumber(Math.round(record.winRate), locale)} %`)}</p><ul>${colorLine(labels.colorWhite, pair.colors.white, locale)}${colorLine(labels.colorBlack, pair.colors.black, locale)}</ul><h2>${e(labels.games)}</h2><div class="classic-table-scroll" role="region" aria-label="${e(`${labels.games}: ${title}`)}" tabindex="0"><table><caption>${e(title)}: ${e(labels.games)}</caption><thead><tr><th scope="col">${e(labels.date)}</th><th scope="col">${e(labels.white)}</th><th scope="col">${e(labels.black)}</th><th scope="col">${e(labels.result)}</th><th scope="col">${e(labels.sheet)}</th></tr></thead><tbody>${rows}</tbody></table></div><a href="${routeHref('classics')}">${e(labels.backClassics)}</a></article>`,
+    html: `<article class="classic-detail"><h1>${e(title)}</h1><p>${e(labels.perspective)}</p>${renderResults(record, labels, locale, recordsEs)}<p>${e(labels.pointsRate)}: ${e(scorePoints(record, locale))} (${e(scorePercent(record, locale))}) · ${e(labels.winsRate)}: ${e(`${formatNumber(Math.round(record.winRate), locale)} %`)}</p><ul class="classic-colors">${colorLine(labels.colorWhite, pair.colors.white, labels, locale)}${colorLine(labels.colorBlack, pair.colors.black, labels, locale)}</ul><h2>${e(labels.games)}</h2><div class="classic-table-scroll" role="region" aria-label="${e(`${labels.games}: ${title}`)}" tabindex="0"><table><caption>${e(title)}: ${e(labels.games)}</caption><thead><tr><th scope="col">${e(labels.date)}</th><th scope="col">${e(labels.white)}</th><th scope="col">${e(labels.black)}</th><th scope="col">${e(labels.result)}</th><th scope="col">${e(labels.sheet)}</th></tr></thead><tbody>${rows}</tbody></table></div><a href="${routeHref('classics')}">${e(labels.backClassics)}</a></article>`,
   };
 }

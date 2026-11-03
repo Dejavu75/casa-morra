@@ -1,6 +1,7 @@
 import { routeHref } from '../router.js';
 import { getHeadToHead, getPlayerProfile } from '../domain/statistics.js?v=0.9.3-demo';
 import { escapeHtml as h, formatDate, formatNumber, playerName, safeRouteHref } from './common.js';
+import { renderResults } from './results.js';
 
 // Las etiquetas se inyectan en vez de mezclarse con datos o lógica de cálculo.
 export const playersEs = Object.freeze({
@@ -19,7 +20,7 @@ export const playersEs = Object.freeze({
   accountNotice: 'Este perfil muestra datos ficticios; no representa una cuenta iniciada.',
   elo: 'Elo del Centro de estadísticas', peakElo: 'Mejor Elo', provisional: 'Provisorio',
   consolidated: 'Consolidado', eloMethod: 'Elo interno de demostración; no es Elo FIDE. Provisorio con menos de 10 partidas elegibles.',
-  games: 'Partidas al tablero', record: 'G–E–P', winsRate: 'Victorias/partidas',
+  games: 'Partidas al tablero', record: 'Resultados', results: 'Resultados', winsRate: 'Victorias/partidas',
   scoreRate: 'Puntos/partidas', rateExplanation: 'Victorias/partidas cuenta solo triunfos. Puntos/partidas también incorpora medio punto por empate.',
   white: 'Con blancas', black: 'Con negras', resultsByColor: 'Resultados por color',
   opponentEloTitle: 'Rendimiento por Elo previo del rival',
@@ -62,28 +63,8 @@ function playerUrl(player) {
   return player && safeRouteHref(routeHref, 'player', { slug: player.slug });
 }
 
-function recordText(record, locale) {
-  return `${formatNumber(record.wins, locale)}–${formatNumber(record.draws, locale)}–${formatNumber(record.losses, locale)}`;
-}
-
 function colorResults(record, colorKey, messages, locale) {
-  const results = [
-    ['wins', 'winOne', 'players-results-win', record.wins],
-    ['draws', 'drawOne', 'players-results-draw', record.draws],
-    ['losses', 'lossOne', 'players-results-loss', record.losses],
-  ];
-  const percentageOf = (count) => (count / (record.played || 1) * 100).toFixed(2);
-  let offset = 0;
-  const bar = results.map(([, , className, count]) => {
-    const segment = `<rect class="${className}" x="${percentageOf(offset)}" width="${percentageOf(count)}" height="8"></rect>`;
-    offset += count;
-    return segment;
-  }).join('');
-  const legend = results.map(([plural, singular, className, count]) =>
-    `<li><span class="${className}" aria-hidden="true"></span>${h(formatNumber(count, locale))} ${h(count === 1 ? message(messages, singular) : message(messages, plural).toLocaleLowerCase(locale))}</li>`).join('');
-  return `<div><dt>${h(message(messages, colorKey))}</dt><dd><strong>${h(message(messages, 'gamesSample')(record.played, locale))}</strong>
-    <svg class="players-results-bar" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false">${bar}</svg>
-    <ul class="players-results-key">${legend}</ul></dd></div>`;
+  return `<div><dt>${h(message(messages, colorKey))}</dt><dd>${renderResults(record, messages, locale, playersEs)}</dd></div>`;
 }
 
 function percentage(value, messages, locale) {
@@ -137,13 +118,11 @@ function officialHistory(data, profile, messages, locale) {
     const url = event && safeRouteHref(routeHref, 'tournament', { slug: event.slug });
     const eventName = h(event?.name ?? standing.tournamentId);
     const linked = url ? `<a href="${h(url)}">${eventName}</a>` : eventName;
-    const results = [standing.wins, standing.draws, standing.losses].map((value) =>
-      `<td>${value == null ? h(message(messages, 'noDetail')) : h(formatNumber(value, locale))}</td>`).join('');
-    return `<tr><th scope="row">${linked}</th><td>${h(formatNumber(standing.rank, locale))}</td><td>${h(formatDate(standing.date, locale))}</td><td>${h(formatNumber(standing.points, locale))}</td>${results}</tr>`;
+    return `<tr><th scope="row">${linked}</th><td>${h(formatNumber(standing.rank, locale))}</td><td>${h(formatDate(standing.date, locale))}</td><td>${h(formatNumber(standing.points, locale))}</td><td>${renderResults(standing, messages, locale, playersEs)}</td></tr>`;
   }).join('');
   return `<p id="players-official-scroll-hint" class="players-scroll-hint">${h(message(messages, 'scrollHint'))}</p><div class="players-table-wrap" role="region" aria-labelledby="players-official" aria-describedby="players-official-scroll-hint" tabindex="0"><table><caption>${h(message(messages, 'officialHistory'))}</caption><thead><tr>
     <th scope="col">${h(message(messages, 'tournament'))}</th><th scope="col">${h(message(messages, 'rank'))}</th><th scope="col">${h(message(messages, 'date'))}</th><th scope="col">${h(message(messages, 'points'))}</th>
-    <th scope="col"><abbr title="${h(message(messages, 'wins'))}">${h(message(messages, 'winsShort'))}</abbr></th><th scope="col"><abbr title="${h(message(messages, 'draws'))}">${h(message(messages, 'drawsShort'))}</abbr></th><th scope="col"><abbr title="${h(message(messages, 'losses'))}">${h(message(messages, 'lossesShort'))}</abbr></th>
+    <th scope="col">${h(message(messages, 'results'))}</th>
     </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
@@ -180,7 +159,7 @@ function opponentEloSummary(profile, messages, locale) {
   const items = [['higher', 'higherElo'], ['equal', 'equalElo'], ['lower', 'lowerElo']]
     .map(([band, key]) => {
       const record = profile.opponentElo[band];
-      return `<div><dt>${h(message(messages, key))}</dt><dd>${h(message(messages, 'gamesSample')(record.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(record, locale))} · ${h(message(messages, 'scoreRate'))}: ${h(percentage(record.scoreRate, messages, locale))}</dd></div>`;
+      return `<div><dt>${h(message(messages, key))}</dt><dd>${renderResults(record, messages, locale, playersEs)}<small>${h(message(messages, 'scoreRate'))}: ${h(percentage(record.scoreRate, messages, locale))}</small></dd></div>`;
     }).join('');
   return `<section aria-labelledby="players-opponent-elo"><h2 id="players-opponent-elo">${h(message(messages, 'opponentEloTitle'))}</h2>
     <p>${h(message(messages, 'opponentEloRule'))}</p><dl class="players-colors">${items}</dl></section>`;
@@ -218,7 +197,7 @@ function eventComparison(row, messages, locale) {
   const name = h(row.event.name);
   const linked = href ? `<a href="${h(href)}">${name}</a>` : name;
   const rate = 100 * (row.wins + row.draws * 0.5) / row.played;
-  return `<p>${linked} · ${h(formatNumber(rate, locale))} % · ${h(message(messages, 'gamesSample')(row.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(row, locale))}</p>`;
+  return `<p>${linked} · ${h(formatNumber(rate, locale))} %</p>${renderResults(row, messages, locale, playersEs)}`;
 }
 
 function rivalCandidates(data, playerId) {
@@ -230,7 +209,7 @@ function rivalCandidates(data, playerId) {
 
 function rivalComparison(row, emptyKey, messages, locale) {
   if (!row) return `<p>${h(message(messages, emptyKey))}</p>`;
-  return `<p>${h(row.person.name)} · ${h(message(messages, 'record'))} ${h(recordText(row, locale))} · ${h(message(messages, 'gamesSample')(row.played, locale))}</p>`;
+  return `<p>${h(row.person.name)}</p>${renderResults(row, messages, locale, playersEs)}`;
 }
 
 function personalComparisons(data, playerId, messages, locale) {
@@ -267,7 +246,7 @@ export function renderPlayerProfile(data, slug, messages = playersEs, locale = '
     <section class="players-summary" aria-label="${h(message(messages, 'profile'))}">
       <div><h2>${h(message(messages, 'elo'))}</h2><p><strong>${h(formatNumber(Math.round(profile.elo.rating), locale))}</strong> · ${h(profile.elo.provisional ? message(messages, 'provisional') : message(messages, 'consolidated'))}</p>
         <p>${h(message(messages, 'peakElo'))}: ${h(formatNumber(Math.round(profile.elo.peak), locale))}</p><small>${h(message(messages, 'eloMethod'))}</small></div>
-      <div><h2>${h(message(messages, 'games'))}</h2><p>${h(formatNumber(count.played, locale))} · ${h(message(messages, 'record'))} ${h(recordText(count, locale))}</p>
+      <div><h2>${h(message(messages, 'games'))}</h2>${renderResults(count, messages, locale, playersEs)}
         <p>${h(message(messages, 'winsRate'))}: ${h(percentage(count.winRate, messages, locale))}</p><p>${h(message(messages, 'scoreRate'))}: ${h(percentage(count.scoreRate, messages, locale))}</p><small>${h(message(messages, 'rateExplanation'))}</small></div>
     </section><section aria-labelledby="players-colors"><h2 id="players-colors">${h(message(messages, 'resultsByColor'))}</h2>
       <dl class="players-colors">${colorResults(colors.white, 'white', messages, locale)}${colorResults(colors.black, 'black', messages, locale)}</dl></section>
