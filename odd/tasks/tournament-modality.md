@@ -10,7 +10,7 @@ Rama: `feat/ux-audit-fixes`. Entrega: `ask-on-risk`; un cambio cohesivo con prue
 
 ## Tasks
 
-- T1 [S1-S2] inline — esquema opcional, render público, endpoint/admin, pruebas y documentación; implementación y comprobaciones completas, RDD aprobado y acusado, commit pendiente. Ruta: inline; un comportamiento cohesivo sin unidades independientes para escritor paralelo. Riesgo: ítems 1, 3 y 4 por contrato persistido y CAS.
+- T1 [S1-S2] inline — esquema opcional, render público, endpoint/admin, pruebas y documentación; completo en `d27e825`, RDD aprobado y acusado. Ruta: inline; un comportamiento cohesivo sin unidades independientes para escritor paralelo. Riesgo: ítems 1, 3 y 4 por contrato persistido y CAS.
 - T2 [S1-S2] odd-verify — comprobación independiente de invariantes; verificado (13/13 pruebas en copia aislada, sin bloqueadores); sin commit propio.
 
 ## Log
@@ -21,3 +21,4 @@ Rama: `feat/ux-audit-fixes`. Entrega: `ask-on-risk`; un cambio cohesivo con prue
 - L3: RED observado: 0/3 pruebas nuevas; GREEN: 4/4. Suite completa: 274 aprobadas, 0 fallidas, 5 omitidas; `npm run verify:data` válido. Verificador independiente: S1/S2 aprobadas, hash canónico previo preservado, rechazo no mutante, auditoría y rollback comprobados. Contención simultánea devuelve 500 en el comportamiento base de partidas también; se registra como observación previa, no se amplía el alcance.
 - L4: Despliegue local con `docker compose -p casa-morra` de web y admin; HTTP 8088 y 8090 responden, hashes de almacén y exportación permanecen intactos. No se cargó una modalidad de ejemplo sin asignación elegida por el usuario. Cambios anteriores de compactación permanecían sin commit en la misma rama y comparten `admin/index.html` y `dist/views/common.js`; el commit de este trabajo sigue pendiente para no mezclar unidades sin preparar el índice selectivamente.
 - L5: Revisión RDD del candidato `sha256:7210d5ca19053364893e6c707210e0c26eeac1a65f841d14529a62e01790eb2c` aprobada por cuatro lentes y acusada con `gentle-ai.review-acknowledged/v1`, lineage `review-a727e62171165c43`. El `invalid_request` intermedio se debió a un identificador `repository-context` mal copiado en el resumen, no a un defecto confirmado del proveedor. La entrega Git sigue separada del acuse.
+- L6: Unidad consolidada en `d27e825` junto a la compactación visual y previsualización pública preexistentes en la rama; excepción de tamaño autorizada previamente por el usuario. Suite repetida: 274 aprobadas, 0 fallidas, 5 omitidas; prueba de modalidad 4/4. Espejo Engram pendiente: el transporte devolvió `Transport closed`.
