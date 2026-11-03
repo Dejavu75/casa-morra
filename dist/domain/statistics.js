@@ -1,4 +1,4 @@
-// Reglas demo propias de Casa Morra: funciones puras, sin DOM ni almacenamiento.
+// Reglas demo propias del Centro de estadísticas: funciones puras, sin DOM ni almacenamiento.
 const INITIAL_ELO = 1400;
 const ELO_K = 20;
 

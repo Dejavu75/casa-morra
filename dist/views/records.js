@@ -7,7 +7,7 @@ import { hasDemoReplay } from './game.js';
 export const recordsEs = Object.freeze({
   statisticsTitle: 'Estadísticas y récords', classicsTitle: 'Clásicos',
   missingClassic: 'Clásico no encontrado',
-  demo: 'Cifras ficticias de demostración. Las reglas de cálculo son propias de Casa Morra.',
+  demo: 'Cifras ficticias de demostración. Las reglas de cálculo son propias del Centro de estadísticas.',
   eyebrow: 'Observatorio de ajedrez',
   lead: 'Una lectura clara de cada partida, torneo y trayectoria registrada.',
   playersCount: 'Jugadores', tournamentsCount: 'Torneos', gamesCount: 'Partidas al tablero',
@@ -97,7 +97,7 @@ export function renderStatistics(data, labels = recordsEs, locale = 'es-AR') {
     [data.games.length, labels.gamesCount],
   ].map(([value, label]) => `<li><strong>${e(formatNumber(value, locale))}</strong><span>${e(label)}</span></li>`).join('');
   const index = boards.map((board, position) => `<a href="#record-${e(board.id)}"><span>${e(formatNumber(position + 1, locale).padStart(2, '0'))}</span>${e(labels.boardTitles?.[board.id] ?? board.label)}</a>`).join('');
-  return { title: labels.statisticsTitle, html: `<section class="records-page"><header class="records-hero"><p class="records-eyebrow">${e(labels.eyebrow)}</p><h1>${e(labels.statisticsTitle)}</h1><p class="records-lead">${e(labels.lead)}</p><ul class="records-totals" aria-label="${e(labels.totalsLabel)}">${totals}</ul><p class="records-demo">${e(labels.demo)}</p></header><nav class="records-index" aria-label="${e(labels.boardIndex)}"><h2>${e(labels.boardIndex)}</h2><div>${index}</div></nav><div class="records-grid">${sections}</div></section>` };
+  return { title: labels.statisticsTitle, html: `<section class="records-page"><header class="records-hero"><img class="records-brand-art" src="/assets/rook-large.png" width="128" height="128" alt="" aria-hidden="true"><p class="records-eyebrow">${e(labels.eyebrow)}</p><h1>${e(labels.statisticsTitle)}</h1><p class="records-lead">${e(labels.lead)}</p><ul class="records-totals" aria-label="${e(labels.totalsLabel)}">${totals}</ul><p class="records-demo">${e(labels.demo)}</p></header><nav class="records-index" aria-label="${e(labels.boardIndex)}"><h2>${e(labels.boardIndex)}</h2><div>${index}</div></nav><div class="records-grid">${sections}</div></section>` };
 }
 
 function scoreSummary(record, locale) {

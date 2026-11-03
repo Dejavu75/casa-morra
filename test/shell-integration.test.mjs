@@ -24,7 +24,7 @@ test('el nombre accesible de la marca conserva todo el texto visible en orden', 
   const html = await read('index.html');
   const brand = html.match(/<a class="brand"[^>]*aria-label="([^"]+)"[^>]*>([\s\S]*?)<\/a>/);
   assert.ok(brand, 'la marca debe ser un enlace con nombre accesible');
-  const visible = brand[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().replace(/CM\s+\./, 'CM.');
+  const visible = brand[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   assert.ok(brand[1].includes(visible), `el nombre accesible debe incluir «${visible}»`);
   assert.equal(es['brand.home'], brand[1], 'el catálogo activo no debe restaurar un nombre diferente');
 });

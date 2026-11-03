@@ -10,7 +10,7 @@ const FIXED_PIECES = Object.freeze({
 });
 
 export const puzzleEs = Object.freeze({
-  eyebrow: 'Problema de demostración · Composición original de Casa Morra',
+  eyebrow: 'Problema de demostración · Composición original del Centro de estadísticas',
   title: 'Mate en una',
   instructions: 'Juegan las blancas. Escriba la casilla de origen y la de destino en formato UCI, sin espacios. Se puede usar íntegramente con el teclado.',
   boardInitial: 'Posición inicial: juegan las blancas',

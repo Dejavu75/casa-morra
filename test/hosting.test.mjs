@@ -66,9 +66,9 @@ test('los recursos de la entrega se revalidan y sus cambios tienen URL nueva', (
   const html = read('dist/index.html');
   const app = read('dist/assets/app.js');
   assert.match(nginx, /add_header\s+Cache-Control\s+no-cache\s+always;/);
-  assert.match(html, /href="\/assets\/site\.css\?v=0\.10\.0-demo"/);
-  assert.match(html, /src="\/assets\/app\.js\?v=0\.10\.0-demo"/);
-  assert.match(app, /from '\.\.\/views\/records\.js\?v=0\.9\.3-demo'/);
+  assert.match(html, /href="\/assets\/site\.css\?v=0\.10\.1-brand"/);
+  assert.match(html, /src="\/assets\/app\.js\?v=0\.10\.1-brand"/);
+  assert.match(app, /from '\.\.\/views\/records\.js\?v=0\.10\.1-brand'/);
 });
 
 test('el contexto Docker excluye archivos internos y credenciales locales', () => {

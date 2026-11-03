@@ -10,7 +10,7 @@ const featured = games.find((game) => game.moves?.length);
 
 test('la portada calcula poblaciones demo y presenta actividad y enlaces reales', () => {
   const view = renderHome(data, { today: '2026-10-07' });
-  assert.equal(view.title, 'Casa Morra — Ajedrez de demostración');
+  assert.equal(view.title, 'Centro de estadísticas — Ajedrez de demostración');
   assert.match(view.html, /<strong>6<\/strong> jugadores/);
   assert.match(view.html, /<strong>6<\/strong> torneos/);
   assert.match(view.html, /<strong>70<\/strong> partidas/);
@@ -29,9 +29,9 @@ test('institución, noticias, clases y socios usan contenido ficticio sin accion
   assert.match(renderAbout(data).html, /Esta casa de demostración/);
   assert.match(renderNewsList(data).html, /Cuaderno para explorar aperturas/i);
   assert.match(renderNewsDetail(data, 'cuaderno-de-aperturas').html, /contenido ficticio de demostración/);
-  assert.equal(renderNewsDetail(data, 'inexistente').title, 'Novedad no encontrada — Casa Morra');
+  assert.equal(renderNewsDetail(data, 'inexistente').title, 'Novedad no encontrada — Centro de estadísticas');
   const classes = renderClasses(data).html;
-  assert.match(classes, /<caption>Clases ficticias de Casa Morra<\/caption>/);
+  assert.match(classes, /<caption>Clases ficticias del Centro de estadísticas<\/caption>/);
   assert.match(classes, /Primeras decisiones/);
   assert.match(classes, /Sala imaginaria/);
   assert.doesNotMatch(classes, /<form|wa\.me|mailto:/);
@@ -42,7 +42,7 @@ test('institución, noticias, clases y socios usan contenido ficticio sin accion
 
 test('la tabla de clases recibe foco con un nombre accesible', async () => {
   const html = renderClasses(data).html;
-  assert.match(html, /<div class="content-table-wrap" role="region" aria-label="Clases ficticias de Casa Morra" tabindex="0"><table>/);
+  assert.match(html, /<div class="content-table-wrap" role="region" aria-label="Clases ficticias del Centro de estadísticas" tabindex="0"><table>/);
   assert.match(renderClasses(data, { classesCaption: 'Chess lessons' }).html, /aria-label="Chess lessons"/);
   assert.doesNotMatch(renderClasses({ ...data, editorial: { ...editorial, classes: [] } }).html, /content-table-wrap/);
   const styles = await readFile(new URL('../dist/views/content.css', import.meta.url), 'utf8');

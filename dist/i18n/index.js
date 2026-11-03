@@ -1,18 +1,18 @@
 // El español es el idioma publicado. Otros catálogos pueden añadirse sin cambiar las vistas.
 import { competitiveEs } from '../views/common.js';
-import { playersEs } from '../views/players.js?v=0.9.3-demo';
-import { recordsEs } from '../views/records.js?v=0.9.3-demo';
-import { homeEs } from '../views/home.js?v=0.9.3-demo';
-import { editorialEs } from '../views/editorial.js?v=0.9.3-demo';
+import { playersEs } from '../views/players.js?v=0.10.1-brand';
+import { recordsEs } from '../views/records.js?v=0.10.1-brand';
+import { homeEs } from '../views/home.js?v=0.10.1-brand';
+import { editorialEs } from '../views/editorial.js?v=0.10.1-brand';
 import { gameEs } from '../views/game.js';
 import { eloEs } from '../views/elo.js';
 import { encyclopediaEs, comparisonEs } from '../views/encyclopedia.js';
 import { puzzleEs } from '../views/puzzle.js';
 
 export const es = Object.freeze({
-  'meta.description': 'Casa Morra: estadísticas y récords de ajedrez con datos de demostración.',
+  'meta.description': 'Centro de estadísticas: estadísticas y récords de ajedrez con datos de demostración.',
   'skip.content': 'Saltar al contenido',
-  'brand.home': 'CM. Casa Morra, ir al inicio',
+  'brand.home': 'Centro de estadísticas, ir al inicio',
   'nav.menu': 'Menú',
   'nav.main': 'Navegación principal',
   'nav.home': 'Inicio',

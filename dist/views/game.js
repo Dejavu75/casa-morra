@@ -90,7 +90,7 @@ function renderReplay(game, ply, messages) {
 
 export function renderGame(data, id, { ply = 0 } = {}, messages = gameEs, locale = 'es-AR') {
   const game = data.games?.find((item) => item.id === id);
-  if (!game) return { title: `${msg(messages, 'missing')} — Casa Morra`, html: `<div class="content-page container"><h1>${h(msg(messages, 'missing'))}</h1><p>${h(msg(messages, 'missingText'))}</p><a href="${h(routeHref('tournaments'))}">${h(msg(messages, 'back'))}</a></div>` };
+  if (!game) return { title: `${msg(messages, 'missing')} — Centro de estadísticas`, html: `<div class="content-page container"><h1>${h(msg(messages, 'missing'))}</h1><p>${h(msg(messages, 'missingText'))}</p><a href="${h(routeHref('tournaments'))}">${h(msg(messages, 'back'))}</a></div>` };
   const event = data.tournaments?.find((item) => item.id === game.tournamentId);
   const result = ({ '1-0': '1–0', '0-1': '0–1', '1/2-1/2': '½–½' })[game.result] ?? game.result;
   let replay = `<p>${h(msg(messages, 'noMoves'))}</p>`;
@@ -106,7 +106,7 @@ export function renderGame(data, id, { ply = 0 } = {}, messages = gameEs, locale
       replay = `<p class="content-error">${h(msg(messages, 'invalid'))}</p>`;
     }
   }
-  return { title: `${msg(messages, 'game')} — Casa Morra`, html: `<div class="content-page content-game container"><p class="content-eyebrow">${h(msg(messages, 'demo'))}</p>
+  return { title: `${msg(messages, 'game')} — Centro de estadísticas`, html: `<div class="content-page content-game container"><p class="content-eyebrow">${h(msg(messages, 'demo'))}</p>
     <h1>${h(msg(messages, 'game'))}: ${h(playerName(data, game.whiteId))} — ${h(playerName(data, game.blackId))}</h1>
     <p>${event ? `${h(event.name)} · ` : ''}${h(formatDate(game.date, locale))} · ${h(msg(messages, 'round'))} ${h(game.round)} · ${h(result)}</p>${replay}</div>` };
 }

@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 const read = (path) => readFile(new URL(`../dist/${path}`, import.meta.url), 'utf8');
 
-test('Casa Morra usa azul marino y blanco sin el verde anterior', async () => {
+test('el Centro de estadísticas usa azul marino y blanco sin el verde anterior', async () => {
   const css = await read('assets/stats.css');
   assert.match(css, /--indigo:\s*#1d2a5f/i);
   assert.match(css, /--indigo-deep:\s*#17213a/i);

@@ -157,25 +157,19 @@ h2 em {
 }
 
 .brand-mark {
-  display: grid;
-  place-items: center;
+  display: block;
   width: 43px;
   height: 43px;
   border: 1px solid rgba(245, 240, 230, 0.6);
-  font-family: var(--font-serif);
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.12em;
-}
-
-.brand-point,
-.footer-brand span {
-  color: #dbad82;
+  padding: 2px;
+  background: var(--paper);
+  object-fit: contain;
+  flex: none;
 }
 
 .brand-name {
   font-family: var(--font-serif);
-  font-size: 1.45rem;
+  font-size: 1.25rem;
   letter-spacing: -0.035em;
 }
 
@@ -340,7 +334,10 @@ h2 em {
   }
 
   .brand-name {
-    font-size: 1.25rem;
+    max-width: 12ch;
+    white-space: normal;
+    font-size: 1rem;
+    line-height: 1.05;
   }
 
   .footer-inner {

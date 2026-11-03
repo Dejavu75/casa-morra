@@ -10,7 +10,7 @@ const data = { players, tournaments, games, byes, titles, seasons };
 
 test('el listado ofrece filtros GET compartibles y distingue sus resultados del total', () => {
   const view = renderTournamentList(data, { tipo: 'interno', temporada: '25-26' });
-  assert.equal(view.title, 'Torneos — Casa Morra');
+  assert.equal(view.title, 'Torneos — Centro de estadísticas');
   assert.match(view.html, /<form[^>]*method="get"[^>]*action="\/torneos"/);
   assert.match(view.html, /name="tipo"/);
   assert.match(view.html, /name="temporada"/);
@@ -65,7 +65,7 @@ test('el detalle conserva tabla oficial, resultados y byes sin inventar jugadas'
   assert.match(patio.html, /href="\/partidas\/patio-2025-r1-p1"/);
   assert.match(patio.html, /Ver secuencia UCI/);
   assert.doesNotMatch(patio.html, /visor en preparación/);
-  assert.equal(renderTournamentDetail(data, 'desconocido').title, 'Torneo no encontrado — Casa Morra');
+  assert.equal(renderTournamentDetail(data, 'desconocido').title, 'Torneo no encontrado — Centro de estadísticas');
 });
 
 test('las tablas de torneo y anual explican el desplazamiento horizontal y aceptan foco', () => {
@@ -83,7 +83,7 @@ test('la anual muestra puestos compartidos, movimiento y exclusiones de la demo'
   assert.match(view.html, /No se incluyen torneos marcados como no elegibles/);
   assert.match(view.html, /la tabla no otorga cupos ni inscripciones/);
   assert.match(view.html, /href="\/torneos\/ronda-de-invierno-2025"/);
-  assert.equal(renderAnnual(data, 'no-existe').title, 'Temporada no encontrada — Casa Morra');
+  assert.equal(renderAnnual(data, 'no-existe').title, 'Temporada no encontrada — Centro de estadísticas');
 
   const tied = {
     players: [{ id: 'ana', name: 'Ana' }, { id: 'bea', name: 'Bea' }, { id: 'cesar', name: 'César' }],
@@ -118,7 +118,7 @@ test('las etiquetas competitivas admiten otro catálogo sin cambiar los datos de
     tournamentIntro: 'Demo events', eventTypes: { interno: 'Internal' },
   };
   const view = renderTournamentList(data, { tipo: 'interno' }, labels);
-  assert.equal(view.title, 'Events — Casa Morra');
+  assert.equal(view.title, 'Events — Centro de estadísticas');
   assert.match(view.html, /<h1>Events<\/h1>/);
   assert.match(view.html, /<p>Demo events<\/p>/);
   assert.match(view.html, /Internal/);

@@ -17,13 +17,13 @@ export const playersEs = Object.freeze({
   back: '← Jugadores', member: 'Socio · dato demo', memberFemale: 'Socia · dato demo',
   nonMember: 'No socio · dato demo', membershipUnknown: 'Estado de socio no disponible · dato demo',
   accountNotice: 'Este perfil muestra datos ficticios; no representa una cuenta iniciada.',
-  elo: 'Elo de Casa Morra', peakElo: 'Mejor Elo', provisional: 'Provisorio',
+  elo: 'Elo del Centro de estadísticas', peakElo: 'Mejor Elo', provisional: 'Provisorio',
   consolidated: 'Consolidado', eloMethod: 'Elo interno de demostración; no es Elo FIDE. Provisorio con menos de 10 partidas elegibles.',
   games: 'Partidas al tablero', record: 'G–E–P', winsRate: 'Victorias/partidas',
   scoreRate: 'Puntos/partidas', rateExplanation: 'Victorias/partidas cuenta solo triunfos. Puntos/partidas también incorpora medio punto por empate.',
   white: 'Con blancas', black: 'Con negras', resultsByColor: 'Resultados por color',
   opponentEloTitle: 'Rendimiento por Elo previo del rival',
-  opponentEloRule: 'Solo partidas con Elo de Casa Morra; se compara el Elo de ambos jugadores antes de cada partida. Los descansos y torneos sin Elo quedan excluidos. Rendimiento = (G + 0,5 × E) / partidas del grupo.',
+  opponentEloRule: 'Solo partidas con Elo del Centro de estadísticas; se compara el Elo de ambos jugadores antes de cada partida. Los descansos y torneos sin Elo quedan excluidos. Rendimiento = (G + 0,5 × E) / partidas del grupo.',
   higherElo: 'Rival con Elo superior', equalElo: 'Rival con Elo igual', lowerElo: 'Rival con Elo inferior',
   officialHistory: 'Historial oficial de torneos', officialHistoryInfo: 'La clasificación oficial conserva puntos y puesto aun cuando no haya resultados individuales.',
   scrollHint: 'Desplace la tabla con las flechas del teclado o con un gesto horizontal para ver todas las columnas.',
@@ -42,7 +42,7 @@ export const playersEs = Object.freeze({
   titleCount: 'Títulos registrados',
   careerExplanation: 'Puntos y puestos provienen de tablas oficiales, aun sin partidas detalladas. Las rachas cuentan solo partidas al tablero; los byes no son partidas. Los títulos se registran por separado y no se infieren de un puesto.',
   comparisons: 'Comparativos propios de demostración',
-  comparisonsRule: 'Reglas propias de Casa Morra, no una réplica de otro club. Rendimiento = (G + 0,5 × E) / partidas al tablero; no se suman descansos ni tablas sin partidas. Ante igual rendimiento prevalece la mayor muestra, luego la fecha más antigua y el ID ascendente del torneo.',
+  comparisonsRule: 'Reglas propias del Centro de estadísticas, no una réplica de otro club. Rendimiento = (G + 0,5 × E) / partidas al tablero; no se suman descansos ni tablas sin partidas. Ante igual rendimiento prevalece la mayor muestra, luego la fecha más antigua y el ID ascendente del torneo.',
   bestEvent: 'Mejor evento al tablero', worstEvent: 'Peor evento al tablero',
   noBoardEvents: 'Sin eventos con partidas al tablero.',
   favorable: 'Balance favorable', adverse: 'Balance adverso',
@@ -53,7 +53,7 @@ export const playersEs = Object.freeze({
 });
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const titleFor = (title) => `${title} — Casa Morra`;
+const titleFor = (title) => `${title} — Centro de estadísticas`;
 const message = (messages, key) => messages?.[key] ?? playersEs[key];
 const normalize = (value, locale) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase(locale);
 const initial = (name, locale) => normalize(name, locale).trim().charAt(0).toUpperCase();

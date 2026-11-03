@@ -62,13 +62,14 @@ export function createAdminServer({ password, store, output }) {
       const assets = { '/': ['../admin/index.html', 'text/html; charset=utf-8'],
         '/admin.js': ['../admin/admin.js', 'text/javascript; charset=utf-8'],
         '/tournament-eligibility.js': ['../admin/tournament-eligibility.js', 'text/javascript; charset=utf-8'],
-        '/admin.css': ['../admin/admin.css', 'text/css; charset=utf-8'] };
+        '/admin.css': ['../admin/admin.css', 'text/css; charset=utf-8'],
+        '/rook-small.png': ['../dist/assets/rook-small.png', 'image/png'] };
       if (request.method === 'GET' && Object.hasOwn(assets, path)) {
         const [file, type] = assets[path];
         const source = await readFile(new URL(file, import.meta.url));
         response.writeHead(200, { 'content-type': type, 'cache-control': 'no-store',
           'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer',
-          'content-security-policy': "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'" });
+          'content-security-policy': "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'" });
         response.end(source); return;
       }
       if (request.method === 'POST' && path === '/api/login') {

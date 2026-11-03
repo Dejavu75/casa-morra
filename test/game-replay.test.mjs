@@ -41,7 +41,7 @@ test('partidas sin planilla, ausentes o incompatibles no exponen controles de re
   const noMoves = games.find((game) => !game.moves);
   assert.match(renderGame(data, noMoves.id).html, /Sin jugadas registradas/);
   assert.doesNotMatch(renderGame(data, noMoves.id).html, /data-replay-action/);
-  assert.equal(renderGame(data, 'inexistente').title, 'Partida no encontrada — Casa Morra');
+  assert.equal(renderGame(data, 'inexistente').title, 'Partida no encontrada — Centro de estadísticas');
   const invalid = { ...data, games: [{ ...featured, id: 'invalid', moves: ['a3a4'] }] };
   assert.equal(hasDemoReplay(invalid.games[0]), false);
   assert.match(renderGame(invalid, 'invalid').html, /La secuencia no se puede reproducir/);

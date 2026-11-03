@@ -12,7 +12,7 @@ function movementText(value, messages, locale) {
 
 export function renderAnnual(data, seasonId, messages = competitiveEs, locale = 'es-AR') {
   const season = data.seasons?.find((item) => item.id === seasonId);
-  if (!season) return { title: `${label(messages, 'notFoundSeason')} — Casa Morra`,
+  if (!season) return { title: `${label(messages, 'notFoundSeason')} — Centro de estadísticas`,
     html: `<div class="competition-page container"><h1>${h(label(messages, 'notFoundSeason'))}</h1><p>${h(label(messages, 'unknownSeason'))}</p><a href="${h(routeHref('tournaments'))}">${h(label(messages, 'viewTournaments'))}</a></div>` };
   const annual = getAnnualStandings(data, seasonId);
   const seasonLinks = (data.seasons ?? []).map((item) => {
@@ -30,7 +30,7 @@ export function renderAnnual(data, seasonId, messages = competitiveEs, locale = 
     const href = safeRouteHref(routeHref, 'tournament', { slug: event.slug });
     return `<li>${href ? `<a href="${h(href)}">${h(event.name)}</a>` : h(event.name)} <span>· ${h(formatDate(event.date, locale))}</span></li>`;
   }).join('');
-  return { title: `${label(messages, 'annual')} ${season.label} — Casa Morra`,
+  return { title: `${label(messages, 'annual')} ${season.label} — Centro de estadísticas`,
     html: `<div class="competition-page container"><p class="competition-eyebrow">${h(label(messages, 'demo'))}</p>
       <h1>${h(label(messages, 'annual'))} ${h(season.label)}</h1><p>${h(label(messages, 'annualIntro'))}</p>
       <nav aria-label="${h(label(messages, 'seasons'))}"><ul class="competition-season-links">${seasonLinks}</ul></nav>

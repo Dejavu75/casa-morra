@@ -1,6 +1,6 @@
 # Carga de partidas (primera etapa)
 
-Casa Morra conserva las partidas en el almacén demo local. Una partida tiene una identidad única (`id`), un torneo, dos jugadores, fecha, ronda y resultado. Las jugadas pueden ser `null`: esto permite registrar el resultado antes de recibir la planilla.
+El Centro de estadísticas conserva las partidas en el almacén demo local. Una partida tiene una identidad única (`id`), un torneo, dos jugadores, fecha, ronda y resultado. Las jugadas pueden ser `null`: esto permite registrar el resultado antes de recibir la planilla.
 
 El módulo `scripts/admin-game.mjs` admite dos operaciones:
 

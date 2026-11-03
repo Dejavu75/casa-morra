@@ -1,4 +1,4 @@
-# Reglamento de demostración de Casa Morra
+# Reglamento de demostración del Centro de estadísticas
 
 **Estado:** reglas propias de la muestra, versión `demo-1`. Definen cómo interpretar `dist/data/demo.js`; **no** describen fórmulas internas de otro club. El núcleo de cálculo es `dist/domain/statistics.js` y las vistas públicas consumen sus resultados.
 
@@ -77,6 +77,6 @@ Ejecutar `node --test` para la suite y `npm run verify:data` para obtener la con
 ## Pendiente, no simulado
 
 - No existe panel, importador, edición de resultados, emparejamiento automático ni inscripción real.
-- No se conoce un desempate interno de otro club. Casa Morra conserva `rank` y `order` oficiales explícitos; no deduce desempates ocultos.
+- No se conoce un desempate interno de otro club. El Centro de estadísticas conserva `rank` y `order` oficiales explícitos; no deduce desempates ocultos.
 - Los colores y resultados se verifican por integridad de fixture; la **legalidad ajedrecística general** de jugadas arbitrarias no está implementada ni se presenta como comprobada.
 - Un cambio a estas reglas requiere versión nueva, pruebas de ejemplo y conciliación de todas las vistas afectadas.

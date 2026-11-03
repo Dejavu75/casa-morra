@@ -9,7 +9,7 @@ const data = { players, tournaments, games, byes, titles, seasons };
 
 test('el directorio distingue el padrón completo de los resultados y permite búsqueda GET', () => {
   const view = renderPlayersDirectory(data, { q: 'Lujan' });
-  assert.equal(view.title, 'Jugadores — Casa Morra');
+  assert.equal(view.title, 'Jugadores — Centro de estadísticas');
   assert.match(view.html, /<form[^>]*method="get"[^>]*action="\/jugadores"/);
   assert.match(view.html, /name="q"[^>]*value="Lujan"/);
   assert.match(view.html, /1 coincidencia de 6 jugadores/);

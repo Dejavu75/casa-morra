@@ -1,6 +1,6 @@
 # Contrato de snapshot de datos de demostración
 
-Este contrato prepara una futura migración local de **datos ficticios originales** de Casa Morra. No crea una base de datos, API, cuenta, inscripción ni operación de usuarios. Tampoco importa información del sitio usado como referencia.
+Este contrato prepara una futura migración local de **datos ficticios originales** del Centro de estadísticas. No crea una base de datos, API, cuenta, inscripción ni operación de usuarios. Tampoco importa información del sitio usado como referencia.
 
 ## Sobre y versión
 

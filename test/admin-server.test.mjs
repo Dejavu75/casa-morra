@@ -28,9 +28,15 @@ test('solo una sesión admin puede crear y completar una partida; exporta sin do
   const page = await fetch(origin);
   assert.equal(page.status, 200);
   assert.match(page.headers.get('content-security-policy'), /default-src 'none'/);
+  assert.match(page.headers.get('content-security-policy'), /img-src 'self'/);
   const html = await page.text();
-  assert.match(html, /Cargar partida|Casa Morra/);
+  assert.match(html, /Cargar partida|Centro de estadísticas/);
   assert.match(html, /id="tournament" aria-describedby="tournament-note"/);
+  const logo = await fetch(`${origin}/rook-small.png`);
+  assert.equal(logo.status, 200);
+  assert.match(logo.headers.get('content-type'), /image\/png/);
+  assert.deepEqual([...new Uint8Array(await logo.arrayBuffer()).subarray(0, 8)],
+    [137, 80, 78, 71, 13, 10, 26, 10]);
   const eligibilityModule = await fetch(`${origin}/tournament-eligibility.js`);
   assert.equal(eligibilityModule.status, 200);
   assert.match(eligibilityModule.headers.get('content-type'), /text\/javascript/);

@@ -17,7 +17,7 @@ function contrast(foreground, background) {
 test('el shell conserva contenido útil sin JavaScript y reserva la altura visible antes de hidratar', async () => {
   const html = await read('index.html');
   const css = await read('assets/site.css');
-  assert.match(html, /<main id="contenido">[\s\S]*<h1 id="fallback-title">Casa Morra<\/h1>/);
+  assert.match(html, /<main id="contenido">[\s\S]*<h1 id="fallback-title">Centro de estadísticas<\/h1>/);
   assert.match(html, /Datos de demostración\. Para consultar las estadísticas se necesita JavaScript\./);
   assert.match(css, /#contenido\s*\{[^}]*min-height:\s*100vh;[^}]*min-height:\s*100svh;/);
 });

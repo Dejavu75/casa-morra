@@ -19,7 +19,7 @@ test('menú y pie responden a pantalla estrecha sin estilos de vistas', () => {
   const css = readFileSync(cssPath, 'utf8');
   assert.match(css, /\.site-footer\s*\{[\s\S]*background: var\(--indigo-deep\)/);
   assert.match(css, /@media \(max-width: 1180px\)\s*\{[\s\S]*\.site-nav\.is-open\s*\{\s*display: flex/);
-  assert.match(css, /@media \(max-width: 560px\)\s*\{[\s\S]*\.brand-name\s*\{[\s\S]*font-size: 1\.25rem/);
+  assert.match(css, /@media \(max-width: 560px\)\s*\{[\s\S]*\.brand-name\s*\{[\s\S]*font-size: 1rem/);
 });
 
 test('la navegación estadística abre un menú en pantallas estrechas', () => {

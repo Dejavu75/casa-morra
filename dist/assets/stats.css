@@ -59,6 +59,21 @@
 }
 
 .stats-only .records-hero > * { position: relative; z-index: 1; }
+.stats-only .records-brand-art { display: none; }
+@media (min-width: 900px) {
+  .stats-only .records-brand-art {
+    display: block;
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 8rem;
+    height: 8rem;
+    padding: .4rem;
+    border-radius: .25rem;
+    background: #f7f8fb;
+    object-fit: contain;
+  }
+}
 .stats-only .records-eyebrow {
   margin: 0 0 .6rem;
   color: #efc991;

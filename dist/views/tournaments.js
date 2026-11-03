@@ -2,7 +2,7 @@ import { routeHref } from '../router.js';
 import { competitiveEs, escapeHtml as h, formatDate, formatNumber, playerLink, playerName, safeRouteHref, typeName } from './common.js';
 import { hasDemoReplay } from './game.js';
 
-const titleFor = (title) => `${title} — Casa Morra`;
+const titleFor = (title) => `${title} — Centro de estadísticas`;
 const label = (messages, key) => messages?.[key] ?? competitiveEs[key];
 
 function tournamentUrl(event) {

@@ -37,9 +37,9 @@ test('la pista de desplazamiento del perfil se puede traducir', () => {
 test('el perfil separa partidas, puntos, colores, Elo e historial oficial', () => {
   const profile = getPlayerProfile(data, 'celia-montiel');
   const view = renderPlayerProfile(data, 'celia-montiel');
-  assert.equal(view.title, 'Celia Montiel — Casa Morra');
+  assert.equal(view.title, 'Celia Montiel — Centro de estadísticas');
   assert.match(view.html, /Datos ficticios de demostración/);
-  assert.match(view.html, /Elo de Casa Morra/);
+  assert.match(view.html, /Elo del Centro de estadísticas/);
   assert.match(view.html, /Mejor Elo/);
   assert.match(view.html, /Provisorio|Consolidado/);
   assert.match(view.html, /Victorias\/partidas/);
@@ -80,7 +80,7 @@ test('el perfil explica los tres grupos de Elo previo y mantiene las etiquetas t
   assert.match(html, /Rival con Elo superior/);
   assert.match(html, /Rival con Elo igual/);
   assert.match(html, /Rival con Elo inferior/);
-  assert.match(html, /Solo partidas con Elo de Casa Morra/);
+  assert.match(html, /Solo partidas con Elo del Centro de estadísticas/);
   assert.match(html, /G–E–P/);
   assert.match(renderPlayerProfile(data, 'celia-montiel', { ...playersEs,
     opponentEloTitle: 'Previous opponent rating comparison',

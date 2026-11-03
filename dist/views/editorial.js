@@ -2,11 +2,11 @@ import { routeHref } from '../router.js';
 import { escapeHtml as h, formatDate, safeRouteHref } from './common.js';
 
 export const editorialEs = Object.freeze({
-  demo: 'Datos ficticios de demostración', about: 'Sobre Casa Morra',
+  demo: 'Datos ficticios de demostración', about: 'Sobre el Centro de estadísticas',
   news: 'Novedades', newsMissing: 'Novedad no encontrada',
   newsEmpty: 'No hay novedades publicadas en esta muestra.',
   newsBack: '← Todas las novedades',
-  classes: 'Clases', classesCaption: 'Clases ficticias de Casa Morra',
+  classes: 'Clases', classesCaption: 'Clases ficticias del Centro de estadísticas',
   classesEmpty: 'No hay clases programadas en esta muestra.',
   day: 'Día', hour: 'Horario', class: 'Clase', teacher: 'Docente', level: 'Nivel', place: 'Lugar',
   membership: 'Socios', noApplications: 'No se reciben solicitudes ni pagos. Este sitio funciona solo como demostración pública.',
@@ -14,7 +14,7 @@ export const editorialEs = Object.freeze({
   newsUnknown: 'El identificador no coincide con ninguna novedad publicada.',
   goNews: 'Ver novedades', aboutNote: 'Este contenido no describe una institución real.',
   history: 'Historia de la muestra', explore: 'Explorar', viewTournaments: 'Ver torneos',
-  galleryTitle: 'Galería de Casa Morra', galleryIntro: 'Escenas imaginarias creadas para la demostración.',
+  galleryTitle: 'Galería del Centro de estadísticas', galleryIntro: 'Escenas imaginarias creadas para la demostración.',
   galleryStudyAlt: 'Ilustración de un tablero de ajedrez y un cuaderno sobre una mesa de estudio',
   galleryRoomAlt: 'Ilustración de una sala vacía con dos tableros listos para analizar partidas',
   galleryStudyCaption: 'La mesa de estudio: un lugar imaginado para revisar variantes.',
@@ -22,7 +22,7 @@ export const editorialEs = Object.freeze({
 });
 
 const msg = (messages, key) => messages?.[key] ?? editorialEs[key];
-const shell = (heading, content, messages) => ({ title: `${heading} — Casa Morra`,
+const shell = (heading, content, messages) => ({ title: `${heading} — Centro de estadísticas`,
   html: `<div class="content-page container"><p class="content-eyebrow">${h(msg(messages, 'demo'))}</p><h1>${h(heading)}</h1>${content}</div>` });
 
 export function renderAbout(data, messages = editorialEs) {

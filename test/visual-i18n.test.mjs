@@ -19,7 +19,7 @@ test('el catálogo español cubre etiquetas visibles y conserva un fallback', as
   assert.equal(translate('nav.home', 'en'), es['nav.home']);
   assert.equal(translate('not.available', 'en'), 'not.available');
   assert.match(html, /<html lang="es">/);
-  assert.match(html, /<title>Estadísticas y récords — Casa Morra/);
+  assert.match(html, /<title>Estadísticas y récords — Centro de estadísticas/);
   assert.match(html, /Datos de demostración/);
 });
 

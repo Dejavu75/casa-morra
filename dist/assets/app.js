@@ -1,11 +1,11 @@
 import * as demo from '../data/demo.js';
-import { applyTranslations, catalogs as defaultCatalogs, resolveLocale, resolveViewMessages, translate } from '../i18n/index.js?v=0.9.3-demo';
+import { applyTranslations, catalogs as defaultCatalogs, resolveLocale, resolveViewMessages, translate } from '../i18n/index.js?v=0.10.1-brand';
 import { parseRoute, routeHref } from '../router.js';
 import { renderTournamentList, renderTournamentDetail } from '../views/tournaments.js';
-import { renderAnnual } from '../views/annual.js?v=0.9.3-demo';
-import { renderPlayersDirectory, renderPlayerProfile } from '../views/players.js?v=0.9.3-demo';
-import { renderStatistics, renderClassics, renderClassic } from '../views/records.js?v=0.9.3-demo';
-import { renderAbout, renderNewsList, renderNewsDetail, renderClasses, renderMembership } from '../views/editorial.js?v=0.9.3-demo';
+import { renderAnnual } from '../views/annual.js?v=0.10.1-brand';
+import { renderPlayersDirectory, renderPlayerProfile } from '../views/players.js?v=0.10.1-brand';
+import { renderStatistics, renderClassics, renderClassic } from '../views/records.js?v=0.10.1-brand';
+import { renderAbout, renderNewsList, renderNewsDetail, renderClasses, renderMembership } from '../views/editorial.js?v=0.10.1-brand';
 import { renderGame, attachGameReplay } from '../views/game.js';
 import { renderElo } from '../views/elo.js';
 import { renderEncyclopedia, renderComparison } from '../views/encyclopedia.js';
@@ -155,7 +155,7 @@ function startApp() {
     detachReplay();
     detachReplay = () => {};
     main.innerHTML = page.html;
-    document.title = page.title.includes('Casa Morra') ? page.title : `${page.title} — Casa Morra`;
+    document.title = page.title.includes('Centro de estadísticas') ? page.title : `${page.title} — Centro de estadísticas`;
     const active = route.name === 'home' ? 'statistics' : navGroup[route.name] ?? route.name;
     for (const link of navigation?.querySelectorAll('[data-route-name]') ?? []) {
       if (link.dataset.routeName === active) link.setAttribute('aria-current', 'page');

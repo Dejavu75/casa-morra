@@ -32,19 +32,18 @@ body { margin: 0; min-height: 100vh; }
 }
 .brand { display: inline-flex; align-items: center; gap: .9rem; white-space: nowrap; }
 .brand-mark {
-  display: grid;
-  place-items: center;
+  display: block;
   width: 43px;
   height: 43px;
   border: 1px solid rgba(245, 240, 230, .6);
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -.12em;
+  padding: 2px;
+  background: var(--paper);
+  object-fit: contain;
+  flex: none;
 }
 .brand-name {
   font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.45rem;
+  font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -.035em;
 }
@@ -139,4 +138,5 @@ footer { font-size: .82rem; color: var(--muted); padding: 2.5rem 0; }
 @media (max-width: 460px) {
   .pair { grid-template-columns: 1fr; }
   .badge { font-size: .7rem; }
+  .brand-name { max-width: 12ch; white-space: normal; font-size: 1rem; line-height: 1.05; }
 }

@@ -5,7 +5,7 @@ import { hasDemoReplay } from './game.js';
 import { puzzleEs, renderPuzzle } from './puzzle.js';
 
 export const homeEs = Object.freeze({
-  title: 'Casa Morra — Ajedrez de demostración', eyebrow: 'Datos ficticios de demostración',
+  title: 'Centro de estadísticas — Ajedrez de demostración', eyebrow: 'Datos ficticios de demostración',
   headline: 'Toda gran partida empieza con una idea.',
   intro: 'Historias, torneos y partidas de una casa de ajedrez imaginaria. Cada cifra procede de la misma muestra ficticia.',
   players: 'jugadores', tournaments: 'torneos', games: 'partidas',
@@ -14,8 +14,8 @@ export const homeEs = Object.freeze({
   allAnnual: 'Ver tabla anual', news: 'Novedades', allNews: 'Ver todas las novedades',
   featured: 'Partida destacada', featuredEmpty: 'No hay jugadas reproducibles en esta muestra.',
   replay: 'Reproducir secuencia disponible', replayNote: 'Secuencia UCI ilustrativa; no es un PGN completo.',
-  about: 'Conocer Casa Morra', classes: 'Ver clases ficticias', membership: 'Información para socios',
-  explore: 'Explorar Casa Morra', totals: 'Cifras de demostración', points: 'puntos',
+  about: 'Conocer el Centro de estadísticas', classes: 'Ver clases ficticias', membership: 'Información para socios',
+  explore: 'Explorar el Centro de estadísticas', totals: 'Cifras de demostración', points: 'puntos',
   noNews: 'Sin novedades publicadas en esta muestra.', projectInfo: 'Información del proyecto',
   galleryTitle: 'Imágenes para imaginar la próxima partida', galleryChoose: 'Elegir una escena',
   galleryStudy: 'Mesa de estudio', galleryRoom: 'Sala de análisis',

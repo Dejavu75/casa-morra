@@ -8,19 +8,20 @@ const artifacts = new Map([
   ['dist/assets/hero-ajedrez.png', '17FD0E195F23D3E83E463880899EBE99ACC931B7E948F1CFCD4E33774614E11F'],
   ['dist/assets/galeria-estudio.png', '6F4879D1DC92FBD354C14DB0F7D971EFB4538C99889CBD661C3F619801103429'],
   ['dist/assets/galeria-sala.png', '7AA62F2D1CA5233418E1C95B66F9DBB75375740A6B844AC677F996FE0D9FB36D'],
-  ['dist/favicon.svg', '92459378F3582F9A4A094E5DC05010CA4174C75D18BBAA6115A0DBC3376F0F75'],
+  ['dist/assets/rook-small.png', '3C4FB4AB0D81D66C3D0C3E813E5AB60FEEED7C6C6DF6B84D435D8CD986044646'],
+  ['dist/assets/rook-large.png', 'EE717F51758E45024DE62EF5CF6B620286E07027712B89E435E24AEE42FE78EF'],
 ]);
 
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex').toUpperCase();
 
 function canonicalBytes(path, bytes) {
-  if (path !== 'dist/data/demo.js' && path !== 'dist/favicon.svg') return bytes;
+  if (path !== 'dist/data/demo.js') return bytes;
   const text = bytes.toString('utf8');
   assert.doesNotMatch(text, /\r(?!\n)/, `${path} tiene retornos de carro aislados`);
   return Buffer.from(text.replace(/\r\n/g, '\n'), 'utf8');
 }
 
-test('la procedencia publicada identifica exactamente los cinco artefactos demo', async () => {
+test('la procedencia publicada identifica exactamente los seis artefactos demo', async () => {
   const document = await readFile('docs/procedencia-demo.md', 'utf8');
   const rows = [...document.matchAll(/^\| `([^`]+)` \| `([A-F0-9]{64})` \|/gm)];
   assert.equal(rows.length, artifacts.size);
@@ -32,7 +33,7 @@ test('la procedencia publicada identifica exactamente los cinco artefactos demo'
     const bytes = await readFile(path);
     assert.equal(sha256(canonicalBytes(path, bytes)), expected,
       `el archivo cambió para ${path}`);
-    if (path === 'dist/data/demo.js' || path === 'dist/favicon.svg') {
+    if (path === 'dist/data/demo.js') {
       const lf = canonicalBytes(path, bytes).toString('utf8');
       assert.equal(sha256(canonicalBytes(path, Buffer.from(lf.replace(/\n/g, '\r\n')))), expected,
         'el hash canónico cambia en un checkout CRLF');
