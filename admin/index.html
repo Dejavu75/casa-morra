@@ -12,7 +12,7 @@
 <body>
   <header class="masthead"><div class="shell"><span class="brand"><img class="brand-mark" src="/rook-large.png?v=0.10.3-rgb" width="43" height="43" alt="" aria-hidden="true"><span class="brand-name">Centro de estadísticas</span></span><span class="badge">Administración local</span></div></header>
   <main class="shell">
-    <div class="intro"><p class="eyebrow">Estadísticas · Ajedrez</p><h1>Administración</h1><p>Registrá resultados, completá jugadas y describí la modalidad de cada torneo.</p></div>
+    <div class="intro"><p class="eyebrow">Estadísticas · Ajedrez</p><h1>Administración</h1><p>Cargá y corregí jugadores, torneos, partidas y estadísticas.</p></div>
     <p id="status" class="status" role="status" aria-live="polite"></p>
     <section id="login-panel" class="panel" aria-labelledby="login-title">
       <h2 id="login-title">Acceso administrativo</h2>
@@ -46,8 +46,18 @@
           </form>
         </section>
       </div>
+      <section class="panel modality-panel" aria-labelledby="correct-game-title">
+        <p class="step">03 · Corrección</p><h2 id="correct-game-title">Corregir resultado de una partida</h2>
+        <form id="correct-game-form">
+          <label for="correct-game">Partida</label><select id="correct-game" required></select>
+          <div class="pair"><div><label for="correct-round">Ronda</label><input id="correct-round" type="number" min="1" step="1" required></div><div><label for="correct-date">Fecha</label><input id="correct-date" type="date" required></div></div>
+          <label for="correct-result">Resultado</label><select id="correct-result" required><option value="1-0">1–0 · ganan blancas</option><option value="0-1">0–1 · ganan negras</option><option value="1/2-1/2">½–½ · empate</option></select>
+          <p class="muted">La partida conserva su identidad y sus jugadas. La tabla se ajusta automáticamente; no se eliminan registros.</p>
+          <button type="submit">Guardar corrección</button>
+        </form>
+      </section>
       <section class="panel modality-panel" aria-labelledby="players-title">
-        <p class="step">03 · Jugadores</p><h2 id="players-title">Cargar o editar jugador</h2>
+        <p class="step">04 · Jugadores</p><h2 id="players-title">Cargar o editar jugador</h2>
         <form id="player-form">
           <label for="player-edit">Registro</label><select id="player-edit"><option value="">Nuevo jugador</option></select>
           <label for="player-name">Nombre</label><input id="player-name" type="text" maxlength="120" autocomplete="off" required>
@@ -81,6 +91,40 @@
           </form>
         </section>
       </div>
+      <div class="grid catalog-grid">
+        <section class="panel" aria-labelledby="bye-title">
+          <p class="step">07 · Descansos</p><h2 id="bye-title">Cargar o editar descanso</h2>
+          <form id="bye-form">
+            <label for="bye-edit">Registro</label><select id="bye-edit"><option value="">Nuevo descanso</option></select>
+            <label for="bye-tournament">Torneo</label><select id="bye-tournament" required></select>
+            <label for="bye-player">Jugador</label><select id="bye-player" required></select>
+            <div class="pair"><div><label for="bye-round">Ronda</label><input id="bye-round" type="number" min="1" step="1" required></div><div><label for="bye-points">Puntos</label><input id="bye-points" type="number" min="0" max="1" step="0.5" required></div></div>
+            <p class="muted">El descanso suma puntos oficiales, pero no cuenta como partida ganada o empatada.</p>
+            <button type="submit">Guardar descanso</button>
+          </form>
+        </section>
+        <section class="panel" aria-labelledby="title-title">
+          <p class="step">08 · Distinciones</p><h2 id="title-title">Cargar o editar título</h2>
+          <form id="title-form">
+            <label for="title-edit">Registro</label><select id="title-edit"><option value="">Nuevo título</option></select>
+            <label for="title-player">Jugador</label><select id="title-player" required></select>
+            <label for="title-tournament">Torneo</label><select id="title-tournament" required></select>
+            <label for="title-kind">Clase</label><input id="title-kind" type="text" maxlength="120" placeholder="campeonato-club" required>
+            <label for="title-label">Nombre</label><input id="title-label" type="text" maxlength="120" required>
+            <button type="submit">Guardar título</button>
+          </form>
+        </section>
+      </div>
+      <section class="panel modality-panel" aria-labelledby="standing-title">
+        <p class="step">09 · Tabla histórica</p><h2 id="standing-title">Corregir puesto y puntos</h2>
+        <form id="standing-form">
+          <label for="standing-tournament">Torneo sin partidas registradas</label><select id="standing-tournament" required></select>
+          <label for="standing-player">Participante</label><select id="standing-player" required></select>
+          <div class="pair"><div><label for="standing-points">Puntos</label><input id="standing-points" type="number" min="0" step="0.5" required></div><div><label for="standing-rank">Puesto</label><input id="standing-rank" type="number" min="1" step="1" required></div></div>
+          <p class="muted">Solo corrige tablas históricas sin partidas individuales. No inventa resultados ni altera otras filas.</p>
+          <button type="submit">Guardar tabla</button>
+        </form>
+      </section>
       <section class="panel modality-panel" aria-labelledby="modality-title">
         <p class="step">06 · Torneo</p><h2 id="modality-title">Modalidad de torneo</h2>
         <form id="modality-form">

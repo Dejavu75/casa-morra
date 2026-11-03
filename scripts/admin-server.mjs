@@ -10,6 +10,8 @@ import { updateTournamentModality } from './admin-tournament.mjs';
 import { createAdminPlayer, updateAdminPlayer } from './admin-player.mjs';
 import { createAdminSeason, updateAdminSeason, createAdminTournament,
   updateAdminTournament } from './admin-catalog.mjs';
+import { createAdminBye, updateAdminBye, createAdminTitle, updateAdminTitle,
+  updateHistoricalStanding } from './admin-records.mjs';
 
 const SESSION_AGE_MS = 8 * 60 * 60 * 1000;
 const MAX_BODY_BYTES = 200_000;
@@ -114,6 +116,28 @@ export function createAdminServer({ password, store, output }) {
         const published = await publishPublicDemo(store, output);
         json(response, 200, { sha256: published.source.sha256, published: true }); return;
       }
+      const byeRoute = path.match(/^\/api\/byes\/([a-zA-Z0-9_-]+)$/);
+      const titleRoute = path.match(/^\/api\/titles\/([a-zA-Z0-9_-]+)$/);
+      const standingRoute = path.match(/^\/api\/tournaments\/([a-zA-Z0-9_-]+)\/standings\/([a-zA-Z0-9_-]+)$/);
+      if (request.method === 'POST' && (path === '/api/byes' || path === '/api/titles') ||
+          request.method === 'PUT' && (byeRoute || titleRoute || standingRoute)) {
+        const input = await bodyJson(request);
+        const result = path === '/api/byes' ? await createAdminBye(store, input) :
+          byeRoute ? await updateAdminBye(store, byeRoute[1], input) :
+            path === '/api/titles' ? await createAdminTitle(store, input) :
+              titleRoute ? await updateAdminTitle(store, titleRoute[1], input) :
+                await updateHistoricalStanding(store, standingRoute[1], standingRoute[2], input);
+        try {
+          await publishPublicDemo(store, output);
+          json(response, request.method === 'POST' ? 201 : 200,
+            { id: result.id, sha256: result.state.snapshot.sha256, published: true });
+        } catch {
+          json(response, 202, { id: result.id, sha256: result.state.snapshot.sha256,
+            saved: true, published: false,
+            warning: 'Registro guardado, publicación pendiente. Use Reintentar publicación.' });
+        }
+        return;
+      }
       const seasonRoute = path.match(/^\/api\/seasons\/([a-zA-Z0-9_-]+)$/);
       const tournamentRoute = path.match(/^\/api\/tournaments\/([a-zA-Z0-9_-]+)$/);
       if (request.method === 'POST' && (path === '/api/seasons' || path === '/api/tournaments') ||
@@ -169,10 +193,12 @@ export function createAdminServer({ password, store, output }) {
         input = await bodyJson(request);
         operation = { mode: 'create', game: input?.game, format: input?.format, text: input?.text };
       } else {
-        const match = path.match(/^\/api\/games\/([a-zA-Z0-9_-]+)\/moves$/);
+        const match = path.match(/^\/api\/games\/([a-zA-Z0-9_-]+)(\/moves)?$/);
         if (request.method === 'PUT' && match) {
           input = await bodyJson(request);
-          operation = { mode: 'complete', gameId: match[1], format: input?.format, text: input?.text };
+          operation = match[2] ? { mode: 'complete', gameId: match[1], format: input?.format,
+            text: input?.text } : { mode: 'correct', gameId: match[1], result: input?.result,
+            date: input?.date, round: input?.round };
         }
       }
       if (!operation) { json(response, 404, { error: 'Ruta inexistente' }); return; }

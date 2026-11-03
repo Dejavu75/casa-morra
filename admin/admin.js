@@ -77,6 +77,70 @@ function render() {
   const games = [...current.games].sort((a, b) => Number(Boolean(a.moves)) - Number(Boolean(b.moves)) ||
     b.date.localeCompare(a.date));
   fill($('game'), games, (game) => es.game(game, names, events.get(game.tournamentId)), previousGame);
+  const previousCorrection = $('correct-game').value;
+  fill($('correct-game'), games, (game) => es.game(game, names, events.get(game.tournamentId)), previousCorrection);
+  updateCorrectionForm();
+  fill($('bye-edit'), [{ id: '', label: 'Nuevo descanso' }, ...current.byes.map((bye) => ({
+    ...bye, label: `${names.get(bye.playerId)} · ${events.get(bye.tournamentId)?.name ?? bye.tournamentId} · ronda ${bye.round}` }))],
+  (bye) => bye.label, $('bye-edit').value);
+  fill($('bye-tournament'), writableTournaments(current.tournaments), (event) => event.name, $('bye-tournament').value);
+  updateByeForm();
+  fill($('title-edit'), [{ id: '', label: 'Nuevo título' }, ...current.titles],
+    (title) => title.label, $('title-edit').value);
+  fill($('title-player'), current.players, (player) => player.name, $('title-player').value);
+  fill($('title-tournament'), current.tournaments, (event) => event.name, $('title-tournament').value);
+  updateTitleForm();
+  const historical = current.tournaments.filter((event) =>
+    !current.games.some((game) => game.tournamentId === event.id));
+  fill($('standing-tournament'), historical, (event) => event.name, $('standing-tournament').value);
+  updateStandingPlayers();
+}
+
+function updateCorrectionForm() {
+  const game = current?.games.find((row) => row.id === $('correct-game').value);
+  $('correct-round').value = game?.round ?? '';
+  $('correct-date').value = game?.date ?? '';
+  $('correct-result').value = game?.result ?? '1-0';
+}
+
+function updateByePlayers() {
+  const event = current?.tournaments.find((row) => row.id === $('bye-tournament').value);
+  const names = new Map(current?.players.map((row) => [row.id, row.name]));
+  fill($('bye-player'), event?.standings.map((row) => ({ id: row.playerId,
+    name: names.get(row.playerId) ?? row.playerId })) ?? [], (player) => player.name, $('bye-player').value);
+}
+
+function updateByeForm() {
+  const bye = current?.byes.find((row) => row.id === $('bye-edit').value);
+  if (bye) $('bye-tournament').value = bye.tournamentId;
+  updateByePlayers();
+  if (bye) $('bye-player').value = bye.playerId;
+  $('bye-tournament').disabled = Boolean(bye);
+  $('bye-player').disabled = Boolean(bye);
+  $('bye-round').value = bye?.round ?? '';
+  $('bye-points').value = bye?.points ?? '1';
+}
+
+function updateTitleForm() {
+  const title = current?.titles.find((row) => row.id === $('title-edit').value);
+  if (title) { $('title-player').value = title.playerId; $('title-tournament').value = title.tournamentId; }
+  $('title-kind').value = title?.kind ?? 'campeonato-club';
+  $('title-label').value = title?.label ?? '';
+}
+
+function updateStandingPlayers() {
+  const event = current?.tournaments.find((row) => row.id === $('standing-tournament').value);
+  const names = new Map(current?.players.map((row) => [row.id, row.name]));
+  fill($('standing-player'), event?.standings.map((row) => ({ id: row.playerId,
+    name: names.get(row.playerId) ?? row.playerId })) ?? [], (player) => player.name, $('standing-player').value);
+  updateStandingForm();
+}
+
+function updateStandingForm() {
+  const event = current?.tournaments.find((row) => row.id === $('standing-tournament').value);
+  const row = event?.standings.find((item) => item.playerId === $('standing-player').value);
+  $('standing-points').value = row?.points ?? '';
+  $('standing-rank').value = row?.rank ?? '';
 }
 
 function updateModality() {
@@ -157,6 +221,58 @@ $('login-form').addEventListener('submit', async (event) => {
 });
 
 $('tournament').addEventListener('change', updateRoster);
+$('correct-game').addEventListener('change', updateCorrectionForm);
+$('correct-game-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const id = $('correct-game').value;
+  try {
+    await save(`/api/games/${encodeURIComponent(id)}`, 'PUT', {
+      round: Number($('correct-round').value), date: $('correct-date').value,
+      result: $('correct-result').value,
+    }, { saved: 'Partida corregida y publicada.', pending: 'Partida corregida; publicación pendiente.' });
+    $('correct-game').value = id;
+    updateCorrectionForm();
+  } catch (error) { message(error.message, 'error'); }
+});
+$('bye-edit').addEventListener('change', updateByeForm);
+$('bye-tournament').addEventListener('change', updateByePlayers);
+$('bye-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const id = $('bye-edit').value;
+  try {
+    const result = await save(id ? `/api/byes/${encodeURIComponent(id)}` : '/api/byes',
+      id ? 'PUT' : 'POST', { tournamentId: $('bye-tournament').value,
+        playerId: $('bye-player').value, round: Number($('bye-round').value),
+        points: Number($('bye-points').value) },
+    { saved: 'Descanso guardado y publicado.', pending: 'Descanso guardado; publicación pendiente.' });
+    $('bye-edit').value = result.id;
+    updateByeForm();
+  } catch (error) { message(error.message, 'error'); }
+});
+$('title-edit').addEventListener('change', updateTitleForm);
+$('title-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const id = $('title-edit').value;
+  try {
+    const result = await save(id ? `/api/titles/${encodeURIComponent(id)}` : '/api/titles',
+      id ? 'PUT' : 'POST', { playerId: $('title-player').value,
+        tournamentId: $('title-tournament').value, kind: $('title-kind').value,
+        label: $('title-label').value },
+    { saved: 'Título guardado y publicado.', pending: 'Título guardado; publicación pendiente.' });
+    $('title-edit').value = result.id;
+    updateTitleForm();
+  } catch (error) { message(error.message, 'error'); }
+});
+$('standing-tournament').addEventListener('change', updateStandingPlayers);
+$('standing-player').addEventListener('change', updateStandingForm);
+$('standing-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  try {
+    await save(`/api/tournaments/${encodeURIComponent($('standing-tournament').value)}/standings/${encodeURIComponent($('standing-player').value)}`,
+      'PUT', { points: Number($('standing-points').value), rank: Number($('standing-rank').value) },
+      { saved: 'Tabla guardada y publicada.', pending: 'Tabla guardada; publicación pendiente.' });
+  } catch (error) { message(error.message, 'error'); }
+});
 $('player-edit').addEventListener('change', updatePlayerForm);
 $('player-form').addEventListener('submit', async (event) => {
   event.preventDefault();

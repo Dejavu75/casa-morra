@@ -32,6 +32,8 @@ test('solo una sesión admin puede crear y completar una partida; exporta sin do
   const html = await page.text();
   assert.match(html, /Cargar partida|Centro de estadísticas/);
   assert.match(html, /id="tournament" aria-describedby="tournament-note"/);
+  for (const form of ['correct-game-form', 'bye-form', 'title-form', 'standing-form'])
+    assert.match(html, new RegExp(`id="${form}"`));
   const logo = await fetch(`${origin}/rook-small.png`);
   assert.equal(logo.status, 200);
   assert.match(logo.headers.get('content-type'), /image\/png/);
@@ -83,9 +85,63 @@ test('solo una sesión admin puede crear y completar una partida; exporta sin do
     decodeDemoSnapshot(saved.data).games.length);
   assert.deepEqual(decodeDemoSnapshot(completed.data).games.find((row) => row.id === game.id).moves,
     ['e2e4', 'e7e5']);
+  const correctionPath = `${origin}/api/games/${game.id}`;
+  const correction = (body, headers = { cookie, origin }) => fetch(correctionPath, {
+    method: 'PUT', headers: { 'content-type': 'application/json', ...headers },
+    body: JSON.stringify(body),
+  });
+  const beforeRejectedPublic = await readFile(output, 'utf8');
+  assert.equal((await correction({ expectedSha: completed.snapshot.sha256,
+    result: '1/2-1/2', date: '2025-99-99', round: game.round })).status, 400);
+  assert.equal((await statusDemoStore(store)).snapshot.sha256, completed.snapshot.sha256);
+  assert.equal(await readFile(output, 'utf8'), beforeRejectedPublic);
+  assert.equal((await correction({ expectedSha: completed.snapshot.sha256,
+    result: '1/2-1/2', date: game.date, round: game.round }, { cookie })).status, 403);
+  const correctedResponse = await correction({ expectedSha: completed.snapshot.sha256,
+    result: '1/2-1/2', date: game.date, round: game.round });
+  assert.equal(correctedResponse.status, 200);
+  const corrected = await statusDemoStore(store);
+  const correctedGame = decodeDemoSnapshot(corrected.data).games.find((row) => row.id === game.id);
+  assert.equal(correctedGame.result, '1/2-1/2');
+  assert.deepEqual(correctedGame.moves, ['e2e4', 'e7e5']);
+  assert.equal(JSON.parse(await readFile(output, 'utf8')).source.sha256, corrected.snapshot.sha256);
+  const byeResponse = await post('/api/byes', { expectedSha: corrected.snapshot.sha256,
+    tournamentId: event.id, playerId: event.standings[2].playerId,
+    round: event.rounds + 2, points: 1 }, { cookie, origin });
+  assert.equal(byeResponse.status, 201);
+  const bye = await byeResponse.json();
+  assert.ok(decodeDemoSnapshot((await statusDemoStore(store)).data).byes.some((row) => row.id === bye.id));
+  const collisionByeResponse = await post('/api/byes', { expectedSha: bye.sha256,
+    tournamentId: event.id, playerId: game.whiteId,
+    round: event.rounds + 3, points: 0.5 }, { cookie, origin });
+  assert.equal(collisionByeResponse.status, 201);
+  const collisionBye = await collisionByeResponse.json();
+  const beforeCollisionPrivate = await readFile(store, 'utf8');
+  const beforeCollisionPublic = await readFile(output, 'utf8');
+  assert.equal((await correction({ expectedSha: collisionBye.sha256,
+    result: '1/2-1/2', date: game.date, round: event.rounds + 3 })).status, 409);
+  assert.equal((await post('/api/games', { expectedSha: collisionBye.sha256,
+    game: { ...game, id: 'admin-conflicto-descanso', round: event.rounds + 3 } },
+  { cookie, origin })).status, 409);
+  assert.equal(await readFile(store, 'utf8'), beforeCollisionPrivate);
+  assert.equal(await readFile(output, 'utf8'), beforeCollisionPublic);
+  const titleResponse = await post('/api/titles', { expectedSha: collisionBye.sha256,
+    playerId: event.standings[0].playerId, tournamentId: event.id,
+    kind: 'distincion', label: 'Premio de prueba' }, { cookie, origin });
+  assert.equal(titleResponse.status, 201);
+  const title = await titleResponse.json();
+  const tableOnly = tournaments.find((row) => row.format === 'table-only');
+  const tableResponse = await fetch(`${origin}/api/tournaments/${tableOnly.id}/standings/${tableOnly.standings[0].playerId}`, {
+    method: 'PUT', headers: { 'content-type': 'application/json', cookie, origin },
+    body: JSON.stringify({ expectedSha: title.sha256,
+      points: tableOnly.standings[0].points + 0.5, rank: tableOnly.standings[0].rank }),
+  });
+  assert.equal(tableResponse.status, 200);
+  const table = await tableResponse.json();
+  assert.equal(JSON.parse(await readFile(output, 'utf8')).source.sha256, table.sha256);
   assert.equal((await post('/api/games', { expectedSha: completed.snapshot.sha256, game },
     { cookie, origin })).status, 409);
-  assert.equal((await statusDemoStore(store)).snapshot.sha256, completed.snapshot.sha256);
+  assert.equal((await statusDemoStore(store)).snapshot.sha256, table.sha256);
   const forgedHostStatus = await new Promise((resolve, reject) => {
     const request = httpRequest(`${origin}/api/state`, { headers: { cookie,
       host: 'sitio-ajeno.invalid:8090' } }, (response) => {

@@ -1,6 +1,7 @@
 import { Chess } from 'chess.js';
 import { decodeDemoSnapshot, encodeDemoSnapshot } from './demo-snapshot.mjs';
 import { verifyData } from './verify-data.mjs';
+import { calendarDate } from '../dist/domain/official-integrity.js';
 
 const results = new Set(['1-0', '0-1', '1/2-1/2']);
 const toUci = (move) => `${move.from}${move.to}${move.promotion ?? ''}`;
@@ -55,13 +56,14 @@ export function parseAdminMoves(format, text, result) {
   return moves;
 }
 
-function incrementStanding(row, result, color) {
+function incrementStanding(row, result, color, delta = 1) {
   const key = result === '1/2-1/2' ? 'draws' :
     (result === '1-0') === (color === 'white') ? 'wins' : 'losses';
   if (!Number.isInteger(row[key]) || row[key] < 0)
     throw new Error('La tabla del torneo no permite sumar este resultado automáticamente');
-  row[key] += 1;
-  row.points += key === 'wins' ? 1 : key === 'draws' ? 0.5 : 0;
+  if (row[key] + delta < 0) throw new Error('La tabla del torneo no permite descontar este resultado');
+  row[key] += delta;
+  row.points += delta * (key === 'wins' ? 1 : key === 'draws' ? 0.5 : 0);
 }
 
 export function rankStandings(event) {
@@ -94,6 +96,9 @@ export function prepareAdminGame(currentData, request) {
       row.round === game.round && [row.whiteId, row.blackId].includes(game.whiteId) &&
       [row.whiteId, row.blackId].includes(game.blackId));
     if (duplicate) throw new Error('Esa pareja ya tiene una partida en la ronda');
+    if (next.byes.some((bye) => bye.tournamentId === game.tournamentId &&
+        bye.round === game.round && [game.whiteId, game.blackId].includes(bye.playerId)))
+      throw new Error('El jugador ya tiene un descanso en la ronda');
     const moves = request.text ? parseAdminMoves(request.format, request.text, game.result) : null;
     const record = { ...game, moves };
     next.games.push(record);
@@ -115,6 +120,40 @@ export function prepareAdminGame(currentData, request) {
     const report = verifyData(next);
     if (!report.ok) throw new Error(`La partida no concilia con las estadísticas (${[...new Set(report.errors.map((row) => row.code))].join(', ')})`);
     return { next, gameId: game.id, operation: 'complete' };
+  }
+  if (request?.mode === 'correct') {
+    const game = next.games.find((row) => row.id === request.gameId);
+    if (!game) throw new Error('Partida inexistente');
+    if (!results.has(request.result)) throw new Error('Resultado inválido');
+    if (!calendarDate(request.date)) throw new Error('Fecha inválida');
+    if (!Number.isInteger(request.round) || request.round < 1) throw new Error('Ronda inválida');
+    if (next.games.some((row) => row.id !== game.id && row.tournamentId === game.tournamentId &&
+        row.round === request.round && [row.whiteId, row.blackId].includes(game.whiteId) &&
+        [row.whiteId, row.blackId].includes(game.blackId)))
+      throw new Error('Esa pareja ya tiene una partida en la ronda');
+    if (next.byes.some((bye) => bye.tournamentId === game.tournamentId &&
+        bye.round === request.round && [game.whiteId, game.blackId].includes(bye.playerId)))
+      throw new Error('El jugador ya tiene un descanso en la ronda');
+    if (game.result === request.result && game.date === request.date && game.round === request.round)
+      return { next, gameId: game.id, operation: 'unchanged' };
+    const event = next.tournaments.find((row) => row.id === game.tournamentId);
+    const white = event?.standings.find((row) => row.playerId === game.whiteId);
+    const black = event?.standings.find((row) => row.playerId === game.blackId);
+    if (!white || !black) throw new Error('La tabla del torneo no contiene la partida');
+    if (game.result !== request.result) {
+      incrementStanding(white, game.result, 'white', -1);
+      incrementStanding(black, game.result, 'black', -1);
+      incrementStanding(white, request.result, 'white');
+      incrementStanding(black, request.result, 'black');
+      rankStandings(event);
+    }
+    game.result = request.result;
+    game.date = request.date;
+    game.round = request.round;
+    event.rounds = Math.max(event.rounds, game.round);
+    const report = verifyData(next);
+    if (!report.ok) throw new Error(`La partida no concilia con las estadísticas (${[...new Set(report.errors.map((row) => row.code))].join(', ')})`);
+    return { next, gameId: game.id, operation: 'correct' };
   }
   throw new Error('Operación de partida inválida');
 }
