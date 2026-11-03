@@ -18,7 +18,7 @@ test('el administrador comparte la paleta y los controles del Centro de estadís
 
 test('la cabecera administrativa utiliza la misma torre coloreada y nombre de marca', async () => {
   const html = await read('index.html');
-  assert.match(html, /class="brand-mark"[^>]*src="\/rook-large\.png"/);
+  assert.match(html, /class="brand-mark"[^>]*src="\/rook-large\.png\?v=0\.10\.3-rgb"/);
   assert.match(html, /class="brand-name"[^>]*>Centro de estadísticas<\/span>/);
   assert.match(html, /Administración local/);
   assert.match(html, /id="login-form"/);

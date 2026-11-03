@@ -1,6 +1,6 @@
 # Verificación visual de la identidad
 
-Referencia aprobada: opción 2 de las cinco propuestas, con torre azul marino. Para tamaños grandes, las tres barras ascendentes se rellenan en rojo, azul y dorado; para tamaños pequeños, quedan como espacios negativos.
+Referencia aprobada: opción 2 de las cinco propuestas, con torre azul marino. La corrección posterior pide barras ascendentes en rojo, gris y azul, también en las variantes pequeñas de cabecera y favicon.
 
 | Vista | Resultado observado |
 | --- | --- |

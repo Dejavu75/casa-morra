@@ -37,3 +37,9 @@ test('la torre usa barras de color en cabeceras, favicon y emblema grande', asyn
     assert.ok((await stat(asset)).size > 10_000);
   }
 });
+
+test('la identidad documenta el orden rojo, gris y azul de las barras', async () => {
+  const guide = await read('docs/identidad-visual.md');
+  assert.match(guide, /partidas perdidas, empatadas y ganadas[^\n]*rojo, gris y azul/i);
+  assert.doesNotMatch(guide, /rojo, azul y dorado|barra de ganadas[^\n]*dorado/i);
+});

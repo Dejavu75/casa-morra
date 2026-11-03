@@ -13,7 +13,7 @@ Estos SHA-256 identifican el contenido **de esta revisión**. Para los PNG, el h
 | `dist/assets/galeria-estudio.png` | `6F4879D1DC92FBD354C14DB0F7D971EFB4538C99889CBD661C3F619801103429` | Imagen generada para el proyecto con una herramienta de OpenAI. |
 | `dist/assets/galeria-sala.png` | `7AA62F2D1CA5233418E1C95B66F9DBB75375740A6B844AC677F996FE0D9FB36D` | Imagen generada para el proyecto con una herramienta de OpenAI. |
 | `dist/assets/rook-small.png` | `3C4FB4AB0D81D66C3D0C3E813E5AB60FEEED7C6C6DF6B84D435D8CD986044646` | Torre con barras en negativo; variante pequeña generada para la nueva marca con una herramienta de OpenAI. |
-| `dist/assets/rook-large.png` | `EE717F51758E45024DE62EF5CF6B620286E07027712B89E435E24AEE42FE78EF` | Edición de la variante elegida con barras roja, azul y dorada; generada para la nueva marca con una herramienta de OpenAI. |
+| `dist/assets/rook-large.png` | `19DF7B663838E36F7C36E1CE9795E6C79C9ED239EDC800AE9688C1480DC3DD2E` | Edición de la variante elegida con barras roja, gris y azul; generada para la nueva marca con una herramienta de OpenAI. |
 
 Se cotejaron los tres PNG originales con los archivos de su generación local: cada par fue idéntico byte por byte. Las dos variantes nuevas de la torre conservan sus hashes de generación en la tabla. No se incluyen en el repositorio los archivos de trabajo ni rutas locales. Esa coincidencia establece la procedencia de los **bytes**, no demuestra por sí sola titularidad de derechos, originalidad absoluta ni ausencia de infracción.
 
